@@ -10,6 +10,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="15.0.1" />
     <PackageReference Include="Nett" Version="0.12.0" />
   </ItemGroup>
 </Project>
