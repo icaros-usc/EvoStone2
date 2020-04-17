@@ -9,7 +9,7 @@ namespace DeckSearch
     {
         static void Main(string[] args)
         {
-            DataProcesser.PreprocessDeckData();
+            DataProcesser.PreprocessDeckDataWithOnehot();
             // var search = new DistributedSearch(args[0]);
             // search.Run();
         }
