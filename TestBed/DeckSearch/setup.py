@@ -12,7 +12,7 @@ for cur_dir in dirs:
 subprocess.call(['dotnet', 'publish', '--configuration', 'Release', '../..'])
 
 ssu_path = '../../SabberStoneUtil/bin/Release/netstandard2.0/publish/*'
-ss_path = '../../DeckSearch/bin/Release/netcoreapp2.1/publish/*'
+ss_path = '../../DeckSearch/bin/Release/netcoreapp3.1/publish/*'
 de_path = '../../DeckEvaluator/bin/Release/netcoreapp2.1/publish/*'
 bin_dir = 'bin/'
 
@@ -23,6 +23,8 @@ for cur_dir in paths:
       print(cur_file)
       if not os.path.isdir(cur_file):
          shutil.copy(cur_file, bin_dir)
+      else:
+         subprocess.call(['cp', '-a', cur_file, bin_dir]) # copy runtimes/ folder to bin
 
 for cur_file in glob.glob('active/*'):
    os.remove(cur_file)
