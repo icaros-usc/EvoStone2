@@ -11,7 +11,7 @@ using CsvHelper.Configuration;
 
 namespace SabberStoneUtil.DataProcessing
 {
-    public class DataProcesser
+    public class DataProcessor
     {
         private static IEnumerable<Card> allCards => Cards.All;
 
@@ -29,7 +29,8 @@ namespace SabberStoneUtil.DataProcessing
                                                        && c.Type != CardType.TOKEN);
         private static void PrintCardInfo(Card card)
         {
-            foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(card)) {
+            foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(card))
+            {
                 Console.WriteLine(card.TargetingPredicate);
                 string name = descriptor.Name;
                 object value = descriptor.GetValue(card);
@@ -39,12 +40,12 @@ namespace SabberStoneUtil.DataProcessing
         }
 
         /// <summary>
-        /// Function to read processed deck feature to csv file
+        /// Function to write processed deck feature to csv file
         /// </summary>
-        private static void WriteDeckData(List<ProcessedIndividual> processedIndividuals)
+        private static void WriteNumericalDeckFeature(List<ProcessedIndividual> processedIndividuals)
         {
             // Write processed data to csv file
-            Console.WriteLine("Printing processed data to csv...");
+            Console.WriteLine("Writing processed data to csv...");
             using (var writer = new StreamWriter("../../../surrogate-model/processed_deck_data.csv"))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
@@ -57,8 +58,9 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Function to read in logged individuals
         /// </summary>
-        public static IEnumerable<LogIndividual> readLogIndividuals() {
-            var reader = new StreamReader("../../../surrogate-model/deck_search/individual_log.csv");
+        public static IEnumerable<LogIndividual> readLogIndividuals(String path) 
+        {
+            var reader = new StreamReader(path);
             var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             IEnumerable<LogIndividual> logIndividuals = csv.GetRecords<LogIndividual>();
             return logIndividuals;
@@ -67,12 +69,13 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Generate numerical deck features
         /// </summary>
-        public static void PreprocessDeckDataWithNumericalFeatures() {
+        public static void PreprocessDeckDataWithNumericalFeatures(String path) 
+        {
             Console.WriteLine("Processing raw deck data...");
             List<ProcessedIndividual> processedIndividuals;
 
             // logged individual, raw data set
-            var logIndividuals = readLogIndividuals();
+            var logIndividuals = readLogIndividuals(path);
 
             // processed individual, processed data set
             processedIndividuals = new List<ProcessedIndividual>();
@@ -177,10 +180,13 @@ namespace SabberStoneUtil.DataProcessing
             Console.WriteLine("Processing Completed!");
 
             // write processed data
-            WriteDeckData(processedIndividuals);
+            WriteNumericalDeckFeature(processedIndividuals);
         }
 
-        private static void PrintEncoding(int [,] cardsEncoding)
+        /// <summary>
+        /// Print encoded deck data
+        /// </summary>
+        private static void PrintDeckEncoding(int [,] cardsEncoding)
         {
             for(int i=0; i<10; i++) {
                 for(int j=0; j<cardsEncoding.GetLength(1); j++) {
@@ -194,10 +200,9 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Write encoded deck data to disk
         /// </summary>
-
-        private static void WriteDeckEncoding(int [,] cardsEncoding)
+        private static void WriteDeckEncoding(int [,] cardsEncoding, String path)
         {
-            using(StreamWriter writer = new StreamWriter("../../../surrogate-model/encoding_deck_data.csv"))
+            using(StreamWriter writer = new StreamWriter(path))
             {
                 for(int i=0; i<cardsEncoding.GetLength(0); i++)
                 {
@@ -215,11 +220,29 @@ namespace SabberStoneUtil.DataProcessing
         }
 
         /// <summary>
+        /// Print onehot encoded deck data
+        /// </summary>
+        public static void PrintDeckOnehotEncoding(String inPath)
+        {
+            (int [,] cardsEncoding, _) = PreprocessDeckDataWithOnehot(inPath);
+            PrintDeckEncoding(cardsEncoding);
+        }
+
+        /// <summary>
+        /// Write onehot encoded deck data to disk
+        /// </summary>
+        public static void WriteDeckOnehotEncoding(String inPath, String outPath)
+        {
+            (int[,] cardsEncoding, _) = PreprocessDeckDataWithOnehot(inPath);
+            WriteDeckEncoding(cardsEncoding, outPath);
+        }
+
+        /// <summary>
         /// Generate (modified) one hot encoding feature
         /// </summary>
-        public static void PreprocessDeckDataWithOnehot()
+        public static (int[,], double[,]) PreprocessDeckDataWithOnehot(String path)
         {
-            var logIndividualsList = readLogIndividuals().ToList();
+            var logIndividualsList = readLogIndividuals(path).ToList();
             var initialCardsList = initialCards.ToList();
 
             // find a map from cards to index. This can save some computation time
@@ -232,14 +255,15 @@ namespace SabberStoneUtil.DataProcessing
                     Console.WriteLine("Error: Could not find card <" +
                                       cardName +
                                       ">. Try to include more cardset and try again.");
-                    return;
+                    return (null, null);
                 }
                 int index = initialCardsList.IndexOf(initialCards.Where(c => c.Name == cardName).ToList()[0]);
                 cardIndex[cardName] = index;
             }
 
             // store encoding in a 2D array
-            int [,] cardsEncoding = new int[logIndividualsList.Count, initialCardsList.Count];
+            int [,] cardsEncoding = new int[logIndividualsList.Count, initialCardsList.Count]; // feature of surrogate model
+            double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
 
             for(int i=0; i<logIndividualsList.Count; i++)
             {
@@ -252,9 +276,11 @@ namespace SabberStoneUtil.DataProcessing
                     // add encoding
                     cardsEncoding[i,j]++;
                 }
+                deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
+                deckStats[i,1] = logIndividualsList[i].NumTurns;
+                deckStats[i,2] = logIndividualsList[i].HandSize;
             }
-            // PrintEncoding(cardsEncoding);
-            WriteDeckEncoding(cardsEncoding);
+            return (cardsEncoding, deckStats);
         }
     }
 }

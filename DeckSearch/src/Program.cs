@@ -12,7 +12,7 @@ namespace DeckSearch
         {
             var model = new Model();
             model.Run();
-            // DataProcesser.PreprocessDeckDataWithOnehot();
+            // DataProcessor.WriteDeckOnehotEncoding("../../../surrogate-model/encoding_deck_data.csv");
             // var search = new DistributedSearch(args[0]);
             // search.Run();
         }
