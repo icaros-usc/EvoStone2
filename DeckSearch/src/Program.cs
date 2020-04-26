@@ -11,7 +11,7 @@ namespace DeckSearch
         static void Main(string[] args)
         {
             var model = new Model();
-            model.Run();
+            model.OfflineFit();
             // DataProcessor.WriteDeckOnehotEncoding("../../../surrogate-model/encoding_deck_data.csv");
             // var search = new DistributedSearch(args[0]);
             // search.Run();
