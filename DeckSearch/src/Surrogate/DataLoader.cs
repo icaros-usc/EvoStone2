@@ -101,7 +101,7 @@ namespace DeckSearch.Surrogate
         {
             var num_row = X.shape[0];
             int row_swap = -1;
-            for (int i=1; i<num_row; i++)
+            for (int i=num_row-1; i>0; i--)
             {
                 // randomly choose row index to shuffle
                 row_swap = np.random.randint(i);

@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Text;
+using System.Collections.Generic;
 using Tensorflow;
 using NumSharp;
 using static Tensorflow.Binding;
@@ -16,11 +18,9 @@ namespace DeckSearch.Surrogate
         Tensor y_true = null;
         Operation train_op = null;
         Tensor loss_op = null;
-        Tensor _mid = null;
-        Tensor x_input_data = null;
-        Tensor y_input_data = null;
         int num_epoch;
         int batch_size;
+        float step_size;
         /// <summary>
         /// Remember number of batches for each iteration to calculate mse error
         /// </summary>
@@ -28,30 +28,28 @@ namespace DeckSearch.Surrogate
         DataLoader dataLoader = null;
 
         /// <summary>
-        /// Constructor of the model
-        /// </summary>
-        /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
-        /// <param name = "batch_size">Batch size of data. Default to 16</param>
-        public Model(int num_epoch = 100, int batch_size = 128)
-        {
-            this.num_epoch = num_epoch;
-            this.batch_size = batch_size;
-        }
-
-        /// <summary>
         /// Tensorflow implementation of fully connected layer
         /// </summary>
         /// <param name = "input">input tensor of the layer. Assumed to be size [-1, num_input]. The first dimension can be of any size. Usually batch size.</param>
         /// <param name = "name">name of the layer</param>
         /// <param name = "num_output">number of output of the layer</param>
-        private Tensor fc_layer(Tensor input, String name, int num_output)
+        /// <param name = "bias">use bias or not. Default to be true. If true, bias is initialized from 
+        private Tensor fc_layer(Tensor input, String name, int num_output, bool bias = true)
         {
             Tensor output = null;
             int num_input = input.shape[1];
             tf_with(tf.variable_scope(name), delegate
             {
-                var w = tf.get_variable("w", shape: (num_input, num_output), initializer: tf.random_normal_initializer(mean: 0, stddev: 0.1f));
-                var b = tf.get_variable("b", shape: num_output, initializer: tf.constant_initializer(0.1));
+                var w = tf.get_variable("w", shape: (num_input, num_output), initializer: tf.variance_scaling_initializer(uniform: true));
+                Tensor b;
+                if (bias)
+                {
+                    b = tf.get_variable("b", shape: num_output, initializer: tf.variance_scaling_initializer(uniform: true));
+                }
+                else
+                {
+                    b = tf.get_variable("b", shape: num_output, initializer: tf.constant_initializer(0));
+                }
                 output = tf.matmul(input, w) + b;
             });
             return output;
@@ -91,15 +89,25 @@ namespace DeckSearch.Surrogate
         }
 
         /// <summary>
+        /// Constructor of the model
+        /// </summary>
+        /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
+        /// <param name = "batch_size">Batch size of data. Default to 16</param>
+        public Model(int num_epoch = 100, int batch_size = 128, float step_size = 0.01f)
+        {
+            this.num_epoch = num_epoch;
+            this.batch_size = batch_size;
+            this.step_size = step_size;
+        }
+
+        /// <summary>
         /// Prepare data for training
         /// </summary>
         private void prepare_data()
         {
-            x_input_data = tf.random_normal(new[] {32, 369}, mean: 0, stddev: 1);
-            y_input_data = tf.random_normal(new[] {32, 3}, mean: 0, stddev: 1);
-
             (int [,] cardsEncoding, double [,] deckStats) = DataProcessor.PreprocessDeckDataWithOnehot("resources/individual_log.csv");
             var X = np.array(cardsEncoding);
+            X += np.random.rand(X.shape) * 0.0001; // add random noise
             var y = np.array(deckStats);
             dataLoader = new DataLoader(X, y, batch_size); // create data loader
         }
@@ -121,20 +129,26 @@ namespace DeckSearch.Surrogate
             });
 
             // establish graph (architectur of neural net)
-            var o_fc1 = fc_layer(input, name: "fc1", num_output: 128);
-            var o_acti1 = elu_layer(input, name: "elu1");
-            var o_fc2 = fc_layer(o_fc1, name: "fc2", num_output: 32);
+            var o_fc0 = fc_layer(input, name: "fc0", num_output: 128);
+            var o_acti0 = elu_layer(o_fc0, name: "elu0");
+
+            var o_fc1 = fc_layer(o_acti0, name: "fc1", num_output: 64);
+            var o_acti1 = elu_layer(o_fc1, name: "elu1");
+
+            var o_fc2 = fc_layer(o_acti1, name: "fc2", num_output: 32);
             var o_acti2 = elu_layer(o_fc2, name: "elu2");
+
             var o_fc3 = fc_layer(o_fc2, name: "fc3", num_output: 16);
             var o_acti3 = elu_layer(o_fc3, name: "elu3");
-            var o_fc4 = fc_layer(o_fc3, name: "fc4", num_output: 3);
+
+            var o_fc4 = fc_layer(o_acti3, name: "fc4", num_output: 3);
             var output = o_fc4;
 
             // loss
             loss_op = mse_loss(output, y_true);
 
             // optimizer
-            var adam =  tf.train.AdamOptimizer(0.01f);
+            var adam =  tf.train.AdamOptimizer(step_size);
             train_op = adam.minimize(loss_op, name: "adam_train");
 
             return g;
@@ -149,6 +163,8 @@ namespace DeckSearch.Surrogate
             {
                 // init variables
                 sess.run(tf.global_variables_initializer());
+                double running_loss = 0;
+                List<double> losses = new List<double>();
 
                 for(int i=0; i<num_epoch; i++)
                 {
@@ -159,11 +175,26 @@ namespace DeckSearch.Surrogate
                                                  (n_samples, (int)x_input.shape[0]), // per-iteration batch size
                                                  (input, x_input), // features
                                                  (y_true, y_input)); // targets
+                        running_loss += loss;
                         if(j % 10 == 0)
                         {
-                            print($"epoch{i}, iter:{j}: loss:{loss}");
+                            print($"epoch{i}, iter:{j}: loss = {running_loss/10}");
+                            losses.Add(running_loss/10);
+                            running_loss = 0;
                         }
                     }
+                }
+                WriteLosses(losses, "train_log/loss_128.txt");
+            }
+        }
+
+        private void WriteLosses(List<double> losses, string path)
+        {
+            using(StreamWriter writer = new StreamWriter(path))
+            {
+                foreach(var loss in losses)
+                {
+                    writer.WriteLine(loss);
                 }
             }
         }
