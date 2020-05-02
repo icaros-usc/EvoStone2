@@ -4,7 +4,7 @@ using Tensorflow;
 using NumSharp;
 using static Tensorflow.Binding;
 
-namespace DeckSearch.Surrogate
+namespace SurrogateModel.Surrogate
 {
     /// <summary>
     /// DataLoader class. Used to store, preprocess, and sample training/testing data

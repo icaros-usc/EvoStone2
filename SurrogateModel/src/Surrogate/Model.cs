@@ -7,7 +7,7 @@ using NumSharp;
 using static Tensorflow.Binding;
 using SabberStoneUtil.DataProcessing;
 
-namespace DeckSearch.Surrogate
+namespace SurrogateModel.Surrogate
 {
     /// <summary>
     /// Implementation of the fully connected surrogate neural network model.

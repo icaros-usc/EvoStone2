@@ -1,5 +1,4 @@
 ﻿using DeckSearch.Search;
-using DeckSearch.Surrogate;
 using System;
 using System.Collections.Generic;
 using SabberStoneUtil.DataProcessing;
@@ -10,11 +9,8 @@ namespace DeckSearch
     {
         static void Main(string[] args)
         {
-            var model = new Model();
-            model.OfflineFit();
-            // DataProcessor.WriteDeckOnehotEncoding("../../../surrogate-model/encoding_deck_data.csv");
-            // var search = new DistributedSearch(args[0]);
-            // search.Run();
+            var search = new DistributedSearch(args[0]);
+            search.Run();
         }
     }
 }
