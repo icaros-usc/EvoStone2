@@ -28,6 +28,9 @@ namespace DeckSearch.Search
 
         private string _configFilename;
 
+        // Data to be used by Surrogate Model
+        private List<Individual> _individualsBuffer = new List<Individual>();
+
         // Search Algorithm
         private SearchAlgorithm _searchAlgo;
 
@@ -35,14 +38,21 @@ namespace DeckSearch.Search
         readonly private CardClass _heroClass;
         readonly private List<Card> _cardSet;
 
-        // Logging 
+        // Logging
         private const string LOG_DIRECTORY = "logs/";
+        private const string TRAIN_LOG_DIRECTORY = "train_log/";
         private const string INDIVIDUAL_LOG_FILENAME =
            LOG_DIRECTORY + "individual_log.csv";
         private const string CHAMPION_LOG_FILENAME =
            LOG_DIRECTORY + "champion_log.csv";
         private const string FITTEST_LOG_FILENAME =
            LOG_DIRECTORY + "fittest_log.csv";
+
+        private const string TRAINING_DATA_LOG_FILENAME_PREFIX =
+           TRAIN_LOG_DIRECTORY + "training_data";
+
+        // record the index of the training data file
+        private int training_idx = 0;
 
         private RunningIndividualLog _individualLog;
         private RunningIndividualLog _championLog;
@@ -189,6 +199,21 @@ namespace DeckSearch.Search
                 _fittestLog.LogIndividual(cur);
         }
 
+        private void LogTrainingIndividuals()
+        {
+            var _trainingDataLog =
+                new RunningIndividualLog(TRAINING_DATA_LOG_FILENAME_PREFIX + training_idx.ToString() + ".csv");
+            training_idx += 1;
+
+            // Log training data to disk
+            _trainingDataLog.LogIndividuals(_individualsBuffer);
+            Console.WriteLine("Training data written to disk");
+
+            // clear the buffer
+            _individualsBuffer.Clear();
+            Console.WriteLine("Buffer cleared");
+        }
+
         private void FindNewWorkers()
         {
             // Look for new workers.
@@ -263,6 +288,15 @@ namespace DeckSearch.Search
 
                         ReceiveResults(outboxPath, _individualStable[workerId]);
                         _searchAlgo.ReturnEvaluatedIndividual(_individualStable[workerId]);
+                        _individualsBuffer.Add(_individualStable[workerId]); // add evaluated individual to batch
+
+                        Console.WriteLine("Batch Queue num: " + _individualsBuffer.Count);
+                        // if reachs certain size, write stored training data to disk
+                        if(_individualsBuffer.Count >= 5)
+                        {
+                            Console.WriteLine("Required batches completed, writing to disk for back prop");
+                            LogTrainingIndividuals();
+                        }
                         LogIndividual(_individualStable[workerId]);
                         _idleWorkers.Enqueue(workerId);
                     }

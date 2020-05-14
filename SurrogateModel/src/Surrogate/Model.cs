@@ -27,6 +27,8 @@ namespace SurrogateModel.Surrogate
         Tensor n_samples;
         DataLoader dataLoaderTrain = null;
         DataLoader dataLoaderTest = null;
+        bool isFirstBatch = true;
+        private Session sess = tf.Session();
 
         /// <summary>
         /// Tensorflow implementation of fully connected layer
@@ -94,7 +96,7 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
         /// <param name = "batch_size">Batch size of data. Default to 16</param>
-        public Model(int num_epoch = 15, int batch_size = 64, float step_size = 0.005f)
+        public Model(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f)
         {
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
@@ -118,10 +120,17 @@ namespace SurrogateModel.Surrogate
             X += np.random.rand(X.shape) * 0.0001; // add random noise
             var y = np.array(deckStats);
 
+            int train_test_split = (int)(X.shape[0] * 0.9); // use first 90% of data for training
             // create data loader
-            dataLoaderTrain = new DataLoader(X[":9000"], y[":9000"], batch_size);
+            dataLoaderTrain = new DataLoader(X[new Slice(0, train_test_split)],
+                                             y[new Slice(0, train_test_split)],
+                                             batch_size);
+            // dataLoaderTrain = new DataLoader(X[":9000"], y[":9000"], batch_size);
             // regard the last 1000 data points as one batch
-            dataLoaderTest = new DataLoader(X["9000:"], y["9000:"], 1000, shuffle: false);
+            dataLoaderTest = new DataLoader(X[new Slice(train_test_split, X.shape[0])],
+                                             y[new Slice(train_test_split, y.Shape[0])],
+                                             X.shape[0] - train_test_split, shuffle: false);
+            // dataLoaderTest = new DataLoader(X["9000:"], y["9000:"], 1000, shuffle: false);
         }
 
         /// <summary>
@@ -168,15 +177,20 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         private void train()
         {
-            using(var sess = tf.Session())
-            {
-                // init variables
-                sess.run(tf.global_variables_initializer());
+            // using(sess)
+            // {
+                if(isFirstBatch)
+                {
+                    // init variables
+                    sess.run(tf.global_variables_initializer());
+                    isFirstBatch = false;
+                }
                 double running_loss = 0;
                 List<double> training_losses = new List<double>();
                 List<double> testing_losses = new List<double>();
-                int log_length = 10;
+                int log_length = 1;
 
+                Console.WriteLine("Start training");
                 for(int i=0; i<num_epoch; i++)
                 {
                     for(int j=0; j<dataLoaderTrain.num_batch; j++)
@@ -208,7 +222,7 @@ namespace SurrogateModel.Surrogate
                 }
                 WriteLosses(training_losses, "train_log/train_loss_128.txt");
                 WriteLosses(testing_losses, "train_log/test_loss_128.txt");
-            }
+            // }
         }
 
         private void WriteLosses(List<double> losses, string path)

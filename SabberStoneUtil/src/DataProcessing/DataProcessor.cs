@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.ComponentModel;
 using System.Globalization;
 using System.Collections.Generic;
@@ -280,6 +281,50 @@ namespace SabberStoneUtil.DataProcessing
                 deckStats[i,1] = logIndividualsList[i].NumTurns;
                 deckStats[i,2] = logIndividualsList[i].HandSize;
             }
+            return (cardsEncoding, deckStats);
+        }
+
+        /// <summary>
+        /// Return true if the file is locked for the indicated access.
+        /// </summary>
+        private static bool FileIsLocked(string filename, FileAccess file_access)
+        {
+            // Try to open the file with the indicated access.
+            try
+            {
+                FileStream fs =
+                    new FileStream(filename, FileMode.Open, file_access);
+                fs.Close();
+                return false;
+            }
+            catch (IOException)
+            {
+                // file does not exist
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Function to read in and preprocess new batches of training data provided by DeckSearch
+        /// </summary>
+        /// <param name = "path">path of the file containing training data</param>
+        public static (int[,] cardsEncoding, double[,] deckStats) ReadNewTrainingData(string path)
+        {
+            Console.WriteLine("Waiting for training data from DeckSearch");
+            while(FileIsLocked(path, FileAccess.Read))
+            {
+                Thread.Sleep(1000); // check for training data for every 2 seconds
+            }
+
+            Console.WriteLine("Found data, start reading");
+
+            // data is ready, read them in, delete file, and return
+            (int[,] cardsEncoding, double[,] deckStats) = PreprocessDeckDataWithOnehot(path);
+            File.Delete(path);
             return (cardsEncoding, deckStats);
         }
     }
