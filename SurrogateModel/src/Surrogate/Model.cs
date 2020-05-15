@@ -14,21 +14,31 @@ namespace SurrogateModel.Surrogate
     /// </summary>
     public class Model
     {
-        Tensor input = null;
-        Tensor y_true = null;
-        Operation train_op = null;
-        Tensor loss_op = null;
-        int num_epoch;
-        int batch_size;
-        float step_size;
+        // Tensors and Operations to be evaluated in the graph
+        private Session sess = tf.Session();
+        private Tensor input = null;
+        private Tensor y_true = null;
+        private Operation train_op = null;
+        private Tensor loss_op = null;
+
         /// <summary>
         /// Remember number of batches for each iteration to calculate mse error
         /// </summary>
-        Tensor n_samples;
-        DataLoader dataLoaderTrain = null;
-        DataLoader dataLoaderTest = null;
-        bool isFirstBatch = true;
-        private Session sess = tf.Session();
+        private Tensor n_samples;
+
+        // hyperparams
+        private int num_epoch;
+        private int batch_size;
+        private float step_size;
+
+        // others
+        private DataLoader dataLoaderTrain = null;
+        private DataLoader dataLoaderTest = null;
+        private bool isFirstBatch = true;
+
+        // writers to record training and testing loss
+        private const string TRAINING_LOSS_FILE = "train_log/train_loss_128.txt";
+        private const string TESTING_LOSS_FILE = "train_log/test_loss_128.txt";
 
         /// <summary>
         /// Tensorflow implementation of fully connected layer
@@ -177,61 +187,58 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         private void train()
         {
-            // using(sess)
-            // {
-                if(isFirstBatch)
-                {
-                    // init variables
-                    sess.run(tf.global_variables_initializer());
-                    isFirstBatch = false;
-                }
-                double running_loss = 0;
-                List<double> training_losses = new List<double>();
-                List<double> testing_losses = new List<double>();
-                int log_length = 1;
+            if(isFirstBatch)
+            {
+                // init variables
+                sess.run(tf.global_variables_initializer());
+                isFirstBatch = false;
+            }
+            double running_loss = 0;
+            List<double> training_losses = new List<double>();
+            List<double> testing_losses = new List<double>();
+            int log_length = 1;
 
-                Console.WriteLine("Start training");
-                for(int i=0; i<num_epoch; i++)
+            Console.WriteLine("Start training");
+            for(int i=0; i<num_epoch; i++)
+            {
+                for(int j=0; j<dataLoaderTrain.num_batch; j++)
                 {
-                    for(int j=0; j<dataLoaderTrain.num_batch; j++)
+                    var (x_input, y_input) = dataLoaderTrain.Sample();
+                    var (_, training_loss) = sess.run((train_op, loss_op), // operations
+                                                (n_samples, (int)x_input.shape[0]), // per-iteration batch size
+                                                (input, x_input), // features
+                                                (y_true, y_input)); // targets
+                    running_loss += training_loss;
+
+                    if(j % log_length == log_length - 1)
                     {
-                        var (x_input, y_input) = dataLoaderTrain.Sample();
-                        var (_, training_loss) = sess.run((train_op, loss_op), // operations
-                                                 (n_samples, (int)x_input.shape[0]), // per-iteration batch size
-                                                 (input, x_input), // features
-                                                 (y_true, y_input)); // targets
-                        running_loss += training_loss;
+                        print($"epoch{i}, iter:{j}:");
+                        print($"training_loss = {running_loss/log_length}");
+                        training_losses.Add(running_loss/log_length);
+                        running_loss = 0;
 
-                        if(j % log_length == log_length - 1)
-                        {
-                            print($"epoch{i}, iter:{j}:");
-                            print($"training_loss = {running_loss/log_length}");
-                            training_losses.Add(running_loss/log_length);
-                            running_loss = 0;
-
-                            // Test the model
-                            var (test_x, test_y) = dataLoaderTest.Sample();
-                            var testing_loss = sess.run((loss_op),
-                                               (n_samples, (int)test_x.shape[0]), // per-iteration batch size
-                                               (input, test_x), // features
-                                               (y_true, test_y)); // targets
-                            testing_losses.Add(testing_loss/1.0); // divide by 1 to convert
-                            print($"testing_loss = {testing_loss}\n");
-                        }
+                        // Test the model
+                        var (test_x, test_y) = dataLoaderTest.Sample();
+                        var testing_loss = sess.run((loss_op),
+                                            (n_samples, (int)test_x.shape[0]), // per-iteration batch size
+                                            (input, test_x), // features
+                                            (y_true, test_y)); // targets
+                        testing_losses.Add(testing_loss/1.0); // divide by 1 to convert
+                        print($"testing_loss = {testing_loss}\n");
                     }
                 }
-                WriteLosses(training_losses, "train_log/train_loss_128.txt");
-                WriteLosses(testing_losses, "train_log/test_loss_128.txt");
-            // }
+            }
+            WriteLosses(training_losses, TRAINING_LOSS_FILE);
+            WriteLosses(testing_losses, TESTING_LOSS_FILE);
         }
 
         private void WriteLosses(List<double> losses, string path)
         {
-            using(StreamWriter writer = new StreamWriter(path))
+            using(StreamWriter sw = File.AppendText(path))
             {
                 foreach(var loss in losses)
                 {
-                    writer.WriteLine(loss);
+                    sw.WriteLine(loss);
                 }
             }
         }

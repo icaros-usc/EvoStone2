@@ -292,7 +292,7 @@ namespace DeckSearch.Search
 
                         Console.WriteLine("Batch Queue num: " + _individualsBuffer.Count);
                         // if reachs certain size, write stored training data to disk
-                        if(_individualsBuffer.Count >= 5)
+                        if(_individualsBuffer.Count >= 128)
                         {
                             Console.WriteLine("Required batches completed, writing to disk for back prop");
                             LogTrainingIndividuals();

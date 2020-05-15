@@ -116,11 +116,21 @@ namespace DeckEvaluator
                      );
                
                // Run the game and collect statistics
-               OverallStatistics stats = launcher.Run();
-               stratStats[i] = new StrategyStatistics();
-               stratStats[i].WinCount += stats.WinCount;
-               stratStats[i].Alignment += stats.StrategyAlignment;
-               overallStats.Accumulate(stats); 
+               try
+               {
+                  OverallStatistics stats = launcher.Run();
+                  stratStats[i] = new StrategyStatistics();
+                  stratStats[i].WinCount += stats.WinCount;
+                  stratStats[i].Alignment += stats.StrategyAlignment;
+                  overallStats.Accumulate(stats);
+               }
+               //  temporarily work around the bug in SabberStone
+               catch (System.AggregateException)
+               {
+                  Console.WriteLine("Exception catched, Rerunning game");
+                  i--;
+                  continue;
+               }
             }
 
             // Write the results
