@@ -18,6 +18,7 @@ namespace SurrogateModel.Surrogate
         private Session sess = tf.Session();
         private Tensor input = null;
         private Tensor y_true = null;
+        private Tensor model_output = null;
         private Operation train_op = null;
         private Tensor loss_op = null;
 
@@ -166,14 +167,14 @@ namespace SurrogateModel.Surrogate
             var o_fc2 = fc_layer(o_acti1, name: "fc2", num_output: 32);
             var o_acti2 = elu_layer(o_fc2, name: "elu2");
 
-            var o_fc3 = fc_layer(o_fc2, name: "fc3", num_output: 16);
+            var o_fc3 = fc_layer(o_acti2, name: "fc3", num_output: 16);
             var o_acti3 = elu_layer(o_fc3, name: "elu3");
 
             var o_fc4 = fc_layer(o_acti3, name: "fc4", num_output: 3);
-            var output = o_fc4;
+            model_output = o_fc4;
 
             // loss
-            loss_op = mse_loss(output, y_true);
+            loss_op = mse_loss(model_output, y_true);
 
             // optimizer
             var adam =  tf.train.AdamOptimizer(step_size);
@@ -253,6 +254,37 @@ namespace SurrogateModel.Surrogate
         {
             prepare_data(online: true, cardsEncoding, deckStats);
             train();
+        }
+
+        public double[,] Predict(int[,] cardsEncoding)
+        {
+            if(isFirstBatch)
+            {
+                // init variables
+                sess.run(tf.global_variables_initializer());
+                isFirstBatch = false;
+            }
+
+            double[,] result;
+            using(var _sess = tf.Session())
+            {
+                var x_input = np.array(cardsEncoding);
+                var output = sess.run((model_output), // operations
+                                    (n_samples, (int)x_input.shape[0]), // batch size
+                                    (input, x_input)); // features
+                // print(output);
+
+                // convert result to double array
+                result = new double[output.shape[0], output.shape[1]];
+                for(int i=0; i<output.shape[0]; i++)
+                {
+                    for(int j=0; j<output.shape[1]; j++)
+                    {
+                        result[i,j] = (double)(float)output[i,j]; // need to cast twice because the model use float
+                    }
+                }
+            }
+            return result;
         }
     }
 }

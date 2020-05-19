@@ -277,6 +277,8 @@ namespace SabberStoneUtil.DataProcessing
                     // add encoding
                     cardsEncoding[i,j]++;
                 }
+
+                // could add more stats here if model is improved
                 deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
                 deckStats[i,1] = logIndividualsList[i].NumTurns;
                 deckStats[i,2] = logIndividualsList[i].HandSize;
