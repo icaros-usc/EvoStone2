@@ -4,7 +4,7 @@ import os
 import subprocess
 
 # Make all the directories that are required for running EvoStone
-dirs = ['bin', 'active', 'boxes', 'logs']
+dirs = ['bin', 'active', 'boxes', 'logs', 'train_log']
 for cur_dir in dirs:
     os.makedirs(cur_dir, exist_ok=True)
 

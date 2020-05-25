@@ -32,17 +32,20 @@ namespace DeckSearch.Search.EvolutionStrategy
         public Individual GenerateIndividual(List<Card> cardSet)
         {
             _individualsDispatched++;
-            Individual ind = _individualsDispatched < _params.Search.InitialPopulation ? 
+            Individual ind = _individualsDispatched < _params.Search.InitialPopulation ?
                              Individual.GenerateRandomIndividual(cardSet)
                            : ChooseParent().Mutate();
             return ind;
         }
 
-        public bool IsBlocking() => _individualsDispatched >= _params.Search.InitialPopulation 
+        public bool IsBlocking() => _individualsDispatched >= _params.Search.InitialPopulation
                                     &&_individualsEvaluated == 0;
 
         public bool IsRunning() => _individualsEvaluated < _params.Search.NumToEvaluate;
-        
+
+        public bool InitialPopulationEvaluated() => _individualsEvaluated >= _params.Search.InitialPopulation;
+
+        public bool InitialPopulationDispatched() => _individualsDispatched >= _params.Search.InitialPopulation;
 
         public void ReturnEvaluatedIndividual(Individual ind)
         {

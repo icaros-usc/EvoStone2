@@ -80,7 +80,7 @@ namespace DeckEvaluator.Evaluation
          _randomHappened = happened;
       }
 
-      public GameResult PlayGame()
+      public GameResult PlayGame(int gameId)
       {
          _randomHappened = false;
          
@@ -160,8 +160,26 @@ namespace DeckEvaluator.Evaluation
                   // Need to count this before processing the task
                   // (in the case of an endturn task.)
                   int cardsDrawnThisTurn = task.Controller.NumCardsDrawnThisTurn;
-                  
-                  //Console.WriteLine(task.FullPrint());
+
+                  // Console.WriteLine(task.FullPrint());
+                  // run until the game processes successfully
+                  // bool success = false;
+                  // while(!success)
+                  // {
+                  //    try
+                  //    {
+                  //       success = game.Process(task);
+                  //       if(!success)
+                  //          break;
+                  //    }
+                  //    catch(System.InvalidCastException)
+                  //    {
+                  //       Console.WriteLine("InvalidCastException detected. Restarting game: {0}", gameId);
+                  //       continue;
+                  //    }
+                  // }
+                  // if(!success)
+                  //    break;
                   if (!game.Process(task))
                      break;
 

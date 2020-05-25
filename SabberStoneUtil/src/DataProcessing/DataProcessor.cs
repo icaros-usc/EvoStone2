@@ -5,8 +5,10 @@ using System.Threading;
 using System.ComponentModel;
 using System.Globalization;
 using System.Collections.Generic;
+
 using SabberStoneCore.Model;
 using SabberStoneCore.Enums;
+
 using CsvHelper;
 using CsvHelper.Configuration;
 
@@ -14,8 +16,7 @@ namespace SabberStoneUtil.DataProcessing
 {
     public class DataProcessor
     {
-        private static IEnumerable<Card> allCards => Cards.All;
-
+        // cards data from SabberStone
         /// <summary>
         /// Basic(CORE) and classic(EXPERT1) cards
         /// </summary>
@@ -28,6 +29,35 @@ namespace SabberStoneUtil.DataProcessing
                                                        && c.Type != CardType.INVALID
                                                        && c.Type != CardType.HERO_POWER
                                                        && c.Type != CardType.TOKEN);
+        private static List<Card> initialCardsList = initialCards.ToList();
+
+        public static int numInitialCards = initialCardsList.Count;
+
+        private static IEnumerable<Card> allCards => Cards.All;
+
+        /// <summary>
+        // A map from cards to index. This can save some computation time
+        /// </summary>
+        private static Dictionary<String, int> cardIndex;
+
+        static DataProcessor()
+        {
+            cardIndex = new Dictionary<string, int>();
+            for(int i=0; i<initialCardsList.Count; i++)
+            {
+                String cardName = initialCardsList[i].Name;
+                var findCardList = initialCards.Where(c => c.Name == cardName).ToList();
+                if(findCardList.Count == 0) {
+                    Console.WriteLine("Error: Could not find card <" +
+                                      cardName +
+                                      ">. Try to include more cardset and try again.");
+                    return;
+                }
+                int index = initialCardsList.IndexOf(initialCards.Where(c => c.Name == cardName).ToList()[0]);
+                cardIndex[cardName] = index;
+            }
+        }
+
         private static void PrintCardInfo(Card card)
         {
             foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(card))
@@ -59,7 +89,7 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Function to read in logged individuals
         /// </summary>
-        public static IEnumerable<LogIndividual> readLogIndividuals(String path) 
+        public static IEnumerable<LogIndividual> readLogIndividuals(String path)
         {
             var reader = new StreamReader(path);
             var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
@@ -70,7 +100,7 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Generate numerical deck features
         /// </summary>
-        public static void PreprocessDeckDataWithNumericalFeatures(String path) 
+        public static void PreprocessDeckDataWithNumericalFeatures(String path)
         {
             Console.WriteLine("Processing raw deck data...");
             List<ProcessedIndividual> processedIndividuals;
@@ -225,7 +255,7 @@ namespace SabberStoneUtil.DataProcessing
         /// </summary>
         public static void PrintDeckOnehotEncoding(String inPath)
         {
-            (int [,] cardsEncoding, _) = PreprocessDeckDataWithOnehot(inPath);
+            (int [,] cardsEncoding, _) = PreprocessDeckDataWithOnehotFromFile(inPath);
             PrintDeckEncoding(cardsEncoding);
         }
 
@@ -234,34 +264,16 @@ namespace SabberStoneUtil.DataProcessing
         /// </summary>
         public static void WriteDeckOnehotEncoding(String inPath, String outPath)
         {
-            (int[,] cardsEncoding, _) = PreprocessDeckDataWithOnehot(inPath);
+            (int[,] cardsEncoding, _) = PreprocessDeckDataWithOnehotFromFile(inPath);
             WriteDeckEncoding(cardsEncoding, outPath);
         }
 
+
         /// <summary>
-        /// Generate (modified) one hot encoding feature
+        /// Generate (modified) one hot encoding feature from data read from data
         /// </summary>
-        public static (int[,], double[,]) PreprocessDeckDataWithOnehot(String path)
+        public static (int[,], double[,]) PreprocessDeckDataWithOnehotFromData(List<LogIndividual> logIndividualsList)
         {
-            var logIndividualsList = readLogIndividuals(path).ToList();
-            var initialCardsList = initialCards.ToList();
-
-            // find a map from cards to index. This can save some computation time
-            Dictionary<String, int> cardIndex = new Dictionary<string, int>();
-            for(int i=0; i<initialCardsList.Count; i++)
-            {
-                String cardName = initialCardsList[i].Name;
-                var findCardList = initialCards.Where(c => c.Name == cardName).ToList();
-                if(findCardList.Count == 0) {
-                    Console.WriteLine("Error: Could not find card <" +
-                                      cardName +
-                                      ">. Try to include more cardset and try again.");
-                    return (null, null);
-                }
-                int index = initialCardsList.IndexOf(initialCards.Where(c => c.Name == cardName).ToList()[0]);
-                cardIndex[cardName] = index;
-            }
-
             // store encoding in a 2D array
             int [,] cardsEncoding = new int[logIndividualsList.Count, initialCardsList.Count]; // feature of surrogate model
             double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
@@ -284,6 +296,16 @@ namespace SabberStoneUtil.DataProcessing
                 deckStats[i,2] = logIndividualsList[i].HandSize;
             }
             return (cardsEncoding, deckStats);
+        }
+
+        /// <summary>
+        /// Generate (modified) one hot encoding feature from data read from file
+        /// </summary>
+        /// <param name = "path">path of the file containing raw data</param>
+        public static (int[,], double[,]) PreprocessDeckDataWithOnehotFromFile(String path)
+        {
+            var logIndividualsList = readLogIndividuals(path).ToList();
+            return PreprocessDeckDataWithOnehotFromData(logIndividualsList);
         }
 
         /// <summary>
@@ -325,7 +347,7 @@ namespace SabberStoneUtil.DataProcessing
             Console.WriteLine("Found data, start reading");
 
             // data is ready, read them in, delete file, and return
-            (int[,] cardsEncoding, double[,] deckStats) = PreprocessDeckDataWithOnehot(path);
+            (int[,] cardsEncoding, double[,] deckStats) = PreprocessDeckDataWithOnehotFromFile(path);
             File.Delete(path);
             return (cardsEncoding, deckStats);
         }

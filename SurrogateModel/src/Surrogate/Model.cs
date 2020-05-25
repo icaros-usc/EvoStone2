@@ -14,28 +14,29 @@ namespace SurrogateModel.Surrogate
     /// </summary>
     public class Model
     {
+        // config and graph
+        private ConfigProto config;
+        private Graph graph;
+
         // Tensors and Operations to be evaluated in the graph
-        private Session sess = tf.Session();
+        private Session sess;
         private Tensor input = null;
         private Tensor y_true = null;
         private Tensor model_output = null;
         private Operation train_op = null;
+        private Operation init = null;
         private Tensor loss_op = null;
-
-        /// <summary>
-        /// Remember number of batches for each iteration to calculate mse error
-        /// </summary>
-        private Tensor n_samples;
+        private Tensor n_samples; // Remember number of batches for each iteration to calculate mse error
 
         // hyperparams
         private int num_epoch;
-        private int batch_size;
+        public int batch_size { get; private set; }
         private float step_size;
 
         // others
+        private int epoch_idx = 0;
         private DataLoader dataLoaderTrain = null;
         private DataLoader dataLoaderTest = null;
-        private bool isFirstBatch = true;
 
         // writers to record training and testing loss
         private const string TRAINING_LOSS_FILE = "train_log/train_loss_128.txt";
@@ -112,7 +113,26 @@ namespace SurrogateModel.Surrogate
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
             this.step_size = step_size;
-            build_graph();
+            graph = build_graph();
+
+            // set up session, attempt to use all cores
+            config = new ConfigProto
+            {
+                IntraOpParallelismThreads = 0,
+                InterOpParallelismThreads = 0,
+            };
+            sess = tf.Session(config);
+            sess.run(init); // initialize the graph
+
+            // delete old loss data
+            if(File.Exists(TRAINING_LOSS_FILE))
+            {
+                File.Delete(TRAINING_LOSS_FILE);
+            }
+            if(File.Exists(TESTING_LOSS_FILE))
+            {
+                File.Delete(TESTING_LOSS_FILE);
+            }
         }
 
         /// <summary>
@@ -125,7 +145,7 @@ namespace SurrogateModel.Surrogate
         {
             if (!online)
             {
-                (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckDataWithOnehot("resources/individual_log.csv");
+                (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckDataWithOnehotFromFile("resources/individual_log.csv");
             }
             var X = np.array(cardsEncoding);
             X += np.random.rand(X.shape) * 0.0001; // add random noise
@@ -180,6 +200,8 @@ namespace SurrogateModel.Surrogate
             var adam =  tf.train.AdamOptimizer(step_size);
             train_op = adam.minimize(loss_op, name: "adam_train");
 
+            init = tf.global_variables_initializer();
+
             return g;
         }
 
@@ -188,12 +210,6 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         private void train()
         {
-            if(isFirstBatch)
-            {
-                // init variables
-                sess.run(tf.global_variables_initializer());
-                isFirstBatch = false;
-            }
             double running_loss = 0;
             List<double> training_losses = new List<double>();
             List<double> testing_losses = new List<double>();
@@ -213,7 +229,8 @@ namespace SurrogateModel.Surrogate
 
                     if(j % log_length == log_length - 1)
                     {
-                        print($"epoch{i}, iter:{j}:");
+                        print($"epoch{epoch_idx}, iter:{j}:");
+                        epoch_idx++;
                         print($"training_loss = {running_loss/log_length}");
                         training_losses.Add(running_loss/log_length);
                         running_loss = 0;
@@ -233,6 +250,9 @@ namespace SurrogateModel.Surrogate
             WriteLosses(testing_losses, TESTING_LOSS_FILE);
         }
 
+        /// <summary>
+        /// Helper function to write loss to file
+        /// </summary>
         private void WriteLosses(List<double> losses, string path)
         {
             using(StreamWriter sw = File.AppendText(path))
@@ -244,44 +264,43 @@ namespace SurrogateModel.Surrogate
             }
         }
 
+        /// <summary>
+        /// offline fit the model using generated data
+        /// </summary>
         public void OfflineFit()
         {
             prepare_data();
             train();
         }
 
+        /// <summary>
+        /// online fit the model using specified data
+        /// </summary>
         public void OnlineFit(int[,] cardsEncoding, double[,] deckStats)
         {
             prepare_data(online: true, cardsEncoding, deckStats);
             train();
         }
 
+        /// <summary>
+        /// Evaluate input, return output. Do not run before initialization
+        /// </summary>
         public double[,] Predict(int[,] cardsEncoding)
         {
-            if(isFirstBatch)
-            {
-                // init variables
-                sess.run(tf.global_variables_initializer());
-                isFirstBatch = false;
-            }
-
             double[,] result;
-            using(var _sess = tf.Session())
-            {
-                var x_input = np.array(cardsEncoding);
-                var output = sess.run((model_output), // operations
-                                    (n_samples, (int)x_input.shape[0]), // batch size
-                                    (input, x_input)); // features
-                // print(output);
+            var x_input = np.array(cardsEncoding);
+            var output = sess.run((model_output), // operations
+                                (n_samples, (int)x_input.shape[0]), // batch size
+                                (input, x_input)); // features
+            // print(output[":10"]);
 
-                // convert result to double array
-                result = new double[output.shape[0], output.shape[1]];
-                for(int i=0; i<output.shape[0]; i++)
+            // convert result to double array
+            result = new double[output.shape[0], output.shape[1]];
+            for(int i=0; i<output.shape[0]; i++)
+            {
+                for(int j=0; j<output.shape[1]; j++)
                 {
-                    for(int j=0; j<output.shape[1]; j++)
-                    {
-                        result[i,j] = (double)(float)output[i,j]; // need to cast twice because the model use float
-                    }
+                    result[i,j] = (double)(float)output[i,j]; // need to cast twice because the model use float
                 }
             }
             return result;

@@ -14,6 +14,7 @@ namespace DeckSearch.Config
 
    class SearchParams
    {
+      public string Category { get; set; }
       public string Type { get; set; }
       public string ConfigFilename { get; set; }
    }

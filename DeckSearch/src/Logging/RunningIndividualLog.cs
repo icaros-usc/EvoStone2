@@ -124,27 +124,27 @@ namespace DeckSearch.Logging
       /// </summary>
       public IEnumerable<string> GetIndividualData(Individual cur)
       {
-            string[] individualData = {
-                  cur.ID.ToString(),
-                  cur.ParentID.ToString(),
-               };
+         string[] individualData = {
+               cur.ID.ToString(),
+               cur.ParentID.ToString(),
+            };
 
-            var overallStatistics =
-               OverallStatistics.Properties
-               .Select(x => cur.OverallData.GetStatByName(x).ToString());
-            var data = individualData.Concat(overallStatistics);
-            foreach (var stratData in cur.StrategyData)
-            {
-               var strategyData = StrategyStatistics.Properties
-                  .Select(x => stratData.GetStatByName(x).ToString());
-               data = data.Concat(strategyData);
-            }
+         var overallStatistics =
+            OverallStatistics.Properties
+            .Select(x => cur.OverallData.GetStatByName(x).ToString());
+         var data = individualData.Concat(overallStatistics);
+         foreach (var stratData in cur.StrategyData)
+         {
+            var strategyData = StrategyStatistics.Properties
+               .Select(x => stratData.GetStatByName(x).ToString());
+            data = data.Concat(strategyData);
+         }
 
-            string[] deckData = {
-                  string.Join("*", cur.GetCards())
-               };
-            data = data.Concat(deckData);
-            return data;
+         string[] deckData = {
+               string.Join("*", cur.GetCards())
+            };
+         data = data.Concat(deckData);
+         return data;
       }
    }
 }

@@ -1,4 +1,8 @@
 ﻿using DeckSearch.Search;
+using DeckSearch.Config;
+
+using Nett;
+
 using System;
 using System.Collections.Generic;
 using SabberStoneUtil.DataProcessing;
@@ -9,8 +13,17 @@ namespace DeckSearch
     {
         static void Main(string[] args)
         {
-            var search = new DistributedSearch(args[0]);
-            search.Run();
+            var config = Toml.ReadFile<Configuration>(args[0]);
+            if(config.Search.Category == "Distributed")
+            {
+                var search = new DistributedSearch(config, args[0]);
+                search.Run();
+            }
+            else if(config.Search.Category == "Surrogated")
+            {
+                var search = new SurrogatedSearch(config, args[0]);
+                search.Run();
+            }
         }
     }
 }

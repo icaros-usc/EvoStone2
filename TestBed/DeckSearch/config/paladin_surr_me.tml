@@ -3,7 +3,7 @@ OpponentDeckSuite = "resources/decks/suites/starterMeta.tml"
 DeckPools = ["resources/decks/pools/starterDecks.tml"]
 
 [[Evaluation.PlayerStrategies]]
-NumGames = 20
+NumGames = 200
 Strategy = "Control"
 
 [Deckspace]
@@ -11,6 +11,6 @@ HeroClass = "paladin"
 CardSets = ["CORE", "EXPERT1"]
 
 [Search]
-Category = "Distributed"
+Category = "Surrogated"
 Type = "MAP-Elites"
 ConfigFilename = "config/paladin_me_config.tml"

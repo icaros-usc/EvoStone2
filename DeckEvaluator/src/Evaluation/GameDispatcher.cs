@@ -66,7 +66,7 @@ namespace DeckEvaluator.Evaluation
          Console.WriteLine("Starting game: "+gameId);
 
          // Run a game
-         GameEvaluator.GameResult result = ev.PlayGame();
+         GameEvaluator.GameResult result = ev.PlayGame(gameId);
          
          // Record stats
          lock (_statsLock)

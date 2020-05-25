@@ -124,10 +124,10 @@ namespace DeckEvaluator
                   stratStats[i].Alignment += stats.StrategyAlignment;
                   overallStats.Accumulate(stats);
                }
-               //  temporarily work around the bug in SabberStone
+               // temporarily work around the bug in SabberStone
                catch (System.AggregateException)
                {
-                  Console.WriteLine("Exception catched, Rerunning game");
+                  Console.WriteLine("Exception catched, Rerunning games");
                   i--;
                   continue;
                }
