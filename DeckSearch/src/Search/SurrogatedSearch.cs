@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 
@@ -141,6 +142,7 @@ namespace DeckSearch.Search
 
                 // wait for workers to finish evaluating initial population
                 _searchManager.FindDoneWorkers(storeBuffer: true, addToOuterFeatureMap: true);
+                Thread.Sleep(1000);
             }
 
             while(_searchManager._searchAlgo.IsRunning())
@@ -189,6 +191,7 @@ namespace DeckSearch.Search
 
                     // wait for workers to finish evaluating all elites
                     _searchManager.FindDoneWorkers(storeBuffer: true, addToOuterFeatureMap: true);
+                    Thread.Sleep(1000);
                 }
                 Console.WriteLine("Finished evaluating {0} elites", _searchManager._individualsBuffer.Count);
             }

@@ -316,7 +316,7 @@ namespace DeckSearch.Search
                     if(storeBuffer)
                     {
                         _individualsBuffer.Add(_individualStable[workerId]); // add evaluated individual to batch
-                        Console.WriteLine("Batch Queue num: " + _individualsBuffer.Count);
+                        Console.WriteLine("Buffer Size: " + _individualsBuffer.Count);
                     }
 
                     LogIndividual(_individualStable[workerId]);

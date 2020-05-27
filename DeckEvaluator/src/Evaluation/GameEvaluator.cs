@@ -31,7 +31,7 @@ namespace DeckEvaluator.Evaluation
          public int _strategyAlignment;
 
          public GameResult(bool didWin, Dictionary<string, int> cardUsage,
-                           int healthDifference, int damageDone, 
+                           int healthDifference, int damageDone,
                            int numTurns, int cardsDrawn, int handSize,
                            int manaSpent, int manaWasted,
                            int strategyAlignment)
@@ -51,7 +51,7 @@ namespace DeckEvaluator.Evaluation
 
       private PlayerSetup _player;
       private PlayerSetup _opponent;
-      private Dictionary<string, int> _cardUsage; 
+      private Dictionary<string, int> _cardUsage;
 
 		public GameEvaluator(PlayerSetup player, PlayerSetup opponent)
 		{
@@ -100,7 +100,7 @@ namespace DeckEvaluator.Evaluation
                });
 
          // Register for random actions in the Hearthstone game.
-         // This prevents the game from crashing by replanning when 
+         // This prevents the game from crashing by replanning when
          // random occurs.
          game.RandomHappenedEvent += RandomHappended;
 
@@ -223,7 +223,7 @@ namespace DeckEvaluator.Evaluation
          bool didWin = game.Player1.PlayState == PlayState.WON;
          return new GameResult(didWin, _cardUsage,
                        game.Player1.Hero.Health-game.Player2.Hero.Health,
-                       totalDamage, numTurns, totalCardsDrawn, 
+                       totalDamage, numTurns, totalCardsDrawn,
                        totalHandSize, totalManaSpent, totalManaWasted,
                        totalOptionScore);
       }

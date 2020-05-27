@@ -34,7 +34,7 @@ namespace DeckEvaluator.Evaluation
       private int _totalManaWasted;
       private int _totalStrategyAlignment;
 
-		public GameDispatcher(PlayerSetup player, 
+		public GameDispatcher(PlayerSetup player,
                             List<PlayerSetup> opponents)
 		{
          // Save the configuration information.
@@ -103,6 +103,9 @@ namespace DeckEvaluator.Evaluation
       private void queueGame(int gameId)
       {
       	var ev = new GameEvaluator(_player, _opponents[gameId]);
+
+         // temporary work around for SabberStone bug
+         // try to run the game until no exceptions are thrown
          try
          {
             runGame(gameId, ev);
@@ -123,7 +126,7 @@ namespace DeckEvaluator.Evaluation
 
       public OverallStatistics Run()
       {
-         Parallel.For(0, _opponents.Count, 
+         Parallel.For(0, _opponents.Count,
                new ParallelOptions {MaxDegreeOfParallelism = 8},
                i => {queueGame(i);});
          /*

@@ -3,10 +3,6 @@ using DeckSearch.Config;
 
 using Nett;
 
-using System;
-using System.Collections.Generic;
-using SabberStoneUtil.DataProcessing;
-
 namespace DeckSearch
 {
     class Program
