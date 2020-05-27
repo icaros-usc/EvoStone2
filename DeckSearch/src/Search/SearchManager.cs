@@ -420,7 +420,6 @@ namespace DeckSearch.Search
         {
             if(_searchAlgo.GetType().Equals(typeof(MapElitesAlgorithm)))
             {
-                Console.WriteLine("Warning: {0} does not have elites!", _searchAlgo.GetType());
                 return true;
             }
             return false;

@@ -40,7 +40,7 @@ namespace DeckEvaluator.Evaluation
          // Save the configuration information.
          _player = player;
          _opponents = opponents;
-      
+
          // Setup the statistics keeping.
          _usageCount = new Dictionary<string,int>();
          _winCount = 0;
@@ -67,7 +67,7 @@ namespace DeckEvaluator.Evaluation
 
          // Run a game
          GameEvaluator.GameResult result = ev.PlayGame(gameId);
-         
+
          // Record stats
          lock (_statsLock)
          {
@@ -75,7 +75,7 @@ namespace DeckEvaluator.Evaluation
             {
                _winCount++;
             }
-            
+
 	         foreach (string cardName in result._cardUsage.Keys)
             {
                if (_usageCount.ContainsKey(cardName))
@@ -83,7 +83,7 @@ namespace DeckEvaluator.Evaluation
                   _usageCount[cardName] += result._cardUsage[cardName];
                }
             }
-  
+
             _totalHealthDifference += result._healthDifference;
             _totalDamage += result._damageDone;
             _totalTurns += result._numTurns;
@@ -95,7 +95,7 @@ namespace DeckEvaluator.Evaluation
          }
 
          Console.WriteLine("Finished game: "+gameId);
-            
+
          // Rest every game.
          Thread.Sleep(1000);
       }
@@ -103,7 +103,15 @@ namespace DeckEvaluator.Evaluation
       private void queueGame(int gameId)
       {
       	var ev = new GameEvaluator(_player, _opponents[gameId]);
-         runGame(gameId, ev);
+         try
+         {
+            runGame(gameId, ev);
+         }
+         catch (System.InvalidCastException)
+         {
+            Console.WriteLine("InvalidCastException catched. Restarting game {0}", gameId);
+            queueGame(gameId);
+         }
       }
 
       private void WriteText(Stream fs, string s)

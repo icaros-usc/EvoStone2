@@ -24,21 +24,21 @@ namespace DeckEvaluator
          string nodeName = args[0];
          int nodeId = Int32.Parse(args[0]);
          Console.WriteLine("Node Id: "+nodeId);
-			
+
          // These files are for asyncronous communication between this
-         // worker and it's scheduler. 
+         // worker and it's scheduler.
          //
          // Decks to evaluate come in the inbox and are dished out of the
          // outbox.
          string boxesDirectory = "boxes/";
-         string inboxPath = boxesDirectory + 
+         string inboxPath = boxesDirectory +
             string.Format("deck-{0,4:D4}-inbox.tml", nodeId);
          string outboxPath = boxesDirectory +
             string.Format("deck-{0,4:D4}-outbox.tml", nodeId);
-			
+
          // Hailing
          string activeDirectory = "active/";
-         string activeWorkerPath = activeDirectory + 
+         string activeWorkerPath = activeDirectory +
             string.Format("worker-{0,4:D4}.txt", nodeId);
          string activeSearchPath = activeDirectory + "search.txt";
          if (!File.Exists(activeSearchPath))
@@ -54,7 +54,7 @@ namespace DeckEvaluator
 
          // Apply nerfs if nerfs are available
          ApplyNerfs(config.Nerfs);
-         
+
          // Setup the pools of card decks for possible opponents.
          var deckPoolManager = new DeckPoolManager();
          deckPoolManager.AddDeckPools(config.Evaluation.DeckPools);
@@ -66,7 +66,7 @@ namespace DeckEvaluator
                                        deckPoolManager);
 
          // Let the scheduler know we are here.
-			using (FileStream ow = File.Open(activeWorkerPath, 
+			using (FileStream ow = File.Open(activeWorkerPath,
                 FileMode.Create, FileAccess.Write, FileShare.None))
 			{
 				WriteText(ow, "Hail!");
@@ -85,7 +85,7 @@ namespace DeckEvaluator
 
             if (!File.Exists(activeSearchPath))
                break;
- 
+
             // Wait for the file to be finish being written
             Thread.Sleep(5000);
 
@@ -101,36 +101,25 @@ namespace DeckEvaluator
             for (int i=0; i<numStrats; i++)
             {
                // Setup the player with the current strategy
-               PlayerStrategyParams curStrat = 
+               PlayerStrategyParams curStrat =
                   config.Evaluation.PlayerStrategies[i];
                var player = new PlayerSetup(playerDeck,
-                  PlayerSetup.GetStrategy(curStrat.Strategy, 
+                  PlayerSetup.GetStrategy(curStrat.Strategy,
                                           config.Network,
                                           playMessage.Strategy));
-               
+
                List<PlayerSetup> opponents =
                   gameSuite.GetOpponents(curStrat.NumGames);
 
                var launcher = new GameDispatcher(
                         player, opponents
                      );
-               
-               // Run the game and collect statistics
-               try
-               {
-                  OverallStatistics stats = launcher.Run();
-                  stratStats[i] = new StrategyStatistics();
-                  stratStats[i].WinCount += stats.WinCount;
-                  stratStats[i].Alignment += stats.StrategyAlignment;
-                  overallStats.Accumulate(stats);
-               }
-               // temporarily work around the bug in SabberStone
-               catch (System.AggregateException)
-               {
-                  Console.WriteLine("Exception catched, Rerunning games");
-                  i--;
-                  continue;
-               }
+
+               OverallStatistics stats = launcher.Run();
+               stratStats[i] = new StrategyStatistics();
+               stratStats[i].WinCount += stats.WinCount;
+               stratStats[i].Alignment += stats.StrategyAlignment;
+               overallStats.Accumulate(stats);
             }
 
             // Write the results
@@ -140,12 +129,12 @@ namespace DeckEvaluator
             results.OverallStats = overallStats;
             results.StrategyStats = stratStats;
             Toml.WriteFile<ResultsMessage>(results, outboxPath);
-           
+
             // Wait for the TOML file to write (buffers are out of sync)
             // Then tell the search that we are done writing the file.
             Thread.Sleep(3000);
 				File.Delete(inboxPath);
-         
+
             // Cleanup.
             GC.Collect();
 
@@ -157,7 +146,7 @@ namespace DeckEvaluator
             {
                if (curFile.EndsWith(nodeName))
                {
-                  File.Delete(curFile); 
+                  File.Delete(curFile);
                }
             }*/
          }
@@ -187,7 +176,7 @@ namespace DeckEvaluator
          cardToNerf.Tags[GameTag.HEALTH] = nerf.NewHealth;
 
          string msg = string.Format("Nerfing ({0}) to ({1}, {2}/{3})",
-               nerf.CardName, nerf.NewManaCost, 
+               nerf.CardName, nerf.NewManaCost,
                nerf.NewAttack, nerf.NewHealth);
          Console.WriteLine(msg);
       }

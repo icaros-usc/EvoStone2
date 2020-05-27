@@ -83,7 +83,7 @@ namespace DeckEvaluator.Evaluation
       public GameResult PlayGame(int gameId)
       {
          _randomHappened = false;
-         
+
          var game = new Game(
             new GameConfig()
                {
@@ -162,24 +162,6 @@ namespace DeckEvaluator.Evaluation
                   int cardsDrawnThisTurn = task.Controller.NumCardsDrawnThisTurn;
 
                   // Console.WriteLine(task.FullPrint());
-                  // run until the game processes successfully
-                  // bool success = false;
-                  // while(!success)
-                  // {
-                  //    try
-                  //    {
-                  //       success = game.Process(task);
-                  //       if(!success)
-                  //          break;
-                  //    }
-                  //    catch(System.InvalidCastException)
-                  //    {
-                  //       Console.WriteLine("InvalidCastException detected. Restarting game: {0}", gameId);
-                  //       continue;
-                  //    }
-                  // }
-                  // if(!success)
-                  //    break;
                   if (!game.Process(task))
                      break;
 
@@ -202,7 +184,7 @@ namespace DeckEvaluator.Evaluation
                      break;
                   }
                }
-               
+
                totalManaSpent += game.Player1.UsedMana;
                totalManaWasted += (game.Player1.BaseMana - game.Player1.UsedMana);
             }
