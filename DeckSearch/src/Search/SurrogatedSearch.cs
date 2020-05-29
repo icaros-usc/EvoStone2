@@ -92,10 +92,14 @@ namespace DeckSearch.Search
             // update statistics of individuals
             foreach (var individual in individuals)
             {
+                // same evaluated stats
                 individual.OverallData = new OverallStatistics();
                 individual.OverallData.AverageHealthDifference = result[0,0];
                 individual.OverallData.NumTurns = result[0,1];
                 individual.OverallData.HandSize = result[0,2];
+
+                // save fitness
+                individual.Fitness = individual.OverallData.AverageHealthDifference;
             }
         }
 
@@ -173,7 +177,7 @@ namespace DeckSearch.Search
                     {
                         _searchManager._searchAlgo.ReturnEvaluatedIndividual(individual);
                     }
-                    Console.WriteLine("Generation {0} completed...", i);
+                    Console.WriteLine("Generation {0} completed...", i+1);
                 }
 
                 // evaluate elites
