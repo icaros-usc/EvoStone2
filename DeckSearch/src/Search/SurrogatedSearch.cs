@@ -18,7 +18,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Surrogate model
         /// </summary>
-        private static Model _surrogateModel = new Model();
+        private static SurrogateBaseModel _surrogateModel = new FullyConnectedNN();
 
         /// <summary>
         /// Search Manager to communicate with DeckEvaluators

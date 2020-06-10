@@ -351,5 +351,25 @@ namespace SabberStoneUtil.DataProcessing
             File.Delete(path);
             return (cardsEncoding, deckStats);
         }
+
+        public static void GenerateCardDescription()
+        {
+            using(StreamWriter sw = new StreamWriter("card2vec/CardTexts.txt"))
+            {
+                foreach(var card in initialCards)
+                {
+                    string cardName = card.Name;
+                    string cardRace = Enum.GetName(typeof(Race), card.GetRawRace());
+                    string cardClass = Enum.GetName(typeof(CardClass), card.Class);
+                    string cardType = Enum.GetName(typeof(CardType), card.Type);
+                    string description = String.Join(" ", new string[] { cardName, cardRace, cardClass, cardType, card.Text});
+
+                    description = description.Replace("<b>", "").Replace("</b>", "")
+                                             .Replace("<i>", "").Replace("</i>", "")
+                                             .Replace("[x]", "").Replace("_", "").Replace("\n", "");
+                    sw.WriteLine(cardName + "*" + description);
+                }
+            }
+        }
     }
 }
