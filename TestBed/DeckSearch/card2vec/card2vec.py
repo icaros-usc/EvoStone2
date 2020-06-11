@@ -21,10 +21,13 @@ model = gensim.models.doc2vec.Doc2Vec(vector_size=10, min_count=1, epochs=50)
 model.build_vocab(card_corpus)
 model.train(card_corpus, total_examples=model.corpus_count, epochs=model.epochs)
 
-result = {}
+all_embeddings = []
 for key, val in card_dict.items():
+    result = {}
     embedding_np = model.infer_vector(val).astype(np.float64)
-    result[key] = list(embedding_np)
+    result["cardName"] = key
+    result["embedding"] = list(embedding_np)
+    all_embeddings.append(result)
 
 with open("CardEmbeddings.json", 'w') as f:
-    json.dump(result, f)
+    json.dump(all_embeddings, f)

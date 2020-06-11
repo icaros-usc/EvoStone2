@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.ComponentModel;
 using System.Globalization;
@@ -38,11 +39,18 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         // A map from cards to index. This can save some computation time
         /// </summary>
-        private static Dictionary<String, int> cardIndex;
+        private static Dictionary<String, int> cardIndex = new Dictionary<string, int>();
+
+        /// <summary>
+        /// A map from cards to its card2vec embedding.
+        /// </summary>
+        public static Dictionary<String, double[]> cardEmbeddings = new Dictionary<string, double[]>();
+
+        private static int cardEmbeddingSize;
 
         static DataProcessor()
         {
-            cardIndex = new Dictionary<string, int>();
+            // construct card2index map
             for(int i=0; i<initialCardsList.Count; i++)
             {
                 String cardName = initialCardsList[i].Name;
@@ -56,6 +64,15 @@ namespace SabberStoneUtil.DataProcessing
                 int index = initialCardsList.IndexOf(initialCards.Where(c => c.Name == cardName).ToList()[0]);
                 cardIndex[cardName] = index;
             }
+
+            // construct card to card embedding map
+            var cardEmbeddingJsonString = File.ReadAllText("card2vec/CardEmbeddings.json");
+            var rawEmbeddings = JsonSerializer.Deserialize<CardEmbedding[]>(cardEmbeddingJsonString);
+            for(int i=0; i<rawEmbeddings.Length; i++)
+            {
+                cardEmbeddings[rawEmbeddings[i].cardName] = rawEmbeddings[i].embedding;
+            }
+            cardEmbeddingSize = rawEmbeddings[0].embedding.Length;
         }
 
         private static void PrintCardInfo(Card card)
@@ -268,6 +285,22 @@ namespace SabberStoneUtil.DataProcessing
             WriteDeckEncoding(cardsEncoding, outPath);
         }
 
+        /// <summary>
+        /// Get Deck stats from list of LogIndividuals as the learning target
+        /// </summary>
+        public static double[,] GetDeckStats(List<LogIndividual> logIndividualsList)
+        {
+            double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
+            for(int i=0; i<logIndividualsList.Count; i++)
+            {
+                // could add more stats here if model is improved
+                deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
+                deckStats[i,1] = logIndividualsList[i].NumTurns;
+                deckStats[i,2] = logIndividualsList[i].HandSize;
+            }
+            return deckStats;
+        }
+
 
         /// <summary>
         /// Generate (modified) one hot encoding feature from data read from data
@@ -276,8 +309,6 @@ namespace SabberStoneUtil.DataProcessing
         {
             // store encoding in a 2D array
             int [,] cardsEncoding = new int[logIndividualsList.Count, initialCardsList.Count]; // feature of surrogate model
-            double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
-
             for(int i=0; i<logIndividualsList.Count; i++)
             {
                 string[] deckCards = logIndividualsList[i].Deck.Split('*');
@@ -289,12 +320,9 @@ namespace SabberStoneUtil.DataProcessing
                     // add encoding
                     cardsEncoding[i,j]++;
                 }
-
-                // could add more stats here if model is improved
-                deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
-                deckStats[i,1] = logIndividualsList[i].NumTurns;
-                deckStats[i,2] = logIndividualsList[i].HandSize;
             }
+            double [,] deckStats = GetDeckStats(logIndividualsList); // target of surrogate model
+
             return (cardsEncoding, deckStats);
         }
 
@@ -306,6 +334,29 @@ namespace SabberStoneUtil.DataProcessing
         {
             var logIndividualsList = readLogIndividuals(path).ToList();
             return PreprocessDeckDataWithOnehotFromData(logIndividualsList);
+        }
+
+        public static (double[][][], double[,]) PreprocessDeckDataWithCard2VecEmbeddingFromData(List<LogIndividual> logIndividualsList)
+        {
+            // store embedding in a 3D array
+            // each deck consists of 30 embedding vectors
+            double[][][] deckEmbeddings = new double[logIndividualsList.Count][][];
+            int destinationIndex = 0;
+            for(int i=0; i<logIndividualsList.Count; i++)
+            {
+                string[] deckCards = logIndividualsList[i].Deck.Split('*');
+                double [][] deckEmbedding = new double[30][];
+                for(int j=0; j<deckCards.Length; j++)
+                {
+                    deckEmbedding[j] = cardEmbeddings[deckCards[j]];
+                    destinationIndex += cardEmbeddingSize;
+                }
+                deckEmbeddings[i] = deckEmbedding;
+            }
+
+            double[,] deckStats = GetDeckStats(logIndividualsList);
+
+            return (deckEmbeddings, deckStats);
         }
 
         /// <summary>

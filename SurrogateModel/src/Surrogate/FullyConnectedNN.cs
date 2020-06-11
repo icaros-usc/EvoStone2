@@ -97,19 +97,7 @@ namespace SurrogateModel.Surrogate
             return g;
         }
 
-        /// <summary>
-        /// Helper function to write loss to file
-        /// </summary>
-        private void WriteLosses(List<double> losses, string path)
-        {
-            using(StreamWriter sw = File.AppendText(path))
-            {
-                foreach(var loss in losses)
-                {
-                    sw.WriteLine(loss);
-                }
-            }
-        }
+
 
         /// <summary>
         /// offline fit the model using generated data

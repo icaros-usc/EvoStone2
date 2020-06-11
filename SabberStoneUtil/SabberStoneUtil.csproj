@@ -12,5 +12,6 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="15.0.1" />
     <PackageReference Include="Nett" Version="0.12.0" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 </Project>

@@ -64,16 +64,24 @@ namespace SurrogateModel.Surrogate
         }
 
         /// <summary>
-        /// Tensorflow implementation of fully connected layer
+        /// Tensorflow implementation of fully connected layer that accepts Tensors of arbitrary dimentions as input. tf.layers.dense of Tensorflow.NET does not support input tensor to be of rank > 2, thus we include such a layer here.
+        /// Note: Similar to standard tf.layers.dense(), fc_layer3D applied the same w of size [num_input, num_output] to the last dimension of input tensor.
         /// </summary>
-        /// <param name = "input">input tensor of the layer. Assumed to be size [-1, num_input]. The first dimension can be of any size. Usually batch size.</param>
+        /// <param name = "input">input tensor of the layer. Assumed to be size [-1, *, num_input]. The first dimension can be of any size. Usually batch size. * could be dimensions of any size</param>
         /// <param name = "name">name of the layer</param>
         /// <param name = "num_output">number of output of the layer</param>
         /// <param name = "bias">use bias or not. Default to be true. If true, bias is initialized</param>
+        /// <returns>Tensor of shape [-1, *, num_output]</returns>
         protected Tensor fc_layer(Tensor input, String name, int num_output, bool bias = true)
         {
             Tensor output = null;
-            int num_input = input.shape[1];
+            int input_rank = input.shape.Length;
+            int num_input = input.shape[input_rank-1];
+
+            // obtain real output shape [-1, *, num_output]
+            int[] real_output_shape = input.shape;
+            real_output_shape[input_rank-1] = num_output;
+
             tf_with(tf.variable_scope(name), delegate
             {
                 var w = tf.get_variable("w", shape: (num_input, num_output), initializer: tf.variance_scaling_initializer(uniform: true));
@@ -86,39 +94,17 @@ namespace SurrogateModel.Surrogate
                 {
                     b = tf.get_variable("b", shape: num_output, initializer: tf.constant_initializer(0));
                 }
-                output = tf.matmul(input, w) + b;
-            });
-            return output;
-        }
 
-        /// <summary>
-        /// Tensorflow implementation of fully connected layer that accepts 3D tensor as input. tf.layers.dense of Tensorflow.NET does not support input tensor to be of rank > 2, thus we include such a layer here.
-        /// Note: Similar to standard tf.layers.dense(), fc_layer3D applied the same w of size [num_input, num_output] to the last dimension of input tensor.
-        /// </summary>
-        /// <param name = "input">input tensor of the layer. Assumed to be size [-1, d1, num_input]. The first dimension can be of any size. Usually batch size.</param>
-        /// <param name = "name">name of the layer</param>
-        /// <param name = "num_output">number of output of the layer</param>
-        /// <param name = "bias">use bias or not. Default to be true. If true, bias is initialized</param>
-        /// <return> 3D tensor of size [-1, d1, num_output]</return>
-        protected Tensor fc_layer3D(Tensor input, String name, int num_output, bool bias = true)
-        {
-            Tensor output = null;
-            // TODO: implement fc_layer3D
-            // int num_input = input.shape[2];
-            // tf_with(tf.variable_scope(name), delegate
-            // {
-            //     var w = tf.get_variable("w", shape: (num_input, num_output), initializer: tf.variance_scaling_initializer(uniform: true));
-            //     Tensor b;
-            //     if (bias)
-            //     {
-            //         b = tf.get_variable("b", shape: num_output, initializer: tf.variance_scaling_initializer(uniform: true));
-            //     }
-            //     else
-            //     {
-            //         b = tf.get_variable("b", shape: num_output, initializer: tf.constant_initializer(0));
-            //     }
-            //     output = tf.matmul(input, w) + b;
-            // });
+                if(input_rank > 2)
+                {
+                    input = tf.reshape(input, new int[]{-1, num_input});
+                }
+                output = tf.matmul(input, w) + b;
+                if(input_rank > 2)
+                {
+                    output = tf.reshape(output, real_output_shape);
+                }
+            });
             return output;
         }
 
