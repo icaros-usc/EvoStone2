@@ -19,3 +19,5 @@ SurrogateModel/obj/
 
 TestBed/DeckSearch/bin/
 TestBed/DeckSearch/train_log/
+TestBed/DeckSearch/card2vec/*.ipynb
+TestBed/DeckSearch/card2vec/.ipynb_checkpoints/

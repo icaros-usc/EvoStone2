@@ -46,7 +46,10 @@ namespace SabberStoneUtil.DataProcessing
         /// </summary>
         public static Dictionary<String, double[]> cardEmbeddings = new Dictionary<string, double[]>();
 
-        private static int cardEmbeddingSize;
+        /// <summary>
+        /// Dimension of the card embedding vector
+        /// </summary>
+        public static int cardEmbeddingSize { get; private set; }
 
         static DataProcessor()
         {
@@ -336,7 +339,7 @@ namespace SabberStoneUtil.DataProcessing
             return PreprocessDeckDataWithOnehotFromData(logIndividualsList);
         }
 
-        public static (double[][][], double[,]) PreprocessDeckDataWithCard2VecEmbeddingFromData(List<LogIndividual> logIndividualsList)
+        public static (double[][][], double[,]) PreprocessDeckEmbeddingFromData(List<LogIndividual> logIndividualsList)
         {
             // store embedding in a 3D array
             // each deck consists of 30 embedding vectors
@@ -357,6 +360,12 @@ namespace SabberStoneUtil.DataProcessing
             double[,] deckStats = GetDeckStats(logIndividualsList);
 
             return (deckEmbeddings, deckStats);
+        }
+
+        public static (double[][][], double[,]) PreprocessDeckEmbeddingFromFile(string path)
+        {
+            var logIndividualsList = readLogIndividuals(path).ToList();
+            return PreprocessDeckEmbeddingFromData(logIndividualsList);
         }
 
         /// <summary>

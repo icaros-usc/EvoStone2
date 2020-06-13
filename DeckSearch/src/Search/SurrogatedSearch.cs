@@ -85,9 +85,7 @@ namespace DeckSearch.Search
         public void Evaluate(List<Individual> individuals)
         {
             var logIndividuals = ConvertIndividuals(individuals, includeStats: false);
-            var (cardsEncoding, _) =
-                DataProcessor.PreprocessDeckDataWithOnehotFromData(logIndividuals);
-            var result = _surrogateModel.Predict(cardsEncoding);
+            var result = _surrogateModel.Predict(logIndividuals);
 
             // update statistics of individuals
             foreach (var individual in individuals)
@@ -109,8 +107,7 @@ namespace DeckSearch.Search
         private void BackProp(List<Individual> individuals)
         {
             var logIndividuals = ConvertIndividuals(individuals);
-            var (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckDataWithOnehotFromData(logIndividuals);
-            _surrogateModel.OnlineFit(cardsEncoding, deckStats);
+            _surrogateModel.OnlineFit(logIndividuals);
         }
 
         private void GetElapsedTime()

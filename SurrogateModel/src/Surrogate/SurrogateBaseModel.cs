@@ -9,9 +9,12 @@ using SabberStoneUtil.DataProcessing;
 
 namespace SurrogateModel.Surrogate
 {
+    /// <summary>
+    /// Base Surrogate Model. Inlcudes shared properties and parameters of all Surrogate Models. All Surrogate Models must inherit from this class.
+    /// </summary>
     public abstract class SurrogateBaseModel
     {
-                // config and graph
+        // config and graph
         protected ConfigProto config;
         protected Graph graph;
 
@@ -36,9 +39,16 @@ namespace SurrogateModel.Surrogate
         protected DataLoader dataLoaderTest = null;
 
         // writers to record training and testing loss
-        private const string TRAINING_LOSS_FILE = "train_log/train_loss_128.txt";
-        private const string TESTING_LOSS_FILE = "train_log/test_loss_128.txt";
+        protected string TRAINING_LOSS_FILE = "train_log/train_loss_128.txt";
+        protected string TESTING_LOSS_FILE = "train_log/test_loss_128.txt";
+        protected const string OFFLINE_DATA_FILE = "resources/individual_log.csv";
 
+        /// <summary>
+        /// Constructor of the Base model
+        /// </summary>
+        /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
+        /// <param name = "batch_size">Batch size of data.</param>
+        /// <param name = "step_size">The step size of adam optimizer.</param>
         public SurrogateBaseModel(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f)
         {
             this.num_epoch = num_epoch;
@@ -51,16 +61,22 @@ namespace SurrogateModel.Surrogate
                 IntraOpParallelismThreads = 0,
                 InterOpParallelismThreads = 0,
             };
+        }
 
-            // delete old loss data
-            if(File.Exists(TRAINING_LOSS_FILE))
-            {
-                File.Delete(TRAINING_LOSS_FILE);
-            }
-            if(File.Exists(TESTING_LOSS_FILE))
-            {
-                File.Delete(TESTING_LOSS_FILE);
-            }
+        /// <summary>
+        /// Helper function to initialize dataLoader used for training and testing.
+        /// </summary>
+        protected void init_data_loaders(NDArray X, NDArray y)
+        {
+            int train_test_split = (int)(X.shape[0] * 0.9); // use first 90% of data for training
+            // create data loader
+            dataLoaderTrain = new DataLoader(X[new Slice(0, train_test_split)],
+                                             y[new Slice(0, train_test_split)],
+                                             batch_size);
+            // regard the last 1000 data points as one batch
+            dataLoaderTest = new DataLoader(X[new Slice(train_test_split, X.shape[0])],
+                                             y[new Slice(train_test_split, y.Shape[0])],
+                                             X.shape[0] - train_test_split, shuffle: false);
         }
 
         /// <summary>
@@ -166,7 +182,6 @@ namespace SurrogateModel.Surrogate
                     if(j % log_length == log_length - 1)
                     {
                         print($"epoch{epoch_idx}, iter:{j}:");
-                        epoch_idx++;
                         print($"training_loss = {running_loss/log_length}");
                         training_losses.Add(running_loss/log_length);
                         running_loss = 0;
@@ -181,6 +196,7 @@ namespace SurrogateModel.Surrogate
                         print($"testing_loss = {testing_loss}\n");
                     }
                 }
+                epoch_idx++;
             }
             WriteLosses(training_losses, TRAINING_LOSS_FILE);
             WriteLosses(testing_losses, TESTING_LOSS_FILE);
@@ -191,6 +207,11 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         private void WriteLosses(List<double> losses, string path)
         {
+            // delete old loss data
+            if(File.Exists(path))
+            {
+                File.Delete(path);
+            }
             using(StreamWriter sw = File.AppendText(path))
             {
                 foreach(var loss in losses)
@@ -201,14 +222,37 @@ namespace SurrogateModel.Surrogate
         }
 
         /// <summary>
+        /// Helper function to get model output given a input tensor
+        /// </summary>
+        protected double[,] PredictHelper(NDArray x_input)
+        {
+            // get the model output
+            var output = sess.run((model_output), // operations
+                                (n_samples, (int)x_input.shape[0]), // batch size
+                                (input, x_input)); // features
+
+            // convert result to double array
+            double[,] result;
+            result = new double[output.shape[0], output.shape[1]];
+            for(int i=0; i<output.shape[0]; i++)
+            {
+                for(int j=0; j<output.shape[1]; j++)
+                {
+                    result[i,j] = (double)(float)output[i,j]; // need to cast twice because the model use float
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// online fit the model using specified data
         /// </summary>
-        public abstract void OnlineFit(int[,] cardsEncoding, double[,] deckStats);
+        public abstract void OnlineFit(List<LogIndividual> logIndividuals);
 
         /// <summary>
         /// Evaluate input, return output. Do not run before initialization
         /// </summary>
-        public abstract double[,] Predict(int[,] cardsEncoding);
+        public abstract double[,] Predict(List<LogIndividual> logIndividuals);
 
 
     }

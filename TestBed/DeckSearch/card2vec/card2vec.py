@@ -17,7 +17,7 @@ def read_corpus(fname, tokens_only=False):
 
 card_dict = {}
 card_corpus = read_corpus("CardTexts.txt")
-model = gensim.models.doc2vec.Doc2Vec(vector_size=10, min_count=1, epochs=50)
+model = gensim.models.doc2vec.Doc2Vec(vector_size=20, min_count=2, epochs=200)
 model.build_vocab(card_corpus)
 model.train(card_corpus, total_examples=model.corpus_count, epochs=model.epochs)
 
