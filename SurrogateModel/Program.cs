@@ -13,9 +13,10 @@ namespace SurrogateModel
     {
         static void Main(string[] args)
         {
+            DataProcessor.GenerateCardDescription();
             // var model = new FullyConnectedNN();
-            var model = new DeepSetModel();
-            model.OfflineFit();
+            // var model = new DeepSetModel();
+            // model.OfflineFit();
 
             // // shape (3, 2, 2)
             // var a = new float[,,] { { { 1, 2 }, { 3, 4 } },

@@ -32,6 +32,7 @@ namespace SurrogateModel.Surrogate
         protected int num_epoch;
         public int batch_size { get; protected set; }
         protected float step_size;
+        protected int log_length;
 
         // others
         protected int epoch_idx = 0;
@@ -49,11 +50,12 @@ namespace SurrogateModel.Surrogate
         /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
-        public SurrogateBaseModel(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f)
+        public SurrogateBaseModel(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f, int log_length = 10)
         {
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
             this.step_size = step_size;
+            this.log_length = log_length;
 
             // set up session, attempt to use all cores
             config = new ConfigProto
@@ -165,7 +167,6 @@ namespace SurrogateModel.Surrogate
             double running_loss = 0;
             List<double> training_losses = new List<double>();
             List<double> testing_losses = new List<double>();
-            int log_length = 1;
 
             Console.WriteLine("Start training");
             for(int i=0; i<num_epoch; i++)

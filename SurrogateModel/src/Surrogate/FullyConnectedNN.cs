@@ -20,8 +20,8 @@ namespace SurrogateModel.Surrogate
         /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
-        public FullyConnectedNN(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f)
-            : base(num_epoch, batch_size, step_size)
+        public FullyConnectedNN(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f, int log_length = 1)
+            : base(num_epoch, batch_size, step_size, log_length)
         {
             graph = build_graph();
             sess = tf.Session(config);
@@ -41,7 +41,7 @@ namespace SurrogateModel.Surrogate
         {
             if (!online)
             {
-                (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckDataWithOnehotFromFile(OFFLINE_DATA_FILE);
+                (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckOnehotFromFile(OFFLINE_DATA_FILE);
             }
             var X = np.array(cardsEncoding);
             X += np.random.rand(X.shape) * 0.0001; // add random noise
@@ -109,7 +109,7 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         public override void OnlineFit(List<LogIndividual> logIndividuals)
         {
-            var (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckDataWithOnehotFromData(logIndividuals);
+            var (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckOnehotFromData(logIndividuals);
             prepare_data(online: true, cardsEncoding, deckStats);
             train();
         }
@@ -120,7 +120,7 @@ namespace SurrogateModel.Surrogate
         public override double[,] Predict(List<LogIndividual> logIndividuals)
         {
             // obtain one hot encoding
-            var (cardsEncoding, _) = DataProcessor.PreprocessDeckDataWithOnehotFromData(logIndividuals);
+            var (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromData(logIndividuals);
             var x_input = np.array(cardsEncoding);
             return PredictHelper(x_input);
         }

@@ -17,8 +17,8 @@ namespace SurrogateModel.Surrogate
         /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
-        public DeepSetModel(int num_epoch = 100, int batch_size = 32, float step_size = 0.002f)
-            : base(num_epoch, batch_size, step_size)
+        public DeepSetModel(int num_epoch = 10, int batch_size = 32, float step_size = 0.002f, int log_length = 10)
+            : base(num_epoch, batch_size, step_size, log_length)
         {
             graph = build_graph();
             sess = tf.Session(config);

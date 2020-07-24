@@ -90,20 +90,33 @@ namespace SabberStoneUtil.DataProcessing
             Console.WriteLine("----------------------------------------------------------------");
         }
 
+
         /// <summary>
-        /// Function to write processed deck feature to csv file
+        /// Helper Function to write processed list of objects to csv file
         /// </summary>
-        private static void WriteNumericalDeckFeature(List<ProcessedIndividual> processedIndividuals)
+        private static void WriteToCsv<T>(List<T> objects, string path)
         {
-            // Write processed data to csv file
-            Console.WriteLine("Writing processed data to csv...");
-            using (var writer = new StreamWriter("../../../surrogate-model/processed_deck_data.csv"))
+            using (var writer = new StreamWriter(path))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(processedIndividuals);
+                csv.WriteRecords(objects);
             }
-            Console.WriteLine("Data written to ../../../surrogate-model/processed_deck_data.csv");
         }
+
+        // /// <summary>
+        // /// Function to write processed deck feature to csv file
+        // /// </summary>
+        // private static void WriteNumericalDeckFeature(List<ProcessedIndividual> processedIndividuals)
+        // {
+        //     // Write processed data to csv file
+        //     Console.WriteLine("Writing processed data to csv...");
+        //     using (var writer = new StreamWriter("../../../surrogate-model/processed_deck_data.csv"))
+        //     using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        //     {
+        //         csv.WriteRecords(processedIndividuals);
+        //     }
+        //     Console.WriteLine("Data written to ../../../surrogate-model/processed_deck_data.csv");
+        // }
 
 
         /// <summary>
@@ -231,7 +244,7 @@ namespace SabberStoneUtil.DataProcessing
             Console.WriteLine("Processing Completed!");
 
             // write processed data
-            WriteNumericalDeckFeature(processedIndividuals);
+            WriteToCsv(processedIndividuals, "../../../surrogate-model/processed_deck_data.csv");
         }
 
         /// <summary>
@@ -275,7 +288,7 @@ namespace SabberStoneUtil.DataProcessing
         /// </summary>
         public static void PrintDeckOnehotEncoding(String inPath)
         {
-            (int [,] cardsEncoding, _) = PreprocessDeckDataWithOnehotFromFile(inPath);
+            (int [,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
             PrintDeckEncoding(cardsEncoding);
         }
 
@@ -284,7 +297,7 @@ namespace SabberStoneUtil.DataProcessing
         /// </summary>
         public static void WriteDeckOnehotEncoding(String inPath, String outPath)
         {
-            (int[,] cardsEncoding, _) = PreprocessDeckDataWithOnehotFromFile(inPath);
+            (int[,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
             WriteDeckEncoding(cardsEncoding, outPath);
         }
 
@@ -308,7 +321,7 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Generate (modified) one hot encoding feature from data read from data
         /// </summary>
-        public static (int[,], double[,]) PreprocessDeckDataWithOnehotFromData(List<LogIndividual> logIndividualsList)
+        public static (int[,], double[,]) PreprocessDeckOnehotFromData(List<LogIndividual> logIndividualsList)
         {
             // store encoding in a 2D array
             int [,] cardsEncoding = new int[logIndividualsList.Count, initialCardsList.Count]; // feature of surrogate model
@@ -333,10 +346,10 @@ namespace SabberStoneUtil.DataProcessing
         /// Generate (modified) one hot encoding feature from data read from file
         /// </summary>
         /// <param name = "path">path of the file containing raw data</param>
-        public static (int[,], double[,]) PreprocessDeckDataWithOnehotFromFile(String path)
+        public static (int[,], double[,]) PreprocessDeckOnehotFromFile(String path)
         {
             var logIndividualsList = readLogIndividuals(path).ToList();
-            return PreprocessDeckDataWithOnehotFromData(logIndividualsList);
+            return PreprocessDeckOnehotFromData(logIndividualsList);
         }
 
         public static (double[][][], double[,]) PreprocessDeckEmbeddingFromData(List<LogIndividual> logIndividualsList)
@@ -407,29 +420,29 @@ namespace SabberStoneUtil.DataProcessing
             Console.WriteLine("Found data, start reading");
 
             // data is ready, read them in, delete file, and return
-            (int[,] cardsEncoding, double[,] deckStats) = PreprocessDeckDataWithOnehotFromFile(path);
+            (int[,] cardsEncoding, double[,] deckStats) = PreprocessDeckOnehotFromFile(path);
             File.Delete(path);
             return (cardsEncoding, deckStats);
         }
 
         public static void GenerateCardDescription()
         {
-            using(StreamWriter sw = new StreamWriter("card2vec/CardTexts.txt"))
+            List<LogCard> logCards = new List<LogCard>();
+            foreach(var card in allCards)
             {
-                foreach(var card in initialCards)
-                {
-                    string cardName = card.Name;
-                    string cardRace = Enum.GetName(typeof(Race), card.GetRawRace());
-                    string cardClass = Enum.GetName(typeof(CardClass), card.Class);
-                    string cardType = Enum.GetName(typeof(CardType), card.Type);
-                    string description = String.Join(" ", new string[] { cardName, cardRace, cardClass, cardType, card.Text});
+                LogCard logCard = new LogCard();
+                logCard.cardName = card.Name;
+                logCard.cardRace = Enum.GetName(typeof(Race), card.GetRawRace());
+                logCard.cardClass = Enum.GetName(typeof(CardClass), card.Class);
+                logCard.cardType = Enum.GetName(typeof(CardType), card.Type);
+                string rawDescription = String.Join(" ", new string[] { logCard.cardName, logCard.cardRace, logCard.cardClass, logCard.cardType, card.Text});
 
-                    description = description.Replace("<b>", "").Replace("</b>", "")
-                                             .Replace("<i>", "").Replace("</i>", "")
-                                             .Replace("[x]", "").Replace("_", "").Replace("\n", "");
-                    sw.WriteLine(cardName + "*" + description);
-                }
+                logCard.description = rawDescription.Replace("<b>", "").Replace("</b>", "")
+                                            .Replace("<i>", "").Replace("</i>", "")
+                                            .Replace("[x]", "").Replace("_", "").Replace("\n", "");
+                logCards.Add(logCard);
             }
+            WriteToCsv(logCards, "card2vec/CardTexts.csv");
         }
     }
 }
