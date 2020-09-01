@@ -3,8 +3,9 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using DeckSearch.Config;
 using SurrogateModel.Surrogate;
+
+using SabberStoneUtil.Config;
 using SabberStoneUtil.DataProcessing;
 using SabberStoneUtil.Messaging;
 
@@ -164,7 +165,7 @@ namespace DeckSearch.Search
                     List<Individual> currGeneration = new List<Individual>();
                     for(int j=0; j<generationSize; j++)
                     {
-                        Individual choiceIndividual = _searchManager._searchAlgo.GenerateIndividual(_searchManager._cardSet);
+                        Individual choiceIndividual = _searchManager._searchAlgo.GenerateIndividual(CardReader._cardSet);
                         currGeneration.Add(choiceIndividual);
                     }
                     Evaluate(currGeneration);

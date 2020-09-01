@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using DeckSearch.Config;
+using SabberStoneUtil.Config;
+
 using DeckSearch.Mapping.Sizers;
 using DeckSearch.Search;
 

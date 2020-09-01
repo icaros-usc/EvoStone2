@@ -1,11 +1,11 @@
-namespace DeckSearch.Config
+namespace SabberStoneUtil.Config
 {
-   class EvolutionStrategyParams
+   public class EvolutionStrategyParams
    {
       public EvolutionStrategySearchParams Search { get; set; }
    }
 
-   class EvolutionStrategySearchParams
+   public class EvolutionStrategySearchParams
    {
       public int InitialPopulation { get; set; }
       public int NumToEvaluate { get; set; }

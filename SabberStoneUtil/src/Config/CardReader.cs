@@ -6,10 +6,32 @@ using System.Xml.Linq;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 
-namespace DeckSearch.Config
+namespace SabberStoneUtil.Config
 {
-    class CardReader
+    public class CardReader
     {
+        /// <summary>
+        /// Hero class read from SabberStone based on config file
+        /// </summary>
+        public static CardClass _heroClass { get; private set; }
+
+        /// <summary>
+        /// List of Cards read from SabberStone based on config file
+        /// </summary>
+        public static List<Card> _cardSet { get; private set; }
+
+        /// <summary>
+        /// static constructor to be called once to initialize the search space
+        /// </summary>
+        public static void Init(Configuration config)
+        {
+            // Configuration for the search space
+            _heroClass = CardReader.GetClassFromName(config.Deckspace.HeroClass);
+            CardSet[] sets = CardReader.GetSetsFromNames(config.Deckspace.CardSets);
+            _cardSet = CardReader.GetCards(_heroClass, sets);
+        }
+
+
         public static CardClass GetClassFromName(string className)
         {
             className = className.ToUpper();

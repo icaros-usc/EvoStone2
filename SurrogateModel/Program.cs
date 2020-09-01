@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Linq;
+using Nett;
+
 using SurrogateModel.Surrogate;
+
 using SabberStoneUtil.DataProcessing;
+using SabberStoneUtil.Config;
 
 using Tensorflow;
 using NumSharp;
@@ -13,10 +17,12 @@ namespace SurrogateModel
     {
         static void Main(string[] args)
         {
-            DataProcessor.GenerateCardDescription();
+            var config = Toml.ReadFile<Configuration>(args[0]);
+            CardReader.Init(config);
+            // DataProcessor.GenerateCardDescription();
             // var model = new FullyConnectedNN();
-            // var model = new DeepSetModel();
-            // model.OfflineFit();
+            var model = new DeepSetModel();
+            model.OfflineFit();
 
             // // shape (3, 2, 2)
             // var a = new float[,,] { { { 1, 2 }, { 3, 4 } },

@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Collections.Generic;
 
+using SabberStoneUtil.Config;
+
 using SabberStoneCore.Model;
 using SabberStoneCore.Enums;
 
@@ -17,22 +19,10 @@ namespace SabberStoneUtil.DataProcessing
 {
     public class DataProcessor
     {
-        // cards data from SabberStone
         /// <summary>
-        /// Basic(CORE) and classic(EXPERT1) cards
+        /// Number of cards in the search space
         /// </summary>
-        private static IEnumerable<Card> initialCards = allCards.Where(c =>
-                                                         (c.Set == CardSet.CORE || c.Set == CardSet.EXPERT1)
-                                                       && c.Collectible
-                                                       && c.Implemented
-                                                       && c.Type != CardType.HERO
-                                                       && c.Type != CardType.ENCHANTMENT
-                                                       && c.Type != CardType.INVALID
-                                                       && c.Type != CardType.HERO_POWER
-                                                       && c.Type != CardType.TOKEN);
-        private static List<Card> initialCardsList = initialCards.ToList();
-
-        public static int numInitialCards = initialCardsList.Count;
+        public static int numCards = CardReader._cardSet.Count;
 
         private static IEnumerable<Card> allCards => Cards.All;
 
@@ -51,32 +41,40 @@ namespace SabberStoneUtil.DataProcessing
         /// </summary>
         public static int cardEmbeddingSize { get; private set; }
 
+        /// <summary>
+        /// static constructor
+        /// </summary>
         static DataProcessor()
         {
             // construct card2index map
-            for(int i=0; i<initialCardsList.Count; i++)
+            for(int i=0; i<numCards; i++)
             {
-                String cardName = initialCardsList[i].Name;
-                var findCardList = initialCards.Where(c => c.Name == cardName).ToList();
+                String cardName = CardReader._cardSet[i].Name;
+                var findCardList = CardReader._cardSet.Where(c => c.Name == cardName).ToList();
                 if(findCardList.Count == 0) {
                     Console.WriteLine("Error: Could not find card <" +
                                       cardName +
                                       ">. Try to include more cardset and try again.");
                     return;
                 }
-                int index = initialCardsList.IndexOf(initialCards.Where(c => c.Name == cardName).ToList()[0]);
+                int index = CardReader._cardSet.IndexOf(CardReader._cardSet.Where(c => c.Name == cardName).ToList()[0]);
                 cardIndex[cardName] = index;
             }
 
-            // construct card to card embedding map
-            var cardEmbeddingJsonString = File.ReadAllText("card2vec/CardEmbeddings.json");
+            // construct card to vector embedding map
+            var cardEmbeddingJsonString =
+                File.ReadAllText("card2vec/CardEmbeddings.json");
             var rawEmbeddings = JsonSerializer.Deserialize<CardEmbedding[]>(cardEmbeddingJsonString);
             for(int i=0; i<rawEmbeddings.Length; i++)
             {
                 cardEmbeddings[rawEmbeddings[i].cardName] = rawEmbeddings[i].embedding;
             }
             cardEmbeddingSize = rawEmbeddings[0].embedding.Length;
+
+            Console.WriteLine("Number of cards in search space: {0}", numCards);
         }
+
+        // ****************** I/O Functions ******************
 
         private static void PrintCardInfo(Card card)
         {
@@ -129,6 +127,65 @@ namespace SabberStoneUtil.DataProcessing
             IEnumerable<LogIndividual> logIndividuals = csv.GetRecords<LogIndividual>();
             return logIndividuals;
         }
+
+
+        /// <summary>
+        /// Print encoded deck data
+        /// </summary>
+        private static void PrintDeckEncoding(int [,] cardsEncoding)
+        {
+            for(int i=0; i<10; i++) {
+                for(int j=0; j<cardsEncoding.GetLength(1); j++) {
+                    Console.Write(cardsEncoding[i,j]);
+                    Console.Write(" ");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Write encoded deck data to disk
+        /// </summary>
+        private static void WriteDeckEncoding(int [,] cardsEncoding, String path)
+        {
+            using(StreamWriter writer = new StreamWriter(path))
+            {
+                for(int i=0; i<cardsEncoding.GetLength(0); i++)
+                {
+                    String line = "";
+                    for(int j=0; j<cardsEncoding.GetLength(1); j++)
+                    {
+                        line += cardsEncoding[i,j].ToString();
+                        if(j != cardsEncoding.GetLength(1)-1) {
+                            line += ",";
+                        }
+                    }
+                    writer.WriteLine(line);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Print onehot encoded deck data
+        /// </summary>
+        public static void PrintDeckOnehotEncoding(String inPath)
+        {
+            (int [,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
+            PrintDeckEncoding(cardsEncoding);
+        }
+
+        /// <summary>
+        /// Write onehot encoded deck data to disk
+        /// </summary>
+        public static void WriteDeckOnehotEncoding(String inPath, String outPath)
+        {
+            (int[,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
+            WriteDeckEncoding(cardsEncoding, outPath);
+        }
+
+        // ***************** End I/O Functions *******************
+
+        // ************ Preprocess Card/Deck Encoding from Data **************
 
         /// <summary>
         /// Generate numerical deck features
@@ -244,77 +301,8 @@ namespace SabberStoneUtil.DataProcessing
             Console.WriteLine("Processing Completed!");
 
             // write processed data
-            WriteToCsv(processedIndividuals, "../../../surrogate-model/processed_deck_data.csv");
-        }
-
-        /// <summary>
-        /// Print encoded deck data
-        /// </summary>
-        private static void PrintDeckEncoding(int [,] cardsEncoding)
-        {
-            for(int i=0; i<10; i++) {
-                for(int j=0; j<cardsEncoding.GetLength(1); j++) {
-                    Console.Write(cardsEncoding[i,j]);
-                    Console.Write(" ");
-                }
-                Console.WriteLine();
-            }
-        }
-
-        /// <summary>
-        /// Write encoded deck data to disk
-        /// </summary>
-        private static void WriteDeckEncoding(int [,] cardsEncoding, String path)
-        {
-            using(StreamWriter writer = new StreamWriter(path))
-            {
-                for(int i=0; i<cardsEncoding.GetLength(0); i++)
-                {
-                    String line = "";
-                    for(int j=0; j<cardsEncoding.GetLength(1); j++)
-                    {
-                        line += cardsEncoding[i,j].ToString();
-                        if(j != cardsEncoding.GetLength(1)-1) {
-                            line += ",";
-                        }
-                    }
-                    writer.WriteLine(line);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Print onehot encoded deck data
-        /// </summary>
-        public static void PrintDeckOnehotEncoding(String inPath)
-        {
-            (int [,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
-            PrintDeckEncoding(cardsEncoding);
-        }
-
-        /// <summary>
-        /// Write onehot encoded deck data to disk
-        /// </summary>
-        public static void WriteDeckOnehotEncoding(String inPath, String outPath)
-        {
-            (int[,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
-            WriteDeckEncoding(cardsEncoding, outPath);
-        }
-
-        /// <summary>
-        /// Get Deck stats from list of LogIndividuals as the learning target
-        /// </summary>
-        public static double[,] GetDeckStats(List<LogIndividual> logIndividualsList)
-        {
-            double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
-            for(int i=0; i<logIndividualsList.Count; i++)
-            {
-                // could add more stats here if model is improved
-                deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
-                deckStats[i,1] = logIndividualsList[i].NumTurns;
-                deckStats[i,2] = logIndividualsList[i].HandSize;
-            }
-            return deckStats;
+            WriteToCsv(processedIndividuals,
+                       "../../../surrogate-model/processed_deck_data.csv");
         }
 
 
@@ -324,7 +312,7 @@ namespace SabberStoneUtil.DataProcessing
         public static (int[,], double[,]) PreprocessDeckOnehotFromData(List<LogIndividual> logIndividualsList)
         {
             // store encoding in a 2D array
-            int [,] cardsEncoding = new int[logIndividualsList.Count, initialCardsList.Count]; // feature of surrogate model
+            int [,] cardsEncoding = new int[logIndividualsList.Count, numCards]; // feature of surrogate model
             for(int i=0; i<logIndividualsList.Count; i++)
             {
                 string[] deckCards = logIndividualsList[i].Deck.Split('*');
@@ -342,6 +330,58 @@ namespace SabberStoneUtil.DataProcessing
             return (cardsEncoding, deckStats);
         }
 
+        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromData(List<LogIndividual> logIndividualsList)
+        {
+            // store embedding in a 3D array
+            // each deck consists of 30 embedding vectors
+            double[][][] deckEmbeddings = new double[logIndividualsList.Count][][];
+            for(int i=0; i<logIndividualsList.Count; i++)
+            {
+                string[] deckCards = logIndividualsList[i].Deck.Split('*');
+                double [][] deckEmbedding = new double[30][];
+                for(int j=0; j<deckCards.Length; j++)
+                {
+                    deckEmbedding[j] = cardEmbeddings[deckCards[j]];
+                }
+                deckEmbeddings[i] = deckEmbedding;
+            }
+
+            double[,] deckStats = GetDeckStats(logIndividualsList);
+
+            return (deckEmbeddings, deckStats);
+        }
+
+        /// <summary>
+        /// Generate encoding of a deck as a set of 30 one hot encoded cards from data
+        /// </summary>
+        public static (double [][][], double[,]) PreprocessCardsSetOnehotFromData(List<LogIndividual> logIndividualsList)
+        {
+            /// store embedding in a 3D array
+            // each deck contains 30 embedding vectors
+            double[][][] deckEmbeddings =
+                new double [logIndividualsList.Count][][];
+            for(int i=0; i<logIndividualsList.Count; i++)
+            {
+                string[] deckCards = logIndividualsList[i].Deck.Split('*');
+                double [][] deckEmbedding = new double[30][];
+                for(int j=0; j<deckCards.Length; j++)
+                {
+                    // create onehot encoding of a card
+                    double[] cardEmbedding = new double[numCards];
+                    cardEmbedding[cardIndex[deckCards[j]]] = 1;
+                    deckEmbedding[j] = cardEmbedding;
+                }
+                deckEmbeddings[i] = deckEmbedding;
+            }
+
+            double[,] deckStats = GetDeckStats(logIndividualsList);
+            return (deckEmbeddings, deckStats);
+        }
+
+        // ********* End Preprocess Card/Deck Encoding from Data ************
+
+        //*********** Preprocess Card/Deck Encoding from File ****************
+
         /// <summary>
         /// Generate (modified) one hot encoding feature from data read from file
         /// </summary>
@@ -352,33 +392,42 @@ namespace SabberStoneUtil.DataProcessing
             return PreprocessDeckOnehotFromData(logIndividualsList);
         }
 
-        public static (double[][][], double[,]) PreprocessDeckEmbeddingFromData(List<LogIndividual> logIndividualsList)
-        {
-            // store embedding in a 3D array
-            // each deck consists of 30 embedding vectors
-            double[][][] deckEmbeddings = new double[logIndividualsList.Count][][];
-            int destinationIndex = 0;
-            for(int i=0; i<logIndividualsList.Count; i++)
-            {
-                string[] deckCards = logIndividualsList[i].Deck.Split('*');
-                double [][] deckEmbedding = new double[30][];
-                for(int j=0; j<deckCards.Length; j++)
-                {
-                    deckEmbedding[j] = cardEmbeddings[deckCards[j]];
-                    destinationIndex += cardEmbeddingSize;
-                }
-                deckEmbeddings[i] = deckEmbedding;
-            }
-
-            double[,] deckStats = GetDeckStats(logIndividualsList);
-
-            return (deckEmbeddings, deckStats);
-        }
-
-        public static (double[][][], double[,]) PreprocessDeckEmbeddingFromFile(string path)
+        /// <summary>
+        /// Generate deck2vec embedding from data read from
+        /// </summary>
+        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromFile(string path)
         {
             var logIndividualsList = readLogIndividuals(path).ToList();
-            return PreprocessDeckEmbeddingFromData(logIndividualsList);
+            return PreprocessDeckToVecEmbeddingFromData(logIndividualsList);
+        }
+
+        /// <summary>
+        /// Generate encoding of a deck as a set of 30 one hot encoded cards from file
+        /// </summary>
+        public static (double [][][], double[,]) PreprocessCardsSetOnehotFromFile(string path)
+        {
+            var logIndividualsList = readLogIndividuals(path).ToList();
+            return PreprocessCardsSetOnehotFromData(logIndividualsList);
+        }
+
+        // ******** End Preprocess Card/Deck Encoding from File ************
+
+        // ***************** Util Functions *********************
+
+        /// <summary>
+        /// Get Deck stats from list of LogIndividuals as the learning target
+        /// </summary>
+        public static double[,] GetDeckStats(List<LogIndividual> logIndividualsList)
+        {
+            double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
+            for(int i=0; i<logIndividualsList.Count; i++)
+            {
+                // could add more stats here if model is improved
+                deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
+                deckStats[i,1] = logIndividualsList[i].NumTurns;
+                deckStats[i,2] = logIndividualsList[i].HandSize;
+            }
+            return deckStats;
         }
 
         /// <summary>
@@ -437,12 +486,16 @@ namespace SabberStoneUtil.DataProcessing
                 logCard.cardType = Enum.GetName(typeof(CardType), card.Type);
                 string rawDescription = String.Join(" ", new string[] { logCard.cardName, logCard.cardRace, logCard.cardClass, logCard.cardType, card.Text});
 
-                logCard.description = rawDescription.Replace("<b>", "").Replace("</b>", "")
-                                            .Replace("<i>", "").Replace("</i>", "")
-                                            .Replace("[x]", "").Replace("_", "").Replace("\n", "");
+                logCard.description =
+                    rawDescription.Replace("<b>", "").Replace("</b>", "")
+                                  .Replace("<i>", "").Replace("</i>", "")
+                                  .Replace("[x]", "").Replace("_", "")
+                                  .Replace("\n", "");
                 logCards.Add(logCard);
             }
             WriteToCsv(logCards, "card2vec/CardTexts.csv");
         }
+
+        // *************** End Util Functions ***********************
     }
 }

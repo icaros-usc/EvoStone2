@@ -39,7 +39,7 @@ namespace SurrogateModel.Surrogate
         {
             if(!online)
             {
-                (deckEmbedding, deckStats) = DataProcessor.PreprocessDeckEmbeddingFromFile(OFFLINE_DATA_FILE);
+                (deckEmbedding, deckStats) = DataProcessor.PreprocessCardsSetOnehotFromFile(OFFLINE_DATA_FILE);
             }
 
             var X = np.array(deckEmbedding);
@@ -61,7 +61,7 @@ namespace SurrogateModel.Surrogate
             tf_with(tf.variable_scope("placeholder"), delegate
             {
                 n_samples = tf.placeholder(tf.float32);
-                input = tf.placeholder(tf.float32, shape: (-1, 30, DataProcessor.cardEmbeddingSize));
+                input = tf.placeholder(tf.float32, shape: (-1, 30, DataProcessor.numCards));
                 y_true = tf.placeholder(tf.float32, shape: (-1, 3));
             });
 
@@ -133,10 +133,10 @@ namespace SurrogateModel.Surrogate
             Tensor phi_output = null;
             tf_with(tf.variable_scope(name), delegate
             {
-                Tensor o_perm_equi1 = perm_equi_layer(input, name: "perm_equi1", num_output: 32, pool);
+                Tensor o_perm_equi1 = perm_equi_layer(input, name: "perm_equi1", num_output: 16, pool);
                 Tensor o_acti1 = elu_layer(o_perm_equi1, name: "elu1");
 
-                Tensor o_perm_equi2 = perm_equi_layer(o_acti1, name: "perm_equi2", num_output: 32, pool);
+                Tensor o_perm_equi2 = perm_equi_layer(o_acti1, name: "perm_equi2", num_output: 16, pool);
                 Tensor o_acti2 = elu_layer(o_perm_equi2, name: "elu2");
 
                 // Tensor o_perm_equi3 = perm_equi_layer(o_acti2, name: "perm_equi3", num_output: 32, pool);
@@ -184,7 +184,7 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         public override void OnlineFit(List<LogIndividual> logIndividuals)
         {
-            var (deckEncoding, deckStats) = DataProcessor.PreprocessDeckEmbeddingFromData(logIndividuals);
+            var (deckEncoding, deckStats) = DataProcessor.PreprocessCardsSetOnehotFromData(logIndividuals);
             prepare_data(online: true, deckEncoding, deckStats);
             train();
         }
@@ -195,7 +195,7 @@ namespace SurrogateModel.Surrogate
         public override double[,] Predict(List<LogIndividual> logIndividuals)
         {
             // obtain deck embedding
-            var (deckEmbedding, _) = DataProcessor.PreprocessDeckEmbeddingFromData(logIndividuals);
+            var (deckEmbedding, _) = DataProcessor.PreprocessCardsSetOnehotFromData(logIndividuals);
             var x_input = np.array(deckEmbedding);
             return PredictHelper(x_input);
         }

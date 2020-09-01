@@ -1,12 +1,12 @@
-namespace DeckSearch.Config
+namespace SabberStoneUtil.Config
 {
-    class MapElitesParams
+    public class MapElitesParams
     {
         public MapElitesSearchParams Search { get; set; }
         public MapParams Map { get; set; }
     }
 
-    class MapElitesSearchParams 
+    public class MapElitesSearchParams 
     {
         public int InitialPopulation { get; set; }
         public int NumToEvaluate { get; set; }

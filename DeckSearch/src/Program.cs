@@ -1,5 +1,5 @@
 ﻿using DeckSearch.Search;
-using DeckSearch.Config;
+using SabberStoneUtil.Config;
 
 using Nett;
 
@@ -11,18 +11,22 @@ namespace DeckSearch
     {
         static void Main(string[] args)
         {
-            DataProcessor.GenerateCardDescription();
-            // var config = Toml.ReadFile<Configuration>(args[0]);
-            // if(config.Search.Category == "Distributed")
-            // {
-            //     var search = new DistributedSearch(config, args[0]);
-            //     search.Run();
-            // }
-            // else if(config.Search.Category == "Surrogated")
-            // {
-            //     var search = new SurrogatedSearch(config, args[0]);
-            //     search.Run();
-            // }
+            // DataProcessor.GenerateCardDescription();
+
+            // read in config and initialize search space (domain of cards to search)
+            var config = Toml.ReadFile<Configuration>(args[0]);
+            CardReader.Init(config);
+
+            if(config.Search.Category == "Distributed")
+            {
+                var search = new DistributedSearch(config, args[0]);
+                search.Run();
+            }
+            else if(config.Search.Category == "Surrogated")
+            {
+                var search = new SurrogatedSearch(config, args[0]);
+                search.Run();
+            }
         }
     }
 }

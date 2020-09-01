@@ -10,8 +10,8 @@ using SabberStoneCore.Model;
 
 using SabberStoneUtil.Decks;
 using SabberStoneUtil.Messaging;
+using SabberStoneUtil.Config;
 
-using DeckSearch.Config;
 using DeckSearch.Logging;
 using DeckSearch.Search.MapElites;
 using DeckSearch.Search.EvolutionStrategy;
@@ -46,16 +46,6 @@ namespace DeckSearch.Search
         /// List of individuals that are evaluated by the workers. The list is emptied periodically
         /// </summary>
         public List<Individual> _individualsBuffer = new List<Individual>();
-
-        /// <summary>
-        /// Hero class read from SabberStone
-        /// </summary>
-        readonly public CardClass _heroClass;
-
-        /// <summary>
-        /// List of Cards read from SabberStone
-        /// </summary>
-        readonly public List<Card> _cardSet;
 
         /// <summary>
         /// Search Algorithm
@@ -144,12 +134,6 @@ namespace DeckSearch.Search
 
             // Grab the configuration info
             _configFilename = configFilename;
-            // var config = Toml.ReadFile<Configuration>(_configFilename);
-
-            // Configuration for the search space
-            _heroClass = CardReader.GetClassFromName(config.Deckspace.HeroClass);
-            CardSet[] sets = CardReader.GetSetsFromNames(config.Deckspace.CardSets);
-            _cardSet = CardReader.GetCards(_heroClass, sets);
 
             // Setup the logs to record the data on individuals
             InitLogs();
@@ -162,7 +146,7 @@ namespace DeckSearch.Search
                 _searchAlgo = new MapElitesAlgorithm(searchConfig);
             }
 
-            else if (config.Search.Type.Equals("EvolutionStrategy")) 
+            else if (config.Search.Type.Equals("EvolutionStrategy"))
             {
                 var searchConfig = Toml.ReadFile<EvolutionStrategyParams>(config.Search.ConfigFilename);
                 _searchAlgo = new EvolutionStrategyAlgorithm(searchConfig);
@@ -244,7 +228,7 @@ namespace DeckSearch.Search
             // Dispatch jobs to the available workers.
             while (_idleWorkers.Count > 0 && !_searchAlgo.IsBlocking())
             {
-                Individual choiceIndividual = _searchAlgo.GenerateIndividual(_cardSet);
+                Individual choiceIndividual = _searchAlgo.GenerateIndividual(CardReader._cardSet);
                 DispatchOneJobToWorker(choiceIndividual);
             }
         }
@@ -275,7 +259,7 @@ namespace DeckSearch.Search
         private void SendWork(string workerInboxPath, Individual cur)
         {
             var deckParams = new DeckParams();
-            deckParams.ClassName = _heroClass.ToString().ToLower();
+            deckParams.ClassName = CardReader._heroClass.ToString().ToLower();
             deckParams.CardList = cur.GetCards();
 
             var msg = new PlayMatchesMessage();

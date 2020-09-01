@@ -115,6 +115,16 @@ namespace DeckEvaluator.Evaluation
             Console.WriteLine("InvalidCastException catched. Restarting game {0}", gameId);
             queueGame(gameId);
          }
+         catch (System.NullReferenceException)
+         {
+            Console.WriteLine("NullReferenceException catched. Restarting game {0}", gameId);
+            queueGame(gameId);
+         }
+         catch (System.Exception)
+         {
+            Console.WriteLine("Unknown Exception catched. Restarting game {0}", gameId);
+            queueGame(gameId);
+         }
       }
 
       private void WriteText(Stream fs, string s)

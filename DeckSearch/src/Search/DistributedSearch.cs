@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 
-using DeckSearch.Config;
+using SabberStoneUtil.Config;
 
 namespace DeckSearch.Search
 {

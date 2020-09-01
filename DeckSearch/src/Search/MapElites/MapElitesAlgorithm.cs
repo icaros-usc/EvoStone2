@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 using SabberStoneCore.Model;
 
-using DeckSearch.Config;
+using SabberStoneUtil.Config;
+
 using DeckSearch.Logging;
 using DeckSearch.Mapping;
 using DeckSearch.Mapping.Sizers;

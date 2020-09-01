@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-using DeckSearch.Config;
+using SabberStoneUtil.Config;
 using SabberStoneCore.Model;
 
 namespace DeckSearch.Search.EvolutionStrategy
