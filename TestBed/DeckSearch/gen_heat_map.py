@@ -20,7 +20,7 @@ FEATURE1_LABEL = None  # label of the first feature to plot
 FEATURE2_LABEL = None  # label of the second feature to plot
 IMAGE_TITLE = None  # title of the image, aka name of the algorithm
 STEP_SIZE = None  # step size of the animation to generate
-LOG_FILE_NAME = None  # filepath to the elite map log file
+ELITE_MAP_LOG_FILE_NAME = None  # filepath to the elite map log file
 NUM_FEATURES = None  # total number of features (bc) used in the experiment
 ROW_INDEX = None  # index of feature 1 to plot
 COL_INDEX = None  # index of feature 2 to plot
@@ -29,7 +29,7 @@ HEAT_MAP_IMAGE_DIR = "heatmaps"
 
 # max and min value of fitness
 FITNESS_MIN = 0
-FITNESS_MAX = 20000
+FITNESS_MAX = 10
 
 
 def read_in_surr_config(exp_config_file):
@@ -205,6 +205,7 @@ def generateAll(logPath):
         allRows = list(csv.reader(csvfile, delimiter=','))
 
         # generate the movie
+        print(tmpImageFolder)
         template = os.path.join(tmpImageFolder, 'grid_{:05d}.png')
         createImages(STEP_SIZE, allRows[1:], template)
         movieFilename = 'fitness_' + str(ROW_INDEX) + '_' + str(
@@ -214,13 +215,13 @@ def generateAll(logPath):
         # Create the final image we need
         imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
             COL_INDEX) + '.png'
-        createImage(allRows[-1], os.path.join(HEAT_MAP_IMAGE_DIR, imageFilename))
+        createImage(allRows[-1], os.path.join(tmpImageFolder, imageFilename))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-l',
-                        '--log_file',
+                        '--log_dir',
                         help='path to the experiment log file',
                         required=True)
     parser.add_argument('-f1',
@@ -237,26 +238,26 @@ if __name__ == "__main__":
                         '--step_size',
                         help='step size of the animation to generate',
                         required=False,
-                        default=100)
+                        default=10)
     # parser.add_argument('-l',
-    #                     '--log_file',
+    #                     '--log_dir',
     #                     help='filepath to the elite map log file',
     #                     required=False,
-    #                     default=os.path.join((parser.parse_args().log_file), "elite_map.csv"))
+    #                     default=os.path.join((parser.parse_args().log_dir), "elite_map.csv"))
     opt = parser.parse_args()
 
     # read in the name of the algorithm and features to plot
     experiment_config, elite_map_config = read_in_surr_config(
-        os.path.join(opt.log_file, "config.tml"))
+        os.path.join(opt.log_dir, "experiment_config.tml"))
     features = elite_map_config['Map']['Features']
-    ELITE_MAP_NAME = experiment_config["experiment_config"]["elite_map_config"]
+    ELITE_MAP_NAME = elite_map_config["Map"]["Type"]
     print(ELITE_MAP_NAME)
 
     # read in parameters
     NUM_FEATURES = len(features)
-    LOG_FILE_NAME = os.path.join(opt.log_file, "elite_map.csv")
+    ELITE_MAP_LOG_FILE_NAME = os.path.join(opt.log_dir, "elite_map_log.csv")
     # Clear out the previous images
-    tmpImageFolder = HEAT_MAP_IMAGE_DIR
+    tmpImageFolder = os.path.join(opt.log_dir, HEAT_MAP_IMAGE_DIR)
     if not os.path.exists(tmpImageFolder):
         os.mkdir(tmpImageFolder)
     for curFile in glob.glob(tmpImageFolder + '/*'):
@@ -264,8 +265,8 @@ if __name__ == "__main__":
 
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
-        IMAGE_TITLE = algorithm_config['name']
-        FEATURE1_LABEL = features[ROW_INDEX]['name']
-        FEATURE2_LABEL = features[COL_INDEX]['name']
+        IMAGE_TITLE = experiment_config["Search"]["Category"] + "_" + experiment_config["Search"]["Type"]
+        FEATURE1_LABEL = features[ROW_INDEX]['Name']
+        FEATURE2_LABEL = features[COL_INDEX]['Name']
 
-        generateAll(LOG_FILE_NAME)
+        generateAll(ELITE_MAP_LOG_FILE_NAME)
