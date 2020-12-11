@@ -17,6 +17,16 @@ namespace DeckSearch.Search
     class SurrogatedSearch
     {
         /// <summary>
+        /// Number of generations to run per round
+        /// </summary>
+        private int _numGeneration;
+
+        /// <summary>
+        /// Number of evaluations to run per generation
+        /// </summary>
+        private int _numToEvaluatePerGen;
+
+        /// <summary>
         /// Surrogate model
         /// </summary>
         private static SurrogateBaseModel _surrogateModel = new FullyConnectedNN();
@@ -35,6 +45,8 @@ namespace DeckSearch.Search
         public SurrogatedSearch(Configuration config, string configFilename)
         {
             _searchManager = new SearchManager(config, configFilename);
+            _numGeneration = config.Search.NumGeneration;
+            _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
         }
 
         /// <summary>
@@ -99,6 +111,9 @@ namespace DeckSearch.Search
 
                 // save fitness
                 individual.Fitness = individual.OverallData.AverageHealthDifference;
+
+                // set StrategyData as empty array to avoid exceptions
+                individual.StrategyData = new StrategyStatistics[0];
             }
         }
 
@@ -155,25 +170,27 @@ namespace DeckSearch.Search
 
                 // run certain number of iterations of map elites
                 List<Individual> allIndividuals = new List<Individual>();
-                int generationSize = 2000;
-                int numIter = 160000/generationSize;
+                // int generationSize = 2000;
+                // int numIter = 160000/generationSize;
                 Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
-                    numIter, generationSize);
-                for(int i=0; i<numIter; i++)
+                    _numGeneration, _numToEvaluatePerGen);
+                for(int i=0; i<_numGeneration; i++)
                 {
                     // generate one generation of individuals
                     List<Individual> currGeneration = new List<Individual>();
-                    for(int j=0; j<generationSize; j++)
+                    for(int j=0; j<_numToEvaluatePerGen; j++)
                     {
                         Individual choiceIndividual = _searchManager._searchAlgo.GenerateIndividual(CardReader._cardSet);
                         currGeneration.Add(choiceIndividual);
                     }
                     Evaluate(currGeneration);
 
+                    // log the evaluated individuals
                     // add evaluated individuals to feature map and outer feature map
                     foreach(var individual in currGeneration)
                     {
                         _searchManager._searchAlgo.ReturnEvaluatedIndividual(individual);
+                        _searchManager.LogIndividual(individual);
                     }
                     Console.WriteLine("Generation {0} completed...", i+1);
                 }

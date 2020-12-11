@@ -6,6 +6,8 @@ using SabberStoneCore.Model;
 
 using SabberStoneUtil.Config;
 
+using Nett;
+
 using DeckSearch.Logging;
 using DeckSearch.Mapping;
 using DeckSearch.Mapping.Sizers;
@@ -48,23 +50,23 @@ namespace DeckSearch.Search.MapElites
       private FrequentMapLog _map_log;
       private FrequentMapLog _outer_map_log;
 
-      // feature map logger file paths
-      private const string ELITE_MAP_FILENAME = "logs/elite_map_log.csv";
-      private const string OUTER_ELITE_MAP_FILENAME = "logs/outer_elite_map_log.csv";
-
-      public MapElitesAlgorithm(MapElitesParams config)
+      public MapElitesAlgorithm(MapElitesParams config, string log_dir_exp)
       {
          _individualsDispatched = 0;
          _individualsEvaluated = 0;
          _params = config;
 
-         InitMap();
+         // write the config file to the log directory for future reference
+         string config_out_path = System.IO.Path.Combine(log_dir_exp, "elite_map_config.tml");
+         Toml.WriteFile<MapElitesParams>(config, config_out_path);
+
+         InitMap(log_dir_exp);
       }
 
       /// <summary>
       /// Initializes feature maps
       /// </summary>
-      private void InitMap()
+      private void InitMap(string log_dir_exp)
       {
          var mapSizer = new LinearMapSizer(_params.Map.StartSize,
                                              _params.Map.EndSize);
@@ -84,6 +86,12 @@ namespace DeckSearch.Search.MapElites
          featureNames = new string[_params.Map.Features.Length];
          for (int i = 0; i < _params.Map.Features.Length; i++)
                featureNames[i] = _params.Map.Features[i].Name;
+
+
+         // create logs
+         string ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "elite_map_log.csv");
+
+         string OUTER_ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "outer_elite_map_log.csv");
 
          _map_log = new FrequentMapLog(ELITE_MAP_FILENAME, _featureMap);
          _outer_map_log = new FrequentMapLog(OUTER_ELITE_MAP_FILENAME, _outerFeatureMap);

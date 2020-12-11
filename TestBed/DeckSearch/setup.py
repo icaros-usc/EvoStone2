@@ -31,5 +31,5 @@ for cur_file in glob.glob('active/*'):
    os.remove(cur_file)
 for cur_file in glob.glob('boxes/*'):
    os.remove(cur_file)
-for cur_file in glob.glob('logs/*'):
-   os.remove(cur_file)
+# for cur_file in glob.glob('logs/*'):
+#    os.remove(cur_file)

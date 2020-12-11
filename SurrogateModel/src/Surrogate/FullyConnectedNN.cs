@@ -64,7 +64,7 @@ namespace SurrogateModel.Surrogate
             tf_with(tf.variable_scope("placeholder"), delegate
             {
                 n_samples = tf.placeholder(tf.float32);
-                input = tf.placeholder(tf.float32, shape: (-1, 369));
+                input = tf.placeholder(tf.float32, shape: (-1, DataProcessor.numCards));
                 y_true = tf.placeholder(tf.float32, shape: (-1, 3));
             });
 

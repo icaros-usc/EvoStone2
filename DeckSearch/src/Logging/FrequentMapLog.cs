@@ -27,7 +27,7 @@ namespace DeckSearch.Logging
          {
             string[] dataLabels = {
                   "Dimensions",
-                  "Map (f1xf2:Size:Individual:Wins:Fitness:Feature1:Feature2)"
+                  "Map (f1xf2:CellCount:IndividualID:Wins:Fitness:Feature1:Feature2)"
                };
 
             WriteText(ow, string.Join(",", dataLabels));
@@ -65,7 +65,6 @@ namespace DeckSearch.Logging
                cellComponents.Add(cur.Fitness.ToString());
                foreach (var curFeature in cur.Features)
                   cellComponents.Add(curFeature.ToString());
-               
                rowData.Add(string.Join(":", cellComponents));
             }
 

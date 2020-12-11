@@ -1,6 +1,6 @@
 [Search]
 InitialPopulation = 10
-NumToEvaluate = 800000
+NumToEvaluate = 20
 
 [Map]
 Type = "FixedFeature"

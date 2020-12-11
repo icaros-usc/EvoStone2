@@ -73,23 +73,6 @@ namespace DeckSearch.Search
         private const string TRAIN_LOG_DIRECTORY = "train_log/";
         private const string BOXES_DIRECTORY = "boxes/";
 
-        /// <summary>
-        /// File path to log all individuals
-        /// </summary>
-        private const string INDIVIDUAL_LOG_FILENAME =
-           LOG_DIRECTORY + "individual_log.csv";
-
-        /// <summary>
-        /// File path to log the champion individuals
-        /// </summary>
-        private const string CHAMPION_LOG_FILENAME =
-           LOG_DIRECTORY + "champion_log.csv";
-
-        /// <summary>
-        /// File path to log the fittest individuals
-        /// </summary>
-        private const string FITTEST_LOG_FILENAME =
-           LOG_DIRECTORY + "fittest_log.csv";
 
         /// <summary>
         /// Prefix of the file path to write the trianing data for Surrogated Search
@@ -135,15 +118,24 @@ namespace DeckSearch.Search
             // Grab the configuration info
             _configFilename = configFilename;
 
+            // set up log directory
+            String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            String log_dir_exp = System.IO.Path.Combine(LOG_DIRECTORY, log_dir_base);
+            System.IO.Directory.CreateDirectory(log_dir_exp);
+
+            // write the config file to the log directory for future reference
+            string config_out_path = System.IO.Path.Combine(log_dir_exp, "experiment_config.tml");
+            Toml.WriteFile<Configuration>(config, config_out_path);
+
             // Setup the logs to record the data on individuals
-            InitLogs();
+            InitLogs(log_dir_exp);
 
             // Set up search algorithm
             Console.WriteLine("Algo: " + config.Search.Type);
             if (config.Search.Type.Equals("MAP-Elites"))
             {
                 var searchConfig = Toml.ReadFile<MapElitesParams>(config.Search.ConfigFilename);
-                _searchAlgo = new MapElitesAlgorithm(searchConfig);
+                _searchAlgo = new MapElitesAlgorithm(searchConfig, log_dir_exp);
             }
 
             else if (config.Search.Type.Equals("EvolutionStrategy"))
@@ -156,8 +148,17 @@ namespace DeckSearch.Search
         /// <summary>
         /// Helper function to initialize the logging related objects
         /// </summary>
-        private void InitLogs()
+        private void InitLogs(string log_dir_exp)
         {
+            // File path to log all individuals
+            string INDIVIDUAL_LOG_FILENAME = System.IO.Path.Combine(log_dir_exp, "individual_log.csv");
+
+            // File path to log the champion individuals
+            string CHAMPION_LOG_FILENAME = System.IO.Path.Combine(log_dir_exp, "champion_log.csv");
+
+            // File path to log the fittest individuals
+            string FITTEST_LOG_FILENAME = System.IO.Path.Combine(log_dir_exp, "fittest_log.csv");
+
             _individualLog =
                new RunningIndividualLog(INDIVIDUAL_LOG_FILENAME);
             _championLog =
@@ -361,7 +362,7 @@ namespace DeckSearch.Search
             {
                 Console.WriteLine("WinCount: " + fs.WinCount);
                 Console.WriteLine("Alignment: " + fs.Alignment);
-                Console.WriteLine("------------------");
+                Console.WriteLine("------------------\n\n");
             }
 
             // Save stats
@@ -381,7 +382,7 @@ namespace DeckSearch.Search
         }
 
         /// <summary>
-        /// Function to log training individuals to Surrogate model
+        /// (deprecated) Function to log training individuals to Surrogate model
         /// </summary>
         public void LogTrainingIndividuals()
         {
