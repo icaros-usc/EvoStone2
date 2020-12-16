@@ -29,9 +29,37 @@ namespace DeckSearch.Search
       /// </summary>
       Individual GenerateIndividual(List<Card> cardSet);
 
+
+      // ***********************************
+      // Optional methods below
+      // ***********************************
+
       /// <summary>
-      /// Record stats of the evaluated individual
+      /// Record stats of the evaluated individual and add an individual to the
+      /// _featureMap. Used by Surrogated Search.
       /// </summary>
-      void ReturnEvaluatedIndividual(Individual ind);
+      void AddToFeatureMap(Individual ind) {}
+
+      /// <summary>
+      /// Generate a random individual or mutate a current individual
+      /// </summary>
+      Individual GenerateIndividualFromSurrogateMap(List<Card> cardSet)
+      { return null; }
+
+      /// <summary>
+      /// Add an individual to the _outerFeatureMap. Used by Surrogated Search
+      /// </summary>
+      void AddToSurrogateFeatureMap(Individual cur) {}
+
+      /// <summary>
+      /// Get all elites in the _featureMap
+      /// </summary>
+      List<Individual> GetAllElitesFromFeatureMap() {return null;}
+
+      /// <summary>
+      /// Get all elites in the _featureMap
+      /// </summary>
+      List<Individual> GetAllElitesFromSurrogateMap() {return null;}
+
    }
 }

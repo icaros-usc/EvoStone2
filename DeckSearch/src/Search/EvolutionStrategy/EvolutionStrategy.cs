@@ -47,7 +47,7 @@ namespace DeckSearch.Search.EvolutionStrategy
 
         public bool InitialPopulationDispatched() => _individualsDispatched >= _params.Search.InitialPopulation;
 
-        public void ReturnEvaluatedIndividual(Individual ind)
+        public void AddToFeatureMap(Individual ind)
         {
             ind.ID = _individualsEvaluated;
             _individualsEvaluated++;

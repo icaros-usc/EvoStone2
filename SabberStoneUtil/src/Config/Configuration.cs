@@ -4,6 +4,7 @@ namespace SabberStoneUtil.Config
     {
         public DeckspaceParams Deckspace { get; set; }
         public SearchParams Search { get; set; }
+        public SurrogateParams Surrogate { get; set; }
     }
 
     public class DeckspaceParams
@@ -19,5 +20,10 @@ namespace SabberStoneUtil.Config
         public string ConfigFilename { get; set; }
         public int NumGeneration { get; set; }
         public int NumToEvaluatePerGeneration { get; set; }
+    }
+
+    public class SurrogateParams
+    {
+        public string Type { get; set; }
     }
 }

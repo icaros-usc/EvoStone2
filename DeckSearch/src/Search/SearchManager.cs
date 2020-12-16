@@ -103,6 +103,8 @@ namespace DeckSearch.Search
         /// </summary>
         private int training_idx = 0;
 
+        private int _numToEvaluate = 0;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -135,12 +137,14 @@ namespace DeckSearch.Search
             if (config.Search.Type.Equals("MAP-Elites"))
             {
                 var searchConfig = Toml.ReadFile<MapElitesParams>(config.Search.ConfigFilename);
+                _numToEvaluate = searchConfig.Search.NumToEvaluate;
                 _searchAlgo = new MapElitesAlgorithm(searchConfig, log_dir_exp);
             }
 
             else if (config.Search.Type.Equals("EvolutionStrategy"))
             {
                 var searchConfig = Toml.ReadFile<EvolutionStrategyParams>(config.Search.ConfigFilename);
+                _numToEvaluate = searchConfig.Search.NumToEvaluate;
                 _searchAlgo = new EvolutionStrategyAlgorithm(searchConfig);
             }
         }
@@ -240,7 +244,7 @@ namespace DeckSearch.Search
         /// <returns> 1 for success, 0 for failure.
         public int DispatchOneJobToWorker(Individual choiceIndividual)
         {
-            if(_idleWorkers.Count == 0)
+            if (_idleWorkers.Count == 0)
             {
                 return 0;
             }
@@ -272,7 +276,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Function to find DeckEvaluator instances that are done with simulation and receieve the result
         /// </summary>
-        public void FindDoneWorkers(bool storeBuffer = false, bool addToOuterFeatureMap = false)
+        public void FindDoneWorkers(bool storeBuffer = false, bool addToSurrogateFeatureMap = false)
         {
             // Look for individuals that are done.
             int numActiveWorkers = _runningWorkers.Count;
@@ -289,16 +293,10 @@ namespace DeckSearch.Search
                     Console.WriteLine("Worker done: " + workerId);
 
                     ReceiveResults(outboxPath, _individualStable[workerId]);
-                    _searchAlgo.ReturnEvaluatedIndividual(_individualStable[workerId]);
-
-                    // store evaluated individual to outer feature map while using Surrogated Search with Map-Elite Algorithm
-                    if(addToOuterFeatureMap)
-                    {
-                        ((MapElitesAlgorithm)_searchAlgo).AddToOuterFeatureMap(_individualStable[workerId]);
-                    }
+                    _searchAlgo.AddToFeatureMap(_individualStable[workerId]);
 
                     // store done individual to a tmp buffer
-                    if(storeBuffer)
+                    if (storeBuffer)
                     {
                         _individualsBuffer.Add(_individualStable[workerId]); // add evaluated individual to batch
                         Console.WriteLine("Buffer Size: " + _individualsBuffer.Count);
@@ -339,8 +337,9 @@ namespace DeckSearch.Search
         {
             var os = cur.OverallData;
             Console.WriteLine("------------------");
-            Console.WriteLine(string.Format("Eval ({0}): {1}",
-                              cur.ID,
+            Console.WriteLine(string.Format("Eval ({0}/{1}): {2}",
+                              cur.ID + 1,
+                              _numToEvaluate,
                               string.Join("", cur.ToString())));
             Console.WriteLine("Win Count: " + os.WinCount);
             Console.WriteLine("Average Health Difference: "
@@ -362,8 +361,10 @@ namespace DeckSearch.Search
             {
                 Console.WriteLine("WinCount: " + fs.WinCount);
                 Console.WriteLine("Alignment: " + fs.Alignment);
-                Console.WriteLine("------------------\n\n");
+                Console.WriteLine("------------------\n");
             }
+
+            Console.WriteLine("\n");
 
             // Save stats
             bool didHitMaxWins =
@@ -403,7 +404,7 @@ namespace DeckSearch.Search
         /// Helper function to determine wether current algorithm is Map-Elites
         private bool IsMapElitesAlgo()
         {
-            if(_searchAlgo.GetType().Equals(typeof(MapElitesAlgorithm)))
+            if (_searchAlgo.GetType().Equals(typeof(MapElitesAlgorithm)))
             {
                 return true;
             }
@@ -413,31 +414,27 @@ namespace DeckSearch.Search
         /// <summary>
         /// For Map-Elite algorithm, get all elites from the FeatureMap
         /// </summary>
-        public List<Individual> GetAllElites()
+        /// <param name="num">Number of elites to choose. Return all if -1.
+        /// </param>
+
+        public List<Individual> GetAllElitesFromSurrogateMap(int num=-1)
         {
-            if(!IsMapElitesAlgo())
+            if (!IsMapElitesAlgo())
             {
                 Console.WriteLine("Warning: {0} does not have elites!", _searchAlgo.GetType());
                 return null;
             }
-            return ((MapElitesAlgorithm)_searchAlgo).GetAllElites();
-        }
 
-        /// <summary>
-        /// Function to choose certain number elites for training
-        /// </summary>
-        /// <param name="num">Number of elites to choose</param>
-        public List<Individual> GetElitesToEvaluate(int num = 40)
-        {
-            var elites = GetAllElites();
-            Console.WriteLine("Total number of elites: {0}", elites.Count);
-            if(elites.Count <= num)
+            var elites = _searchAlgo.GetAllElitesFromSurrogateMap();
+
+            if (num == -1)
             {
                 return elites;
             }
+
             var random = new Random();
             List<Individual> choiceElites = new List<Individual>();
-            while(choiceElites.Count < num)
+            while (choiceElites.Count < num)
             {
                 choiceElites.Add(elites[random.Next(elites.Count)]);
             }

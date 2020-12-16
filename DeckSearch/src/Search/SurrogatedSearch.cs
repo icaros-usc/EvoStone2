@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 
 using SurrogateModel.Surrogate;
+using DeckSearch.Search.MapElites;
 
 using SabberStoneUtil.Config;
 using SabberStoneUtil.DataProcessing;
@@ -29,7 +30,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Surrogate model
         /// </summary>
-        private static SurrogateBaseModel _surrogateModel = new FullyConnectedNN();
+        private static SurrogateBaseModel _surrogateModel;
 
         /// <summary>
         /// Search Manager to communicate with DeckEvaluators
@@ -47,6 +48,17 @@ namespace DeckSearch.Search
             _searchManager = new SearchManager(config, configFilename);
             _numGeneration = config.Search.NumGeneration;
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
+
+            // configurate surrogate model
+            if (config.Surrogate.Type == "DeepSetModel")
+            {
+                _surrogateModel = new DeepSetModel();
+            }
+            else if (config.Surrogate.Type == "FullyConnectedNN")
+            {
+                _surrogateModel = new FullyConnectedNN();
+            }
+
         }
 
         /// <summary>
@@ -95,7 +107,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Function to run SurrogateModel Evaluation and record results
         /// </summary>
-        public void Evaluate(List<Individual> individuals)
+        public void EvaluateOnSurrogate(List<Individual> individuals)
         {
             var logIndividuals = ConvertIndividuals(individuals, includeStats: false);
             var result = _surrogateModel.Predict(logIndividuals);
@@ -122,6 +134,10 @@ namespace DeckSearch.Search
         /// </summary>
         private void BackProp(List<Individual> individuals)
         {
+            if (individuals.Count == 0) {
+                Console.WriteLine("Buffer is empty. Skipping backprop...");
+                return;
+            }
             var logIndividuals = ConvertIndividuals(individuals);
             _surrogateModel.OnlineFit(logIndividuals);
         }
@@ -147,20 +163,20 @@ namespace DeckSearch.Search
             _searchManager.AnnounceWorkersStart();
             Console.WriteLine("Begin Surrogated Search...");
 
-            // generate initial population
-            while(!_searchManager._searchAlgo.InitialPopulationEvaluated())
-            {
-                // dispatch jobs until the number reaches initial population size
-                if(!_searchManager._searchAlgo.InitialPopulationDispatched())
-                {
-                    _searchManager.FindNewWorkers();
-                    _searchManager.DispatchJobsToWorkers();
-                }
+            // // generate initial population
+            // while(!_searchManager._searchAlgo.InitialPopulationEvaluated())
+            // {
+            //     // dispatch jobs until the number reaches initial population size
+            //     if(!_searchManager._searchAlgo.InitialPopulationDispatched())
+            //     {
+            //         _searchManager.FindNewWorkers();
+            //         _searchManager.DispatchJobsToWorkers();
+            //     }
 
-                // wait for workers to finish evaluating initial population
-                _searchManager.FindDoneWorkers(storeBuffer: true, addToOuterFeatureMap: true);
-                Thread.Sleep(1000);
-            }
+            //     // wait for workers to finish evaluating initial population
+            //     _searchManager.FindDoneWorkers(storeBuffer: true);
+            //     Thread.Sleep(1000);
+            // }
 
             while(_searchManager._searchAlgo.IsRunning())
             {
@@ -180,23 +196,23 @@ namespace DeckSearch.Search
                     List<Individual> currGeneration = new List<Individual>();
                     for(int j=0; j<_numToEvaluatePerGen; j++)
                     {
-                        Individual choiceIndividual = _searchManager._searchAlgo.GenerateIndividual(CardReader._cardSet);
+                        Individual choiceIndividual = _searchManager._searchAlgo.GenerateIndividualFromSurrogateMap(CardReader._cardSet);
                         currGeneration.Add(choiceIndividual);
                     }
-                    Evaluate(currGeneration);
+                    EvaluateOnSurrogate(currGeneration);
 
                     // log the evaluated individuals
                     // add evaluated individuals to feature map and outer feature map
                     foreach(var individual in currGeneration)
                     {
-                        _searchManager._searchAlgo.ReturnEvaluatedIndividual(individual);
-                        _searchManager.LogIndividual(individual);
+                        _searchManager._searchAlgo.AddToSurrogateFeatureMap(individual);
+                        // _searchManager.LogIndividual(individual);
                     }
                     Console.WriteLine("Generation {0} completed...", i+1);
                 }
 
                 // evaluate elites
-                var elites = _searchManager.GetAllElites();
+                var elites = _searchManager.GetAllElitesFromSurrogateMap();
                 Console.WriteLine("Get {0} elites. Start evaluation...", elites.Count);
                 int eliteIdx = 0; // index of elite to dispatch, also the number of elites dispatched.
                 while(_searchManager._individualsBuffer.Count < elites.Count)
@@ -209,7 +225,7 @@ namespace DeckSearch.Search
                     }
 
                     // wait for workers to finish evaluating all elites
-                    _searchManager.FindDoneWorkers(storeBuffer: true, addToOuterFeatureMap: true);
+                    _searchManager.FindDoneWorkers(storeBuffer: true, addToSurrogateFeatureMap: true);
                     Thread.Sleep(1000);
                 }
                 Console.WriteLine("Finished evaluating {0} elites", _searchManager._individualsBuffer.Count);

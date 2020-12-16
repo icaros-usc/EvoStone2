@@ -24,7 +24,7 @@ namespace DeckSearch.Search.MapElites
       /// <summary>
       /// Number of individuals estimated by evaluators
       /// </summary>
-      private int _individualsEvaluated;
+      public int _individualsEvaluated { get; private set; }
 
       /// <summary>
       /// Number of individuals dispatched to the evaluators
@@ -42,13 +42,14 @@ namespace DeckSearch.Search.MapElites
       FeatureMap _featureMap;
 
       /// <summary>
-      /// Another feature map used by Surrogated Search to record elites that are run for real
+      /// Another feature map used by Surrogated Search to record elites that
+      /// are run on the surogate model
       /// </summary>
-      FeatureMap _outerFeatureMap;
+      FeatureMap _surrogateFeatureMap;
 
       // feature map loggers
       private FrequentMapLog _map_log;
-      private FrequentMapLog _outer_map_log;
+      private FrequentMapLog _surrogate_map_log;
 
       public MapElitesAlgorithm(MapElitesParams config, string log_dir_exp)
       {
@@ -73,12 +74,12 @@ namespace DeckSearch.Search.MapElites
          if (_params.Map.Type.Equals("SlidingFeature"))
          {
             _featureMap = new SlidingFeatureMap(_params.Search.NumToEvaluate, _params.Map, mapSizer);
-            _outerFeatureMap = new SlidingFeatureMap(_params.Search.NumToEvaluate, _params.Map, mapSizer);
+            _surrogateFeatureMap = new SlidingFeatureMap(_params.Search.NumToEvaluate, _params.Map, mapSizer);
          }
          else if (_params.Map.Type.Equals("FixedFeature"))
          {
             _featureMap = new FixedFeatureMap(_params.Search.NumToEvaluate, _params.Map, mapSizer);
-            _outerFeatureMap = new FixedFeatureMap(_params.Search.NumToEvaluate, _params.Map, mapSizer);
+            _surrogateFeatureMap = new FixedFeatureMap(_params.Search.NumToEvaluate, _params.Map, mapSizer);
          }
          else
                Console.WriteLine("ERROR: No feature map specified in config file.");
@@ -91,10 +92,10 @@ namespace DeckSearch.Search.MapElites
          // create logs
          string ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "elite_map_log.csv");
 
-         string OUTER_ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "outer_elite_map_log.csv");
+         string SURROGATE_ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "surrogate_elite_map_log.csv");
 
          _map_log = new FrequentMapLog(ELITE_MAP_FILENAME, _featureMap);
-         _outer_map_log = new FrequentMapLog(OUTER_ELITE_MAP_FILENAME, _outerFeatureMap);
+         _surrogate_map_log = new FrequentMapLog(SURROGATE_ELITE_MAP_FILENAME, _surrogateFeatureMap);
       }
 
       public bool InitialPopulationEvaluated() => _individualsEvaluated >= _params.Search.InitialPopulation;
@@ -114,34 +115,61 @@ namespace DeckSearch.Search.MapElites
                 _featureMap.GetRandomElite().Mutate();
       }
 
-      public void ReturnEvaluatedIndividual(Individual cur)
+      public Individual GenerateIndividualFromSurrogateMap(List<Card> cardSet)
       {
-         cur.ID = _individualsEvaluated;
-         _individualsEvaluated++;
+         _individualsDispatched++;
+         return _individualsDispatched <= _params.Search.InitialPopulation ?
+                Individual.GenerateRandomIndividual(cardSet) :
+                _surrogateFeatureMap.GetRandomElite().Mutate();
+      }
 
+      private void CalculateFeatures(Individual cur)
+      {
          cur.Features = new double[featureNames.Length];
          for (int i = 0; i < featureNames.Length; i++)
             cur.Features[i] = cur.GetStatByName(featureNames[i]);
-
-         _featureMap.Add(cur);
-         _map_log.UpdateLog();
       }
 
       /// <summary>
       /// Add an individual to the _outerFeatureMap. Used by Surrogated Search
       /// </summary>
-      public void AddToOuterFeatureMap(Individual cur)
+      public void AddToSurrogateFeatureMap(Individual cur)
       {
-         _outerFeatureMap.Add(cur);
-         _outer_map_log.UpdateLog();
+         CalculateFeatures(cur);
+         _surrogateFeatureMap.Add(cur);
+         _surrogate_map_log.UpdateLog();
+      }
+
+
+      /// <summary>
+      /// Add an individual to the _featureMap. Used by Surrogated Search
+      /// </summary>
+      public void AddToFeatureMap(Individual cur)
+      {
+         cur.ID = _individualsEvaluated;
+         _individualsEvaluated++;
+
+         CalculateFeatures(cur);
+
+         _featureMap.Add(cur);
+         _map_log.UpdateLog();
+      }
+
+
+      /// <summary>
+      /// Get all elites in the _featureMap
+      /// </summary>
+      public List<Individual> GetAllElitesFromFeatureMap()
+      {
+         return _featureMap.EliteMap.Values.ToList();
       }
 
       /// <summary>
       /// Get all elites in the _featureMap
       /// </summary>
-      public List<Individual> GetAllElites()
+      public List<Individual> GetAllElitesFromSurrogateMap()
       {
-         return _featureMap.EliteMap.Values.ToList();
+         return _surrogateFeatureMap.EliteMap.Values.ToList();
       }
    }
 }
