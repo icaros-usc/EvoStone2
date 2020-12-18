@@ -197,7 +197,10 @@ namespace SurrogateModel.Surrogate
             // obtain deck embedding
             var (deckEmbedding, _) = DataProcessor.PreprocessCardsSetOnehotFromData(logIndividuals);
             var x_input = np.array(deckEmbedding);
-            return PredictHelper(x_input);
+            return PredictHelper(x_input, model_output);
         }
+
+        protected override void add_extra_data_to(List<FeedItem> feed_dict) {}
+
     }
 }

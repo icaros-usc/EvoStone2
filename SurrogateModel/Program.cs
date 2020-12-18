@@ -21,8 +21,18 @@ namespace SurrogateModel
             CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
             // var model = new FullyConnectedNN();
-            var model = new DeepSetModel();
+            // var model = new DeepSetModel();
+            var model = new VAE();
             model.OfflineFit();
+
+            // // shape (2, 2)
+            // var c = new float[,] { {1, 4}, {2, 5} };
+            // var c_np = np.array(c);
+
+            // // shape (2, 2)
+            // var d = new float[,] { {1, 2 }, {3, 4}};
+            // var d_np = np.array(d);
+
 
             // // shape (3, 2, 2)
             // var a = new float[,,] { { { 1, 2 }, { 3, 4 } },
@@ -35,6 +45,8 @@ namespace SurrogateModel
             // var b_np = np.array(b);
 
             // Tensor x = tf.placeholder(tf.float32, shape: (3, 2, 2));
+            // Tensor y = tf.placeholder(tf.float32, shape: (2, 2));
+            // print(np.array(x.shape).shape);
 
             // print(x.shape);
             // int[] real_shape = x.shape;
@@ -85,6 +97,62 @@ namespace SurrogateModel
             // test elu_layer on 3D input
 
 
+            // // test tf.reduce_sum
+            // Tensor z = tf.reduce_sum(x, axis: new int[]{1});
+            // var sess = tf.Session();
+            // var out_z = sess.run(z, (x, np.array(c)));
+            // print(out_z);
+
+
+            // // test sample from Gaussian
+            // Tensor mean = tf.placeholder(tf.float32, shape: (2, 2));
+            // Tensor logvar = tf.placeholder(tf.float32, shape: (2, 2));
+
+            // // var y = np.random.normal(0, 1, 2).astype(np.float32);//.reshape((-1, 10));
+            // var y = np.array(new float[]{1, 2}).reshape((2, -1));
+            // print(y);
+            // var z = y * tf.exp(logvar * 0.5) + mean;
+            // var sess = tf.Session();
+            // var out_z = sess.run(z, (mean, d_np), (logvar, c_np));
+            // print(out_z);
+
+
+            // // test relu layer
+            // Tensor z = tf.nn.relu(x);
+            // var sess = tf.Session();
+            // a_np[0, 0] = -5.0;
+            // print(a_np);
+            // var out_z = sess.run(z, (x, a_np));
+            // print(out_z);
+
+
+            // // test cross entropy function
+            // Tensor logits = tf.placeholder(tf.float32, shape: (2, 2));
+            // Tensor labels = tf.placeholder(tf.float32, shape: (2, 2));
+            // Tensor z = tf.nn.sigmoid_cross_entropy_with_logits(logits, labels);
+
+            // var sess = tf.Session();
+
+            // var z_out = sess.run(z, (logits, c_np), (labels, d_np));
+            // print(z_out);
+
+            // tf.square(z);
+
+
+            // Tensor e = tf.constant(0);
+            // Tensor begin = tf.placeholder(tf.int32);
+            // Tensor size = tf.placeholder(tf.int32);
+            // Tensor z = tf.slice<Tensor, Tensor>(y, new Tensor[]{e, e},
+            //                                        new Tensor[]{size+1, size});
+            // var sess = tf.Session();
+            // var z_out = sess.run(z, (y, c_np), (begin, 1), (size, 1));
+            // print(z_out);
+
+            // NDArray m = np.ndarray((2, 2));
+            // m[0] = np.random.normal(0, 1, 2);
+            // print(m);
+            // Tensor z = tf.constant(c_np);
+            // print(z[0, 0]);
         }
     }
 }

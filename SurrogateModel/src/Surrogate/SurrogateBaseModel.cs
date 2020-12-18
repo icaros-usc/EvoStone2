@@ -75,7 +75,7 @@ namespace SurrogateModel.Surrogate
             dataLoaderTrain = new DataLoader(X[new Slice(0, train_test_split)],
                                              y[new Slice(0, train_test_split)],
                                              batch_size);
-            // regard the last 1000 data points as one batch
+            // regard the last 10% data points as one batch
             dataLoaderTest = new DataLoader(X[new Slice(train_test_split, X.shape[0])],
                                              y[new Slice(train_test_split, y.Shape[0])],
                                              X.shape[0] - train_test_split, shuffle: false);
@@ -94,11 +94,11 @@ namespace SurrogateModel.Surrogate
         {
             Tensor output = null;
             int input_rank = input.shape.Length;
-            int num_input = input.shape[input_rank-1];
+            int num_input = input.shape[input_rank - 1];
 
             // obtain real output shape [-1, *, num_output]
             int[] real_output_shape = input.shape;
-            real_output_shape[input_rank-1] = num_output;
+            real_output_shape[input_rank - 1] = num_output;
 
             tf_with(tf.variable_scope(name), delegate
             {
@@ -113,12 +113,12 @@ namespace SurrogateModel.Surrogate
                     b = tf.get_variable("b", shape: num_output, initializer: tf.constant_initializer(0));
                 }
 
-                if(input_rank > 2)
+                if (input_rank > 2)
                 {
-                    input = tf.reshape(input, new int[]{-1, num_input});
+                    input = tf.reshape(input, new int[] { -1, num_input });
                 }
                 output = tf.matmul(input, w) + b;
-                if(input_rank > 2)
+                if (input_rank > 2)
                 {
                     output = tf.reshape(output, real_output_shape);
                 }
@@ -135,7 +135,8 @@ namespace SurrogateModel.Surrogate
         protected Tensor elu_layer(Tensor input, String name, double alpha = 1.0)
         {
             Tensor output = null;
-            tf_with(tf.variable_scope(name), delegate{
+            tf_with(tf.variable_scope(name), delegate
+            {
                 var mask_greater = tf.cast(tf.greater_equal(input, 0), tf.float32) * input;
                 var mask_smaller = tf.cast(tf.less(input, 0), tf.float32) * input;
                 var middle = alpha * (tf.exp(mask_smaller) - 1);
@@ -159,7 +160,13 @@ namespace SurrogateModel.Surrogate
             return _loss_op;
         }
 
-                /// <summary>
+
+
+        // protected var tape = tf.GradientTape();
+
+
+
+        /// <summary>
         /// Traning loop of the model
         /// </summary>
         protected void train()
@@ -168,32 +175,50 @@ namespace SurrogateModel.Surrogate
             List<double> training_losses = new List<double>();
             List<double> testing_losses = new List<double>();
 
-            Console.WriteLine("Start training");
-            for(int i=0; i<num_epoch; i++)
+            Console.WriteLine("Start training...");
+            for (int i = 0; i < num_epoch; i++)
             {
-                for(int j=0; j<dataLoaderTrain.num_batch; j++)
+                for (int j = 0; j < dataLoaderTrain.num_batch; j++)
                 {
                     var (x_input, y_input) = dataLoaderTrain.Sample();
-                    var (_, training_loss) = sess.run((train_op, loss_op), // operations
-                                                (n_samples, (int)x_input.shape[0]), // per-iteration batch size
-                                                (input, x_input), // features
-                                                (y_true, y_input)); // targets
+                    List<FeedItem> feed_dict = new List<FeedItem>{
+                        // per-iteration batch size
+                        (n_samples, (int)x_input.shape[0]),
+                        // input
+                        (input, x_input),
+                        // target
+                        (y_true, y_input),
+                    };
+                    add_extra_data_to(feed_dict);
+                    var (_, training_loss) =
+                        sess.run((train_op, loss_op), feed_dict.ToArray());
                     running_loss += training_loss;
 
-                    if(j % log_length == log_length - 1)
+                    if (j % log_length == log_length - 1)
                     {
                         print($"epoch{epoch_idx}, iter:{j}:");
-                        print($"training_loss = {running_loss/log_length}");
-                        training_losses.Add(running_loss/log_length);
+                        print($"training_loss = {running_loss / log_length}");
+                        training_losses.Add(running_loss / log_length);
                         running_loss = 0;
 
                         // Test the model
                         var (test_x, test_y) = dataLoaderTest.Sample();
-                        var testing_loss = sess.run((loss_op),
-                                            (n_samples, (int)test_x.shape[0]), // per-iteration batch size
-                                            (input, test_x), // features
-                                            (y_true, test_y)); // targets
-                        testing_losses.Add(testing_loss/1.0); // divide by 1 to convert
+                        List<FeedItem> feed_dict_test = new List<FeedItem>{
+                            // per-iteration batch size
+                            (n_samples, (int)test_x.shape[0]),
+                            // input
+                            (input, test_x),
+                            // target
+                            (y_true, test_y),
+                        };
+                        add_extra_data_to(feed_dict_test);
+                        var (testing_loss, recon_deck) = sess.run((loss_op, model_output),
+                                           feed_dict_test.ToArray());
+                        // print("deck");
+                        // print(test_x[0]);
+                        // print("recon_deck");
+                        // print(recon_deck[0]);
+                        testing_losses.Add(testing_loss / 1.0); // divide by 1 to convert
                         print($"testing_loss = {testing_loss}\n");
                     }
                 }
@@ -209,13 +234,13 @@ namespace SurrogateModel.Surrogate
         private void WriteLosses(List<double> losses, string path)
         {
             // delete old loss data
-            if(File.Exists(path))
+            if (File.Exists(path))
             {
                 File.Delete(path);
             }
-            using(StreamWriter sw = File.AppendText(path))
+            using (StreamWriter sw = File.AppendText(path))
             {
-                foreach(var loss in losses)
+                foreach (var loss in losses)
                 {
                     sw.WriteLine(loss);
                 }
@@ -225,25 +250,34 @@ namespace SurrogateModel.Surrogate
         /// <summary>
         /// Helper function to get model output given a input tensor
         /// </summary>
-        protected double[,] PredictHelper(NDArray x_input)
+        protected double[,] PredictHelper(NDArray x_input, Tensor to_eval)
         {
             // get the model output
-            var output = sess.run((model_output), // operations
-                                (n_samples, (int)x_input.shape[0]), // batch size
-                                (input, x_input)); // features
+            var curr_num_input = np.array(input.shape[0]);
+            var output = sess.run((to_eval), // operations
+                                  (n_samples, curr_num_input), // batch size
+                                  (input, x_input)); // features
 
             // convert result to double array
             double[,] result;
             result = new double[output.shape[0], output.shape[1]];
-            for(int i=0; i<output.shape[0]; i++)
+            for (int i = 0; i < output.shape[0]; i++)
             {
-                for(int j=0; j<output.shape[1]; j++)
+                for (int j = 0; j < output.shape[1]; j++)
                 {
-                    result[i,j] = (double)(float)output[i,j]; // need to cast twice because the model use float
+                    result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
                 }
             }
             return result;
         }
+
+
+        /// <summary>
+        /// Add extra data to feed dict of computation graph. Sub class can
+        /// override this method if the model needs extra feed dicts.
+        /// </summary>
+        protected abstract void add_extra_data_to(List<FeedItem> feed_dict);
+
 
         /// <summary>
         /// online fit the model using specified data

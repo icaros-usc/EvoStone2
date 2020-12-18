@@ -1,2 +1,0 @@
-MAP Elites
-config/paladin_me.tml
