@@ -70,15 +70,19 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         protected void init_data_loaders(NDArray X, NDArray y)
         {
-            int train_test_split = (int)(X.shape[0] * 0.9); // use first 90% of data for training
+            int total_num = X.shape[0];
+            int train_test_split = (int)(total_num * 0.9); // use first 90% of data for training
             // create data loader
             dataLoaderTrain = new DataLoader(X[new Slice(0, train_test_split)],
                                              y[new Slice(0, train_test_split)],
                                              batch_size);
             // regard the last 10% data points as one batch
-            dataLoaderTest = new DataLoader(X[new Slice(train_test_split, X.shape[0])],
-                                             y[new Slice(train_test_split, y.Shape[0])],
-                                             X.shape[0] - train_test_split, shuffle: false);
+            dataLoaderTest = new DataLoader(X[new Slice(train_test_split,
+                                                        total_num)],
+                                            y[new Slice(train_test_split,
+                                                        total_num)],
+                                            total_num - train_test_split,
+                                            shuffle: false);
         }
 
         /// <summary>
@@ -102,11 +106,11 @@ namespace SurrogateModel.Surrogate
 
             tf_with(tf.variable_scope(name), delegate
             {
-                var w = tf.get_variable("w", shape: (num_input, num_output), initializer: tf.variance_scaling_initializer(uniform: true));
+                var w = tf.get_variable("w", shape: (num_input, num_output), initializer: tf.variance_scaling_initializer());
                 Tensor b;
                 if (bias)
                 {
-                    b = tf.get_variable("b", shape: num_output, initializer: tf.variance_scaling_initializer(uniform: true));
+                    b = tf.get_variable("b", shape: num_output, initializer: tf.variance_scaling_initializer());
                 }
                 else
                 {
@@ -212,12 +216,25 @@ namespace SurrogateModel.Surrogate
                             (y_true, test_y),
                         };
                         add_extra_data_to(feed_dict_test);
-                        var (testing_loss, recon_deck) = sess.run((loss_op, model_output),
+                        var (testing_loss, model_out) = sess.run((loss_op, model_output),
                                            feed_dict_test.ToArray());
-                        // print("deck");
-                        // print(test_x[0]);
-                        // print("recon_deck");
-                        // print(recon_deck[0]);
+                        print("deck");
+                        print(test_y[0][new Slice(0,10)]);
+                        // print("model_out");
+                        // print(model_out[0]);
+
+                        NDArray recon_deck = np.zeros(test_y.shape);
+                        for(int m = 0; m < test_y.shape[0]; m++)
+                        {
+                            for(int n = 0; n < test_y.shape[1]; n++)
+                            {
+                                int idx = np.argmax(model_out[m, n]);
+                                recon_deck[m, n, idx] = 1;
+                            }
+                        }
+                        print("recon_deck");
+                        print(recon_deck[0][new Slice(0,10)]);
+
                         testing_losses.Add(testing_loss / 1.0); // divide by 1 to convert
                         print($"testing_loss = {testing_loss}\n");
                     }

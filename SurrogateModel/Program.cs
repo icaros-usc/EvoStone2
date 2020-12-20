@@ -41,11 +41,15 @@ namespace SurrogateModel
             // var b = new float[,,] { { { 3, 4 }, { 1, 2 }},
             //                         { { 7, 8 }, { 5, 6 }, },
             //                         { { 11, 12 }, { 9, 10 },} };
+            // var c = new float[,,] { { { 0, 1 }, { 1, 0 }, },
+            //                         { { 1, 0 }, { 1, 0 }, },
+            //                         { { 0, 1 }, { 0, 1 }, }, };
             // var a_np = np.array(a);
             // var b_np = np.array(b);
+            // var c_np = np.array(c);
 
-            // Tensor x = tf.placeholder(tf.float32, shape: (3, 2, 2));
-            // Tensor y = tf.placeholder(tf.float32, shape: (2, 2));
+            // Tensor x = tf.placeholder(tf.float32, shape: (-1, 2, 2));
+            // Tensor y = tf.placeholder(tf.float32, shape: (-1, 2, 2));
             // print(np.array(x.shape).shape);
 
             // print(x.shape);
@@ -139,6 +143,7 @@ namespace SurrogateModel
             // tf.square(z);
 
 
+            // test tf.slice
             // Tensor e = tf.constant(0);
             // Tensor begin = tf.placeholder(tf.int32);
             // Tensor size = tf.placeholder(tf.int32);
@@ -153,6 +158,36 @@ namespace SurrogateModel
             // print(m);
             // Tensor z = tf.constant(c_np);
             // print(z[0, 0]);
+
+
+            // test reshape
+            // Tensor z = tf.reshape(y, new int[]{2, 2, 1});
+            // var sess = tf.Session();
+            // var z_out = sess.run(z, (y, d_np));
+            // print(z_out);
+            // print(z_out.shape);
+
+            // test np.zeros
+            // var z = np.zeros((2, 2), dtype: np.float32);
+            // print(z);
+            // z[0, 1] = 1;
+            // print(z);
+
+            // // test softmax_cross_entropy_with_logits on 3D
+            // var shape = x.TensorShape;
+            // foreach (var d in shape.dims.Take(shape.ndim - 1))
+            // {
+            //     print(d);
+            // }
+
+            // Tensor z = tf.nn.softmax_cross_entropy_with_logits(logits: x, labels: y);
+            // var sess = tf.Session();
+            // var z_out = sess.run(z, (x, a_np), (y, c_np));
+            // print(z_out);
+
+
+            // print(np.logical_and(np.array(new int[]{1, 2}) == np.array(new int[]{2, 3})));
+
         }
     }
 }

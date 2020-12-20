@@ -52,7 +52,7 @@ namespace SurrogateModel.Surrogate
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
         /// <param name = "z_dim">The dimension of the Gaussian encoding space.</param>
-        public VAE(int num_epoch = 10, int batch_size = 32, float step_size = 0.001f, int log_length = 1, int z_dim = 10)
+        public VAE(int num_epoch = 10, int batch_size = 128, float step_size = 0.005f, int log_length = 1, int z_dim = 20)
             : base(num_epoch, batch_size, step_size, log_length)
         {
             this.z_dim = z_dim;
@@ -79,8 +79,8 @@ namespace SurrogateModel.Surrogate
             {
                 n_samples = tf.placeholder(tf.float32);
                 // input and output has the same dimension
-                input = tf.placeholder(tf.float32, shape: (-1, DataProcessor.numCards));
-                y_true = tf.placeholder(tf.float32, shape: (-1, DataProcessor.numCards));
+                input = tf.placeholder(tf.float32, shape: (-1, DataProcessor.numCards, 3));
+                y_true = tf.placeholder(tf.float32, shape: (-1, DataProcessor.numCards, 3));
                 // raw samples drawn from normal distribution
                 std_norm_sampls_tf = tf.placeholder(tf.float32, shape: (-1, z_dim));
             });
@@ -95,12 +95,18 @@ namespace SurrogateModel.Surrogate
             var o_fc2 = fc_layer(o_acti1, name: "fc2_1", num_output: 32);
             var o_acti2 = elu_layer(o_fc2, name: "elu2_1");
 
-            var o_fc2_2 = fc_layer(o_acti2, name: "fc2_2", num_output: 32);
+
+            var o_fc2_2 = fc_layer(o_acti2, name: "fc2_2", num_output: 1);
             var o_acti2_2 = elu_layer(o_fc2_2, name: "elu2_2");
 
+
+            var o_acti2_2D = tf.reshape(o_acti2_2, new int[]{ -1, DataProcessor.numCards });
+
             // two parallel layers of mean and variance
-            encoded_mean = fc_layer(o_acti2_2, name: "fc3_1", num_output: this.z_dim);
-            encoded_logvar = fc_layer(o_acti2, name: "fc3_2", num_output: this.z_dim);
+            encoded_mean = fc_layer(o_acti2_2D, name: "fc3_1",
+                                    num_output: this.z_dim);
+            encoded_logvar = fc_layer(o_acti2_2D, name: "fc3_2",
+                                      num_output: this.z_dim);
 
             // ************** Sampling **************
             // Reparameterization of standard normal Gaussian distribution
@@ -108,19 +114,35 @@ namespace SurrogateModel.Surrogate
                         + encoded_mean;
 
             // ************** Decoder **************
-            var o_fc3 = fc_layer(samples, name: "fc3", num_output: 32);
+
+
+            var o_fc5 = fc_layer(samples, name: "fc5",
+                                 num_output: DataProcessor.numCards);
+            var o_relu5 = tf.nn.relu(o_fc5, name: "relu5");
+
+            // expand the dimension to 3D
+            // i.e. from [batch_size, DataProcessor.numCards] to
+            // [batch_size, DataProcessor.numCards, 1]
+            var o_relu5_3D = tf.reshape(o_relu5, new int[]{-1, DataProcessor.numCards, 1});
+
+            var o_fc3 = fc_layer(o_relu5_3D, name: "fc3", num_output: 32);
             var o_acti3 = elu_layer(o_fc3, name: "elu3");
 
             var o_fc4_1 = fc_layer(o_acti3, name: "fc4_1", num_output: 32);
             var o_acti4_1 = elu_layer(o_fc4_1, name: "elu4_1");
 
-            var o_fc4 = fc_layer(o_acti4_1, name: "fc4", num_output: 128);
+            var o_fc4 = fc_layer(o_acti4_1, name: "fc4", num_output: 32);
             var o_acti4 = elu_layer(o_fc4, name: "elu4");
 
-            var o_fc5 = fc_layer(o_acti4, name: "fc5",
-                                 num_output: DataProcessor.numCards);
-            model_output = tf.nn.relu(o_fc5, name: "relu5");
-            // model_output = o_fc5;
+
+            // final layer that expand the last layer to 3
+            // i.e. to [batch_size, DataProcessor.numCards, 3]
+            // Each [,,3] is a categorical distribution over the
+            // number of a kind of card over [0, 1, 2].
+            var categorical_dist = fc_layer(o_acti4,
+                                            name: "fc6_expand",
+                                            num_output: 3);
+            model_output = tf.nn.relu(categorical_dist, name: "relu6");
 
             // loss
             loss_op = vae_loss(model_output, y_true,
@@ -155,15 +177,15 @@ namespace SurrogateModel.Surrogate
             tf_with(tf.variable_scope("vae_loss"), delegate
             {
                 // for VAE, model_output is the reconstructed deck
-                Tensor cross_ent = tf.nn.sigmoid_cross_entropy_with_logits(logits: model_output, labels: y);
+                Tensor cross_ent = tf.nn.softmax_cross_entropy_with_logits(logits: model_output, labels: y);
 
                 // minimize Binary Cross Entropy loss
-                Tensor BCE = tf.reduce_sum(cross_ent, axis: 1);
+                Tensor CE = tf.reduce_sum(cross_ent, axis: 1);
 
                 // minimize KL Divergence
                 Tensor DKL = -0.5 * tf.reduce_sum(1 + logvar - tf.square(mean) - tf.exp(logvar), axis: 1);
 
-                _loss_op = tf.reduce_mean(BCE) + tf.reduce_mean(DKL);
+                _loss_op = tf.reduce_mean(CE) + tf.reduce_mean(DKL);
 
             });
 
@@ -182,11 +204,24 @@ namespace SurrogateModel.Surrogate
             {
                 (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromFile(OFFLINE_DATA_FILE);
             }
-            var X = np.array(cardsEncoding);
-            X += np.random.rand(X.shape) * 0.0001; // add random noise
-            var y = np.array(cardsEncoding);
 
-            // could do more data preprocessing here if applicable
+
+            int[,,] cardsEncoding3D = new int[cardsEncoding.GetLength(0),
+                                              cardsEncoding.GetLength(1), 3];
+
+            for(int i = 0; i<cardsEncoding.GetLength(0); i++)
+            {
+                for(int j=0; j<cardsEncoding.GetLength(1); j++)
+                {
+                    int idx = cardsEncoding[i, j];
+                    cardsEncoding3D[i, j, idx] = 1;
+                }
+            }
+
+
+            var X = np.array(cardsEncoding3D);
+            X += np.random.rand(X.shape) * 0.0001; // add random noise
+            var y = np.array(cardsEncoding3D);
 
             init_data_loaders(X, y);
         }
