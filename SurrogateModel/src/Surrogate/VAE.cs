@@ -33,12 +33,6 @@ namespace SurrogateModel.Surrogate
 
 
         /// <summary>
-        /// Samples from standard normal of size [batch_size, z_dim]
-        /// </summary>
-        // protected Tensor raw_std_norm_sampls_tf = null;
-
-
-        /// <summary>
         /// Dimension of the Gaussian latent space.
         /// </summary>
         private int z_dim;
@@ -52,7 +46,7 @@ namespace SurrogateModel.Surrogate
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
         /// <param name = "z_dim">The dimension of the Gaussian encoding space.</param>
-        public VAE(int num_epoch = 10, int batch_size = 128, float step_size = 0.005f, int log_length = 1, int z_dim = 20)
+        public VAE(int num_epoch = 20, int batch_size = 128, float step_size = 0.005f, int log_length = 1, int z_dim = 20)
             : base(num_epoch, batch_size, step_size, log_length)
         {
             this.z_dim = z_dim;
@@ -142,7 +136,7 @@ namespace SurrogateModel.Surrogate
             var categorical_dist = fc_layer(o_acti4,
                                             name: "fc6_expand",
                                             num_output: 3);
-            model_output = tf.nn.relu(categorical_dist, name: "relu6");
+            model_output = categorical_dist;
 
             // loss
             loss_op = vae_loss(model_output, y_true,
@@ -179,7 +173,7 @@ namespace SurrogateModel.Surrogate
                 // for VAE, model_output is the reconstructed deck
                 Tensor cross_ent = tf.nn.softmax_cross_entropy_with_logits(logits: model_output, labels: y);
 
-                // minimize Binary Cross Entropy loss
+                // minimize Cross Entropy loss
                 Tensor CE = tf.reduce_sum(cross_ent, axis: 1);
 
                 // minimize KL Divergence
