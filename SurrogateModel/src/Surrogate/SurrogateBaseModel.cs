@@ -265,27 +265,16 @@ namespace SurrogateModel.Surrogate
         }
 
         /// <summary>
-        /// Helper function to get model output given a input tensor
+        /// Helper function to get the tensor to evaluate given a input tensor.
         /// </summary>
-        protected double[,] PredictHelper(NDArray x_input, Tensor to_eval)
+        protected NDArray PredictHelper(NDArray x_input, Tensor to_eval)
         {
-            // get the model output
+            // get the output
             var curr_num_input = np.array(input.shape[0]);
             var output = sess.run((to_eval), // operations
                                   (n_samples, curr_num_input), // batch size
                                   (input, x_input)); // features
-
-            // convert result to double array
-            double[,] result;
-            result = new double[output.shape[0], output.shape[1]];
-            for (int i = 0; i < output.shape[0]; i++)
-            {
-                for (int j = 0; j < output.shape[1]; j++)
-                {
-                    result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
-                }
-            }
-            return result;
+            return output;
         }
 
 
@@ -293,7 +282,7 @@ namespace SurrogateModel.Surrogate
         /// Add extra data to feed dict of computation graph. Sub class can
         /// override this method if the model needs extra feed dicts.
         /// </summary>
-        protected abstract void add_extra_data_to(List<FeedItem> feed_dict);
+        protected virtual void add_extra_data_to(List<FeedItem> feed_dict) { }
 
 
         /// <summary>
@@ -303,9 +292,68 @@ namespace SurrogateModel.Surrogate
 
         /// <summary>
         /// Evaluate input, return output. Do not run before initialization
+        /// The un-overriden version only works with 2D output for now.
         /// </summary>
-        public abstract double[,] Predict(List<LogIndividual> logIndividuals);
+        public virtual double[,] Predict(List<LogIndividual> logIndividuals)
+        {
+            // obtain deck embedding
+            var (deckEmbedding, _) = DataProcessor.PreprocessCardsSetOnehotFromData(logIndividuals);
+            var x_input = np.array(deckEmbedding);
+            NDArray output = PredictHelper(x_input, model_output);
+
+            // // convert result to double array
+            // double[,] result;
+            // result = new double[output.shape[0], output.shape[1]];
+            // for (int i = 0; i < output.shape[0]; i++)
+            // {
+            //     for (int j = 0; j < output.shape[1]; j++)
+            //     {
+            //         result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
+            //     }
+            // }
+            if (model_output.shape.Length == 2)
+            {
+                return NDArray2DToDoubleArray(output);
+            }
+            else
+            {
+                throw new NotImplementedException("Non-overriden version only supports 2D output, please override this method to implement your own version.");
+            }
+        }
 
 
+        protected double[,] NDArray2DToDoubleArray(NDArray arr)
+        {
+            // convert result to double array
+            double[,] result;
+            result = new double[arr.shape[0], arr.shape[1]];
+            for (int i = 0; i < arr.shape[0]; i++)
+            {
+                for (int j = 0; j < arr.shape[1]; j++)
+                {
+                    result[i, j] = (double)(float)arr[i, j]; // need to cast twice because the model use float
+                }
+            }
+            return result;
+        }
+
+
+        protected double[,,] NDArray3DToDoubleArray(NDArray arr)
+        {
+            // convert result to double array
+            double[,,] result;
+            result = new double[arr.shape[0], arr.shape[1], arr.shape[2]];
+            for (int i = 0; i < arr.shape[0]; i++)
+            {
+                for (int j = 0; j < arr.shape[1]; j++)
+                {
+                    for (int k = 0; k < arr.shape[2]; k++)
+                    {
+                        result[i, j, k] = (double)(float)arr[i, j]; // need to cast twice because the model use float
+                    }
+                }
+            }
+            return result;
+        }
     }
 }

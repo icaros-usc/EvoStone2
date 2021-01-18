@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 using Tensorflow;
 using NumSharp;
@@ -33,6 +34,12 @@ namespace SurrogateModel.Surrogate
 
 
         /// <summary>
+        /// Samples from the learned latent distribution.
+        /// </summary>
+        protected Tensor samples = null;
+
+
+        /// <summary>
         /// Dimension of the Gaussian latent space.
         /// </summary>
         private int z_dim;
@@ -46,7 +53,7 @@ namespace SurrogateModel.Surrogate
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
         /// <param name = "z_dim">The dimension of the Gaussian encoding space.</param>
-        public VAE(int num_epoch = 20, int batch_size = 128, float step_size = 0.005f, int log_length = 1, int z_dim = 20)
+        public VAE(int num_epoch = 50, int batch_size = 128, float step_size = 0.005f, int log_length = 1, int z_dim = 32)
             : base(num_epoch, batch_size, step_size, log_length)
         {
             this.z_dim = z_dim;
@@ -104,7 +111,7 @@ namespace SurrogateModel.Surrogate
 
             // ************** Sampling **************
             // Reparameterization of standard normal Gaussian distribution
-            Tensor samples = std_norm_sampls_tf * tf.exp(encoded_logvar * 0.5)
+            samples = std_norm_sampls_tf * tf.exp(encoded_logvar * 0.5)
                         + encoded_mean;
 
             // ************** Decoder **************
@@ -179,7 +186,17 @@ namespace SurrogateModel.Surrogate
                 // minimize KL Divergence
                 Tensor DKL = -0.5 * tf.reduce_sum(1 + logvar - tf.square(mean) - tf.exp(logvar), axis: 1);
 
-                _loss_op = tf.reduce_mean(CE) + tf.reduce_mean(DKL);
+                // // regularize number of cards with num zero
+                // int num_zero_cards = DataProcessor.numCards - 30;
+                // Tensor num_zero_cards_tf =
+                //     tf.constant(num_zero_cards, dtype: tf.float32);
+                // Tensor num_zero_cards_out =
+                //     tf.reduce_sum(model_output, axis: 1)[Slice.All, 0];
+                // Tensor error = mse_loss(num_zero_cards_out, num_zero_cards_tf) / n_samples;
+
+                _loss_op = tf.reduce_mean(CE) +
+                           tf.reduce_mean(DKL);
+                        //    tf.reduce_mean(error);
 
             });
 
@@ -199,7 +216,17 @@ namespace SurrogateModel.Surrogate
                 (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromFile(OFFLINE_DATA_FILE);
             }
 
+            var cardsEncoding3D = expand_deck_embedding(cardsEncoding);
+            var X = np.array(cardsEncoding3D);
+            X += np.random.rand(X.shape) * 0.0001; // add random noise
+            var y = np.array(cardsEncoding3D);
 
+            init_data_loaders(X, y);
+        }
+
+
+        private int[,,] expand_deck_embedding(int[,] cardsEncoding)
+        {
             int[,,] cardsEncoding3D = new int[cardsEncoding.GetLength(0),
                                               cardsEncoding.GetLength(1), 3];
 
@@ -211,13 +238,7 @@ namespace SurrogateModel.Surrogate
                     cardsEncoding3D[i, j, idx] = 1;
                 }
             }
-
-
-            var X = np.array(cardsEncoding3D);
-            X += np.random.rand(X.shape) * 0.0001; // add random noise
-            var y = np.array(cardsEncoding3D);
-
-            init_data_loaders(X, y);
+            return cardsEncoding3D;
         }
 
 
@@ -262,25 +283,87 @@ namespace SurrogateModel.Surrogate
             train();
         }
 
+
         /// <summary>
-        /// Evaluate input, return output. Do not run before initialization
+        /// Given input decks, return the parameters of the encoded latent
+        /// distributions
         /// </summary>
-        public override double[,] Predict(List<LogIndividual> logIndividuals)
+        public (double[,], double[,]) Encode(List<LogIndividual> logIndividuals)
         {
             // obtain one hot encoding
             var (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromData(logIndividuals);
-            var x_input = np.array(cardsEncoding);
-            return PredictHelper(x_input, model_output);
+            var cardsEncoding3D = expand_deck_embedding(cardsEncoding);
+            var x_input = np.array(cardsEncoding3D);
+            print(x_input.shape);
+            // the mean and log-variance
+
+            return (NDArray2DToDoubleArray(
+                        PredictHelper(x_input, encoded_mean)),
+                    NDArray2DToDoubleArray(
+                        PredictHelper(x_input, encoded_logvar)));
         }
 
-        public double[,] Encode(List<LogIndividual> logIndividuals)
+
+        public void writeEncodedTestResult()
+        {
+            var logIndividuals = DataProcessor.readLogIndividuals(OFFLINE_DATA_FILE).ToList();
+            var (encoded_mean, encoded_logvar) = Encode(logIndividuals);
+            using(StreamWriter writer = new StreamWriter("train_log/encoded_mean.csv"))
+            {
+                for(int i=0; i<encoded_mean.GetLength(0); i++)
+                {
+                    String line = "";
+                    for(int j=0; j<encoded_mean.GetLength(1); j++)
+                    {
+                        line += encoded_mean[i,j].ToString();
+                        if(j != encoded_mean.GetLength(1)-1) {
+                            line += ",";
+                        }
+                    }
+                    writer.WriteLine(line);
+                }
+            }
+            using(StreamWriter writer = new StreamWriter("train_log/encoded_logvar.csv"))
+            {
+                for(int i=0; i<encoded_logvar.GetLength(0); i++)
+                {
+                    String line = "";
+                    for(int j=0; j<encoded_logvar.GetLength(1); j++)
+                    {
+                        line += encoded_logvar[i,j].ToString();
+                        if(j != encoded_logvar.GetLength(1)-1) {
+                            line += ",";
+                        }
+                    }
+                    writer.WriteLine(line);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Reconstruct decks
+        /// </summary>
+        public int[,,] Reconstruct(List<LogIndividual> logIndividuals)
         {
             // obtain one hot encoding
             var (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromData(logIndividuals);
             var x_input = np.array(cardsEncoding);
-            // the most probable encoding result from latent distribution
-            // is the mean.
-            return PredictHelper(x_input, encoded_mean);
+            var categorical_logits = PredictHelper(x_input, model_output);
+
+            // reconstruct the deck
+            int[,,] recon_deck = new int[categorical_logits.shape[0],
+                                         categorical_logits.shape[1],
+                                         categorical_logits.shape[2]];
+            for(int m = 0; m < categorical_logits.shape[0]; m++)
+            {
+                for(int n = 0; n < categorical_logits.shape[1]; n++)
+                {
+                    int idx = np.argmax(categorical_logits[m, n]);
+                    recon_deck[m, n, idx] = 1;
+                }
+            }
+            return recon_deck;
         }
     }
 }

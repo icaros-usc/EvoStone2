@@ -24,6 +24,7 @@ namespace SurrogateModel
             // var model = new DeepSetModel();
             var model = new VAE();
             model.OfflineFit();
+            model.writeEncodedTestResult();
 
             // // shape (2, 2)
             // var c = new float[,] { {1, 4}, {2, 5} };
@@ -188,6 +189,24 @@ namespace SurrogateModel
 
             // print(np.logical_and(np.array(new int[]{1, 2}) == np.array(new int[]{2, 3})));
 
+            // // test reduce sum on 3D tensor
+            // var c = new float[,,] { { { 0, 1, 0 }, { 1, 0, 0 }, },
+            //                         { { 1, 0, 0 }, { 1, 0, 0}, },
+            //                         { { 0, 1, 0 }, { 0, 1, 0 }, }, };
+            // Tensor x = tf.placeholder(tf.float32, shape: (3, 2, 3));
+            // Tensor z = tf.reduce_sum(x, axis: 1)[Slice.All, 0];
+            // Tensor error = tf.reduce_sum(tf.pow(z - tf.constant(30, dtype: tf.float32), 2));
+
+            // var sess = tf.Session();
+            // var z_out = sess.run((error), (x, np.array(c)));
+
+            // print(z_out);
+
+            // // test tensor constant
+            // int x = 300;
+            // Tensor y = tf.constant(x, shape: 3);
+            // var z = tf.Session().run(y);
+            // print(z);
         }
     }
 }
