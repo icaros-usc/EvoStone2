@@ -58,6 +58,7 @@ namespace DeckSearch.Search
             {
                 _surrogateModel = new FullyConnectedNN();
             }
+            Console.WriteLine("{0} Surrogate model created.", config.Surrogate.Type);
 
         }
 
@@ -208,7 +209,10 @@ namespace DeckSearch.Search
                         _searchManager._searchAlgo.AddToSurrogateFeatureMap(individual);
                         // _searchManager.LogIndividual(individual);
                     }
-                    Console.WriteLine("Generation {0} completed...", i+1);
+                    if ((i+1) % 100 == 0)
+                    {
+                        Console.WriteLine("Generation {0} completed...", i+1);
+                    }
                 }
 
                 // evaluate elites
