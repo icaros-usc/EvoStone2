@@ -44,7 +44,7 @@ namespace SurrogateModel.Surrogate
                 (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckOnehotFromFile(OFFLINE_DATA_FILE);
             }
             var X = np.array(cardsEncoding);
-            X += np.random.rand(X.shape) * 0.0001; // add random noise
+            X += np.random.normal(0, 1, X.shape) * 0.0001; // add random noise
             var y = np.array(deckStats);
 
             // could do more data preprocessing here if applicable
