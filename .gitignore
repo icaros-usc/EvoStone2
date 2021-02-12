@@ -19,6 +19,7 @@ SurrogateModel/bin/
 SurrogateModel/obj/
 
 TestBed/DeckSearch/bin/
+TestBed/DeckSearch/active/
 TestBed/DeckSearch/logs/
 TestBed/DeckSearch/train_log/
 TestBed/DeckSearch/boxes/

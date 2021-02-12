@@ -1,0 +1,21 @@
+[Evaluation]
+OpponentDeckSuite = "resources/decks/suites/starterMeta.tml"
+DeckPools = ["resources/decks/pools/starterDecks.tml"]
+
+[[Evaluation.PlayerStrategies]]
+NumGames = 200
+Strategy = "Control"
+
+[Deckspace]
+HeroClass = "paladin"
+CardSets = ["CORE", "EXPERT1"]
+
+[Search]
+Category = "Surrogated"
+Type = "MAP-Elites"
+ConfigFilename = "config/paladin_me_config.tml"
+NumGeneration = 10000
+NumToEvaluatePerGeneration = 100
+
+[Surrogate]
+Type="FullyConnectedNN"
