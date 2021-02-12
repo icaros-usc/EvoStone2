@@ -43,6 +43,7 @@ namespace SurrogateModel.Surrogate
             }
 
             var X = np.array(deckEmbedding);
+            X += np.random.normal(0, 1, X.shape) * 0.0001; // add random noise
             var y = np.array(deckStats);
 
             // could do more data preprocessing here if applicable
