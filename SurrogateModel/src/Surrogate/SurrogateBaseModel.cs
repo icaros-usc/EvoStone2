@@ -70,15 +70,16 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         protected void init_data_loaders(NDArray X, NDArray y)
         {
-            int train_test_split = (int)(X.shape[0] * 0.9); // use first 90% of data for training
+            int train_test_split = (int)(X.shape[0] * 0.9) + 1; // use first 90% of data for training
+
             // create data loader
             dataLoaderTrain = new DataLoader(X[new Slice(0, train_test_split)],
                                              y[new Slice(0, train_test_split)],
                                              batch_size);
             // regard the last 1000 data points as one batch
-            dataLoaderTest = new DataLoader(X[new Slice(train_test_split, X.shape[0])],
-                                             y[new Slice(train_test_split, y.Shape[0])],
-                                             X.shape[0] - train_test_split, shuffle: false);
+            dataLoaderTest = new DataLoader(X[new Slice(train_test_split-1, X.shape[0])],
+                                             y[new Slice(train_test_split-1, y.Shape[0])],
+                                             X.shape[0] - train_test_split + 1, shuffle: false);
         }
 
         /// <summary>
