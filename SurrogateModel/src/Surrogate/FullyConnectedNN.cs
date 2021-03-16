@@ -114,15 +114,17 @@ namespace SurrogateModel.Surrogate
             train();
         }
 
-        // /// <summary>
-        // /// Evaluate input, return output. Do not run before initialization
-        // /// </summary>
-        // public override double[,] Predict(List<LogIndividual> logIndividuals)
-        // {
-        //     // obtain one hot encoding
-        //     var (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromData(logIndividuals);
-        //     var x_input = np.array(cardsEncoding);
-        //     return PredictHelper(x_input, model_output);
-        // }
+        /// <summary>
+        /// Evaluate input, return output. Do not run before initialization
+        /// </summary>
+        public override double[,] Predict(List<LogIndividual> logIndividuals)
+        {
+            // obtain one hot encoding
+            var (cardsEncoding, _) = DataProcessor.PreprocessDeckOnehotFromData(logIndividuals);
+            var x_input = np.array(cardsEncoding);
+            NDArray output = PredictHelper(x_input, model_output);
+
+            return NDArray2DToDoubleArray(output);
+        }
     }
 }

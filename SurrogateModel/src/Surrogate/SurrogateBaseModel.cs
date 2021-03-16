@@ -292,16 +292,6 @@ namespace SurrogateModel.Surrogate
             var x_input = np.array(deckEmbedding);
             NDArray output = PredictHelper(x_input, model_output);
 
-            // // convert result to double array
-            // double[,] result;
-            // result = new double[output.shape[0], output.shape[1]];
-            // for (int i = 0; i < output.shape[0]; i++)
-            // {
-            //     for (int j = 0; j < output.shape[1]; j++)
-            //     {
-            //         result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
-            //     }
-            // }
             if (model_output.shape.Length == 2)
             {
                 return NDArray2DToDoubleArray(output);
