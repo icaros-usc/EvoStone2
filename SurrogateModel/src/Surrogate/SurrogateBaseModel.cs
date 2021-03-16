@@ -10,7 +10,7 @@ using SabberStoneUtil.DataProcessing;
 namespace SurrogateModel.Surrogate
 {
     /// <summary>
-    /// Base Surrogate Model. Inlcudes shared properties and parameters of all Surrogate Models. All Surrogate Models must inherit from this class.
+    /// Base Surrogate Model. Includes shared properties and parameters of all Surrogate Models. All Surrogate Models must inherit from this class.
     /// </summary>
     public abstract class SurrogateBaseModel
     {
@@ -70,27 +70,16 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         protected void init_data_loaders(NDArray X, NDArray y)
         {
-            // if there is only one data point, use it both
-            // for training and testing
-            if (X.shape[0] <= 1){
-                dataLoaderTrain = new DataLoader(X, y, 1, shuffle: false);
-                dataLoaderTest = new DataLoader(X, y, 1, shuffle: false);
-            }
+            int train_test_split = (int)(X.shape[0] * 0.9) + 1; // use first 90% of data for training
 
-            else{
-                // use first 90% of data for training
-                int train_test_split = (int)(X.shape[0] * 0.9);
-
-                // create data loader
-                dataLoaderTrain = new DataLoader(
-                    X[new Slice(0, train_test_split)],
-                    y[new Slice(0, train_test_split)],
-                    batch_size);
-                dataLoaderTest = new DataLoader(
-                    X[new Slice(train_test_split, X.shape[0])],
-                    y[new Slice(train_test_split, y.Shape[0])],
-                    X.shape[0] - train_test_split, shuffle: false);
-            }
+            // create data loader
+            dataLoaderTrain = new DataLoader(X[new Slice(0, train_test_split)],
+                                             y[new Slice(0, train_test_split)],
+                                             batch_size);
+            // regard the last 1000 data points as one batch
+            dataLoaderTest = new DataLoader(X[new Slice(train_test_split-1, X.shape[0])],
+                                             y[new Slice(train_test_split-1, y.Shape[0])],
+                                             X.shape[0] - train_test_split + 1, shuffle: false);
         }
 
         /// <summary>
@@ -172,12 +161,6 @@ namespace SurrogateModel.Surrogate
             return _loss_op;
         }
 
-
-
-        // protected var tape = tf.GradientTape();
-
-
-
         /// <summary>
         /// Traning loop of the model
         /// </summary>
@@ -226,22 +209,22 @@ namespace SurrogateModel.Surrogate
                         add_extra_data_to(feed_dict_test);
                         var (testing_loss, model_out) = sess.run((loss_op, model_output),
                                            feed_dict_test.ToArray());
-                        print("deck");
-                        print(test_y[0][new Slice(0,10)]);
+                        // print("deck");
+                        // print(test_y[0][new Slice(0,10)]);
                         // print("model_out");
                         // print(model_out[0]);
 
-                        NDArray recon_deck = np.zeros(test_y.shape);
-                        for(int m = 0; m < test_y.shape[0]; m++)
-                        {
-                            for(int n = 0; n < test_y.shape[1]; n++)
-                            {
-                                int idx = np.argmax(model_out[m, n]);
-                                recon_deck[m, n, idx] = 1;
-                            }
-                        }
-                        print("recon_deck");
-                        print(recon_deck[0][new Slice(0,10)]);
+                        // NDArray recon_deck = np.zeros(test_y.shape);
+                        // for(int m = 0; m < test_y.shape[0]; m++)
+                        // {
+                        //     for(int n = 0; n < test_y.shape[1]; n++)
+                        //     {
+                        //         int idx = np.argmax(model_out[m, n]);
+                        //         recon_deck[m, n, idx] = 1;
+                        //     }
+                        // }
+                        // print("recon_deck");
+                        // print(recon_deck[0][new Slice(0,10)]);
 
                         testing_losses.Add(testing_loss / 1.0); // divide by 1 to convert
                         print($"testing_loss = {testing_loss}\n");

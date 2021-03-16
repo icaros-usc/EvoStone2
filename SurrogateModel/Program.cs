@@ -24,7 +24,7 @@ namespace SurrogateModel
             // var model = new DeepSetModel();
             var model = new VAE();
             model.OfflineFit();
-            model.writeEncodedTestResult();
+            // model.writeEncodedTestResult();
 
             // // shape (2, 2)
             // var c = new float[,] { {1, 4}, {2, 5} };
