@@ -98,6 +98,10 @@ namespace DeckSearch.Search
         public const string _activeSearchPath = ACTIVE_DIRECTORY
                + "search.txt";
 
+
+
+        public string log_dir_exp { get; set; }
+
         /// <summary>
         // Record the index of the training data file.
         /// </summary>
@@ -123,6 +127,7 @@ namespace DeckSearch.Search
             // set up log directory
             String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             String log_dir_exp = System.IO.Path.Combine(LOG_DIRECTORY, log_dir_base);
+            this.log_dir_exp = log_dir_exp;
             System.IO.Directory.CreateDirectory(log_dir_exp);
 
             // write the config file to the log directory for future reference
@@ -276,7 +281,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Function to find DeckEvaluator instances that are done with simulation and receieve the result
         /// </summary>
-        public void FindDoneWorkers(bool storeBuffer = false, bool addToSurrogateFeatureMap = false)
+        public void FindDoneWorkers(bool storeBuffer = false, bool keepIndID = false)
         {
             // Look for individuals that are done.
             int numActiveWorkers = _runningWorkers.Count;
@@ -293,7 +298,14 @@ namespace DeckSearch.Search
                     Console.WriteLine("Worker done: " + workerId);
 
                     ReceiveResults(outboxPath, _individualStable[workerId]);
+                    int originalID = _individualStable[workerId].ID;
                     _searchAlgo.AddToFeatureMap(_individualStable[workerId]);
+                    _searchAlgo.LogFeatureMap();
+                    // For Surrogate Search we need to keep the ID.
+                    if (keepIndID)
+                    {
+                        _individualStable[workerId].ID = originalID;
+                    }
 
                     // store done individual to a tmp buffer
                     if (storeBuffer)
@@ -338,7 +350,7 @@ namespace DeckSearch.Search
             var os = cur.OverallData;
             Console.WriteLine("------------------");
             Console.WriteLine(string.Format("Eval ({0}/{1}): {2}",
-                              cur.ID + 1,
+                              _searchAlgo.NumIndividualsEvaled(),
                               _numToEvaluate,
                               string.Join("", cur.ToString())));
             Console.WriteLine("Win Count: " + os.WinCount);

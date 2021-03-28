@@ -11,7 +11,7 @@ namespace SabberStoneUtil.Messaging
 		public StrategyStatistics[] StrategyStats { get; set; }
    }
 
-   public class OverallStatistics
+   [Serializable]public class OverallStatistics
    {
       public int[] UsageCounts { get; set; }
       public double WinCount { get; set; }
@@ -107,7 +107,7 @@ namespace SabberStoneUtil.Messaging
          };
    }
 
-   public class StrategyStatistics
+   [Serializable]public class StrategyStatistics
    {
       public double WinCount { get; set; }
       public double Alignment { get; set; }

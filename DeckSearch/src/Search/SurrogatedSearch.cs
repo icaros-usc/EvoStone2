@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 using SurrogateModel.Surrogate;
 using DeckSearch.Search.MapElites;
+using DeckSearch.Logging;
+using DeckSearch;
 
 using SabberStoneUtil.Config;
 using SabberStoneUtil.DataProcessing;
@@ -37,7 +39,19 @@ namespace DeckSearch.Search
         /// </summary>
         private SearchManager _searchManager;
 
+
+        private RunningIndividualLog _individualLog;
+
+
         private Stopwatch _stopWatch = new Stopwatch();
+
+
+        private int _numSurrogateEvals = 0;
+
+
+        private int _numMAPElitesRun = 0;
+
+
 
         /// <summary>
         /// Constructor
@@ -116,6 +130,9 @@ namespace DeckSearch.Search
             // update statistics of individuals
             foreach (var individual in individuals)
             {
+                individual.ID = this._numSurrogateEvals;
+                this._numSurrogateEvals += 1;
+
                 // same evaluated stats
                 individual.OverallData = new OverallStatistics();
                 individual.OverallData.AverageHealthDifference = result[0,0];
@@ -215,8 +232,24 @@ namespace DeckSearch.Search
                     }
                 }
 
-                // evaluate elites
                 var elites = _searchManager.GetAllElitesFromSurrogateMap();
+
+                // update surrogate feature map log
+                _searchManager._searchAlgo.LogSurrogateFeatureMap();
+
+                // log all elites for the current MAP-Elites run
+                string surrogate_log_file = System.IO.Path.Combine(_searchManager.log_dir_exp,
+                     String.Format("surrogate_individual_log{0}.csv",
+                                   this._numMAPElitesRun));
+                this._numMAPElitesRun += 1;
+
+                this._individualLog = new RunningIndividualLog(surrogate_log_file);
+                for (int i=0; i<elites.Count; i++)
+                {
+                    this._individualLog.LogIndividual(elites[i]);
+                }
+
+                // evaluate elites
                 Console.WriteLine("Get {0} elites. Start evaluation...", elites.Count);
                 int eliteIdx = 0; // index of elite to dispatch, also the number of elites dispatched.
                 while(_searchManager._individualsBuffer.Count < elites.Count)
@@ -225,11 +258,11 @@ namespace DeckSearch.Search
                     if(eliteIdx < elites.Count)
                     {
                         _searchManager.FindNewWorkers();
-                        eliteIdx += _searchManager.DispatchOneJobToWorker(choiceIndividual: elites[eliteIdx]);
+                        eliteIdx += _searchManager.DispatchOneJobToWorker(choiceIndividual: new Individual(elites[eliteIdx]));
                     }
 
                     // wait for workers to finish evaluating all elites
-                    _searchManager.FindDoneWorkers(storeBuffer: true, addToSurrogateFeatureMap: true);
+                    _searchManager.FindDoneWorkers(storeBuffer: true, keepIndID: true);
                     Thread.Sleep(1000);
                 }
                 Console.WriteLine("Finished evaluating {0} elites", _searchManager._individualsBuffer.Count);

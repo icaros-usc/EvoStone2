@@ -52,6 +52,16 @@ namespace DeckSearch.Search
       void AddToSurrogateFeatureMap(Individual cur) {}
 
       /// <summary>
+      /// Log content of feature maps to disk.
+      /// </summary>
+      void LogFeatureMap() {}
+
+      /// <summary>
+      /// Log content of surrogate feature maps to disk.
+      /// </summary>
+      void LogSurrogateFeatureMap() {}
+
+      /// <summary>
       /// Get all elites in the _featureMap
       /// </summary>
       List<Individual> GetAllElitesFromFeatureMap() {return null;}
@@ -60,6 +70,9 @@ namespace DeckSearch.Search
       /// Get all elites in the _featureMap
       /// </summary>
       List<Individual> GetAllElitesFromSurrogateMap() {return null;}
+
+
+      int NumIndividualsEvaled() { return 0; }
 
    }
 }

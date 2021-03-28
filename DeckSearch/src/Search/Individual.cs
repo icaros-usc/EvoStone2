@@ -1,5 +1,9 @@
 using System;
+using System.Linq;
+using System.Runtime;
 using System.Collections.Generic;
+
+using DeckSearch;
 
 using SabberStoneCore.Model;
 
@@ -11,6 +15,19 @@ namespace DeckSearch.Search
 {
    class Individual
    {
+      public Individual() {}
+      public Individual(Individual other)
+      {
+         this._cardCounts = other._cardCounts.Select(a => a).ToArray();
+         this.Features = other.Features.Select(a => a).ToArray();
+         this._cardSet = other._cardSet;
+         this.ID = other.ID;
+         this.ParentID = other.ParentID;
+         this.Fitness = other.Fitness;
+
+         this.OverallData = Utilities.DeepClone<OverallStatistics>(other.OverallData);
+         this.StrategyData = Utilities.DeepClone<StrategyStatistics[]>(other.StrategyData);
+      }
       private static Random rnd = new Random();
       public static Individual GenerateRandomIndividual(List<Card> cardSet)
       {
