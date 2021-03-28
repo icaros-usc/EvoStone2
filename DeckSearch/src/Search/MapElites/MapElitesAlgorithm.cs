@@ -137,7 +137,6 @@ namespace DeckSearch.Search.MapElites
       {
          CalculateFeatures(cur);
          _surrogateFeatureMap.Add(cur);
-         _surrogate_map_log.UpdateLog();
       }
 
 
@@ -152,7 +151,15 @@ namespace DeckSearch.Search.MapElites
          CalculateFeatures(cur);
 
          _featureMap.Add(cur);
+      }
+
+
+      public void LogFeatureMap() {
          _map_log.UpdateLog();
+      }
+
+      public void LogSurrogateFeatureMap() {
+         _surrogate_map_log.UpdateLog();
       }
 
 
@@ -171,5 +178,8 @@ namespace DeckSearch.Search.MapElites
       {
          return _surrogateFeatureMap.EliteMap.Values.ToList();
       }
+
+
+      public int NumIndividualsEvaled() { return this._individualsEvaluated; }
    }
 }

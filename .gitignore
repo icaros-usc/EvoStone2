@@ -26,3 +26,4 @@ TestBed/DeckSearch/boxes/
 TestBed/DeckSearch/resources/
 TestBed/DeckSearch/card2vec/*.ipynb
 TestBed/DeckSearch/card2vec/.ipynb_checkpoints/
+TestBed/DeckSearch/singularity/ubuntu_dotnet
