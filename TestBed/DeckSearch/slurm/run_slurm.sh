@@ -22,7 +22,7 @@ echo "\
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --tasks-per-node=1
-#SBATCH --time=24:00:00
+#SBATCH --time=30:00:00
 #SBATCH --account=nikolaid_548
 #SBATCH --output $SEARCH_OUT
 #SBATCH --error $SEARCH_OUT
@@ -86,7 +86,7 @@ echo "\
 #SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --tasks-per-node=1
-#SBATCH --time=24:00:00
+#SBATCH --time=30:00:00
 #SBATCH --account=nikolaid_548
 #SBATCH --output $WORKER_OUT
 #SBATCH --error $WORKER_OUT

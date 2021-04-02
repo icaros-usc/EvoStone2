@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SabberStoneUtil\SabberStoneUtil.csproj" />
+    <ProjectReference Include="..\DeckEvaluator\DeckEvaluator.csproj" />
   </ItemGroup>
 
   <ItemGroup>

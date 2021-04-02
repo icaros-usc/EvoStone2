@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabberStoneUtil", "SabberStoneUtil\SabberStoneUtil.csproj", "{31A39005-C16A-4BE1-B2A2-38BF7C3876DE}"
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeckSearch", "DeckSearch\DeckSearch.csproj", "{5E3E7140-A44C-4AD4-AC0C-A89A081861FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurrogateModel", "SurrogateModel\SurrogateModel.csproj", "{D7E28B83-FBC0-47CA-8CD8-A81DF03AB19A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "Playground\Playground.csproj", "{D5AFE276-1848-494B-8121-189D3AB8506D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,5 +39,9 @@ Global
 		{D7E28B83-FBC0-47CA-8CD8-A81DF03AB19A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7E28B83-FBC0-47CA-8CD8-A81DF03AB19A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7E28B83-FBC0-47CA-8CD8-A81DF03AB19A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5AFE276-1848-494B-8121-189D3AB8506D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5AFE276-1848-494B-8121-189D3AB8506D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5AFE276-1848-494B-8121-189D3AB8506D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5AFE276-1848-494B-8121-189D3AB8506D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

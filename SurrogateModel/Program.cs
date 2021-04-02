@@ -7,6 +7,11 @@ using SurrogateModel.Surrogate;
 using SabberStoneUtil.DataProcessing;
 using SabberStoneUtil.Config;
 
+using DeckEvaluator.Config;
+
+using SabberStoneCore.Enums;
+using SabberStoneCore.Model;
+
 using Tensorflow;
 using NumSharp;
 using static Tensorflow.Binding;
@@ -17,12 +22,48 @@ namespace SurrogateModel
     {
         static void Main(string[] args)
         {
-            var config = Toml.ReadFile<Configuration>(args[0]);
-            CardReader.Init(config);
+            // var config = Toml.ReadFile<Configuration>(args[0]);
+            // CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
             // var model = new FullyConnectedNN();
-            var model = new DeepSetModel();
-            model.OfflineFit();
+            // var model = new DeepSetModel();
+            // model.OfflineFit();
+            // Console.WriteLine(DataProcessor.numCards);
+
+
+            // ******* Some random demoing of classic cards *****
+            // Card card = Cards.FromName("Execute");
+            // // Card card = Cards.FromId("VAN_EX1_089");
+            // Console.WriteLine("ID: {0}", card.Id);
+            // Console.WriteLine("Cost: {0}", card.Cost);
+            // Console.WriteLine("Attack: {0}", card.ATK);
+            // Console.WriteLine("Health: {0}", card.Health);
+            // Console.WriteLine("Text: {0}", card.Text);
+            // Console.WriteLine("Implemented: {0}", card.Implemented);
+
+            Console.WriteLine(args[0]);
+            var config = Toml.ReadFile<DeckEvaluator.Config.Configuration>(args[0]);
+            // Console.WriteLine(config.Nerfs.Length);
+            int not_imp = 0;
+            foreach (var nerfParam in config.Nerfs)
+            {
+                Card card = Cards.FromName(nerfParam.CardName);
+                if (!card.Implemented) {
+                    not_imp++;
+                    Console.WriteLine("Name: {0}", card.Name);
+                    Console.WriteLine("Cardset: {0}", card.Set);
+                    Console.WriteLine("ID: {0}", card.Id);
+                    Console.WriteLine("Cost: {0}", card.Cost);
+                    Console.WriteLine("Attack: {0}", card.ATK);
+                    Console.WriteLine("Health: {0}", card.Health);
+                    Console.WriteLine("Text: {0}", card.Text);
+                    Console.WriteLine("Implemented: {0}", card.Implemented);
+                    Console.WriteLine();
+                }
+
+            }
+            Console.WriteLine("Not imp: {0}", not_imp);
+
 
             // // shape (3, 2, 2)
             // var a = new float[,,] { { { 1, 2 }, { 3, 4 } },

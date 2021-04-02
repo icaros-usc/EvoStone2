@@ -9,7 +9,7 @@ using DeckEvaluator.Config;
 
 namespace DeckEvaluator.Evaluation
 {
-   class PlayerSetup
+   public class PlayerSetup
    {
       public Deck Deck { get; private set; }
       public Score Strategy { get; private set; }
