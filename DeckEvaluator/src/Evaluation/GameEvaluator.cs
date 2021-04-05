@@ -15,7 +15,7 @@ using SabberStoneCoreAi.Score;
 
 namespace DeckEvaluator.Evaluation
 {
-   class GameEvaluator
+   public class GameEvaluator
    {
       public struct GameResult
       {
