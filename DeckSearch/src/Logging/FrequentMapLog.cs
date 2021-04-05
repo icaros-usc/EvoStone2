@@ -71,5 +71,11 @@ namespace DeckSearch.Logging
             sw.WriteLine(string.Join(",", rowData));
          }
       }
+
+      // change the map to log
+      public void UpdateMap(FeatureMap newMap)
+      {
+         this._map = newMap;
+      }
    }
 }

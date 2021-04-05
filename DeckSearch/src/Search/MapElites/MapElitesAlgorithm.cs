@@ -51,23 +51,29 @@ namespace DeckSearch.Search.MapElites
       private FrequentMapLog _map_log;
       private FrequentMapLog _surrogate_map_log;
 
+
+      // log directory
+      private string _log_dir_exp;
+
       public MapElitesAlgorithm(MapElitesParams config, string log_dir_exp)
       {
          _individualsDispatched = 0;
          _individualsEvaluated = 0;
          _params = config;
+         _log_dir_exp = log_dir_exp;
 
          // write the config file to the log directory for future reference
          string config_out_path = System.IO.Path.Combine(log_dir_exp, "elite_map_config.tml");
          Toml.WriteFile<MapElitesParams>(config, config_out_path);
 
-         InitMap(log_dir_exp);
+         InitMaps(_log_dir_exp);
+         InitLogs(_log_dir_exp);
       }
 
       /// <summary>
       /// Initializes feature maps
       /// </summary>
-      private void InitMap(string log_dir_exp)
+      private void InitMaps(string log_dir_exp)
       {
          var mapSizer = new LinearMapSizer(_params.Map.StartSize,
                                              _params.Map.EndSize);
@@ -88,8 +94,11 @@ namespace DeckSearch.Search.MapElites
          for (int i = 0; i < _params.Map.Features.Length; i++)
                featureNames[i] = _params.Map.Features[i].Name;
 
+      }
 
-         // create logs
+      // create logs
+      private void InitLogs(string log_dir_exp)
+      {
          string ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "elite_map_log.csv");
 
          string SURROGATE_ELITE_MAP_FILENAME = System.IO.Path.Combine(log_dir_exp, "surrogate_elite_map_log.csv");
@@ -177,6 +186,21 @@ namespace DeckSearch.Search.MapElites
       public List<Individual> GetAllElitesFromSurrogateMap()
       {
          return _surrogateFeatureMap.EliteMap.Values.ToList();
+      }
+
+
+      /// <summary>
+      /// Clear feature maps and create new ones.
+      /// </summary>
+      public void ClearMaps()
+      {
+         // init new maps
+         InitMaps(_log_dir_exp);
+         _individualsDispatched = 0;
+
+         // update map logs
+         _map_log.UpdateMap(_featureMap);
+         _surrogate_map_log.UpdateMap(_surrogateFeatureMap);
       }
 
 

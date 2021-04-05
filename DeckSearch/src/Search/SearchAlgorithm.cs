@@ -74,5 +74,8 @@ namespace DeckSearch.Search
 
       int NumIndividualsEvaled() { return 0; }
 
+
+      void ClearMaps() { }
+
    }
 }

@@ -181,21 +181,6 @@ namespace DeckSearch.Search
             _searchManager.AnnounceWorkersStart();
             Console.WriteLine("Begin Surrogated Search...");
 
-            // // generate initial population
-            // while(!_searchManager._searchAlgo.InitialPopulationEvaluated())
-            // {
-            //     // dispatch jobs until the number reaches initial population size
-            //     if(!_searchManager._searchAlgo.InitialPopulationDispatched())
-            //     {
-            //         _searchManager.FindNewWorkers();
-            //         _searchManager.DispatchJobsToWorkers();
-            //     }
-
-            //     // wait for workers to finish evaluating initial population
-            //     _searchManager.FindDoneWorkers(storeBuffer: true);
-            //     Thread.Sleep(1000);
-            // }
-
             while(_searchManager._searchAlgo.IsRunning())
             {
                 // back prop using individuals in the buffer
@@ -206,6 +191,11 @@ namespace DeckSearch.Search
                 List<Individual> allIndividuals = new List<Individual>();
                 // int generationSize = 2000;
                 // int numIter = 160000/generationSize;
+
+                // clear the maps
+                _searchManager._searchAlgo.ClearMaps();
+
+                // run MAP-Elites on surrogate
                 Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
                     _numGeneration, _numToEvaluatePerGen);
                 for(int i=0; i<_numGeneration; i++)
