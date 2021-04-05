@@ -1,0 +1,2317 @@
+[Evaluation]
+OpponentDeckSuite = "resources/decks/suites/starterMeta.tml"
+DeckPools = ["resources/decks/pools/starterDecks.tml"]
+
+[[Evaluation.PlayerStrategies]]
+NumGames = 200
+Strategy = "Control"
+
+[Deckspace]
+HeroClass = "paladin"
+# CardSets = ["CORE", "EXPERT1", "HOF"]
+CardSets = ["CORE"]
+
+[Search]
+Category = "Surrogated"
+Type = "MAP-Elites"
+ConfigFilename = "config/paladin_me_config.tml"
+NumGeneration = 10000
+NumToEvaluatePerGeneration = 100
+
+[Surrogate]
+Type="FullyConnectedNN"
+
+[[Nerfs]]
+CardName = "Ancestral Healing"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Backstab"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Circle of Healing"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Hunter's Mark"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Inner Rage"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Innervate"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Moonfire"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Preparation"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sacrificial Pact"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shadowstep"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Silence"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Soulfire"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Totemic Might"
+NewManaCost = 0
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Wisp"
+NewManaCost = 0
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Abusive Sergeant"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Angry Chicken"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Arcane Missiles"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Arcane Shot"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Argent Squire"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Bestial Wrath"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blessing of Might"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blessing of Wisdom"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blood Imp"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Bloodsail Corsair"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Claw"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Cold Blood"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Conceal"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Corruption"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Deadly Poison"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Dust Devil"
+NewManaCost = 1
+NewAttack = 3
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Earth Shock"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Elven Archer"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Execute"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Eye for an Eye"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Flame Imp"
+NewManaCost = 1
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Flare"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Forked Lightning"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Frost Shock"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Goldshire Footman"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Grimscale Oracle"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Hand of Protection"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Holy Smite"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Humility"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Hungry Crab"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Ice Lance"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Inner Fire"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Leper Gnome"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Light's Justice"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Lightning Bolt"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Lightwarden"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Mana Wyrm"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Mind Vision"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Mirror Image"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Mortal Coil"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Murloc Raider"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Murloc Tidecaller"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Naturalize"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Noble Sacrifice"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Northshire Cleric"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Power Overwhelming"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Power Word: Shield"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Redemption"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Repentance"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Rockbiter Weapon"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Savagery"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Secretkeeper"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Shield Slam"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shieldbearer"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Sinister Strike"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Southsea Deckhand"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Stonetusk Boar"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Timber Wolf"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Tracking"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Upgrade!"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Voidwalker"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Voodoo Doctor"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Whirlwind"
+NewManaCost = 1
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Worgen Infiltrator"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Young Dragonhawk"
+NewManaCost = 1
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Young Priestess"
+NewManaCost = 1
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Acidic Swamp Ooze"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Amani Berserker"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Ancestral Spirit"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Ancient Watcher"
+NewManaCost = 2
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Arcane Explosion"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Argent Protector"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Armorsmith"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Battle Rage"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Betrayal"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blade Flurry"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Bloodfen Raptor"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Bloodmage Thalnos"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Bloodsail Raider"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Bluegill Warrior"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Captain's Parrot"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Cleave"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Commanding Shout"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Crazed Alchemist"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Cruel Taskmaster"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Defias Ringleader"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Demonfire"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Dire Wolf Alpha"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Divine Spirit"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Doomsayer"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Equality"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Eviscerate"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Explosive Trap"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Faerie Dragon"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Felstalker"
+NewManaCost = 2
+NewAttack = 4
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Fiery War Axe"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Flametongue Totem"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Freezing Trap"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Frostbolt"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Frostwolf Grunt"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Heroic Strike"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Holy Light"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Ironbeak Owl"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Knife Juggler"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Kobold Geomancer"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Lightwell"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Loot Hoarder"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Lorewalker Cho"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Mad Bomber"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Mana Addict"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Mana Wraith"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Mark of the Wild"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Master Swordsmith"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Millhouse Manastorm"
+NewManaCost = 2
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Mind Blast"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Misdirection"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Murloc Tidehunter"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Nat Pagle"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Novice Engineer"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Patient Assassin"
+NewManaCost = 2
+NewAttack = 1
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Pint-Sized Summoner"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Power of the Wild"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Rampage"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "River Crocolisk"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Sap"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Scavenging Hyena"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Shadow Word: Pain"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shiv"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Slam"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Snake Trap"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Snipe"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sorcerer's Apprentice"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Starving Buzzard"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Stormforged Axe"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sunfury Protector"
+NewManaCost = 2
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Wild Growth"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Wild Pyromancer"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Windfury"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Wrath"
+NewManaCost = 2
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Youthful Brewmaster"
+NewManaCost = 2
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Acolyte of Pain"
+NewManaCost = 3
+NewAttack = 1
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Alarm-o-Bot"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Aldor Peacekeeper"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Animal Companion"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Arcane Golem"
+NewManaCost = 3
+NewAttack = 4
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Arcane Intellect"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Big Game Hunter"
+NewManaCost = 3
+NewAttack = 4
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Blood Knight"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Charge"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Coldlight Oracle"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Coldlight Seer"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Counterspell"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Dalaran Mage"
+NewManaCost = 3
+NewAttack = 1
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Deadly Shot"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Demolisher"
+NewManaCost = 3
+NewAttack = 1
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Divine Favor"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Drain Life"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Eaglehorn Bow"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Earthen Ring Farseer"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Edwin VanCleef"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Emperor Cobra"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Fan of Knives"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Far Sight"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Felguard"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Feral Spirit"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Flesheating Ghoul"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Frost Nova"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Frothing Berserker"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Harvest Golem"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Headcrack"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Healing Touch"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Hex"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Ice Barrier"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Ice Block"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Imp Master"
+NewManaCost = 3
+NewAttack = 1
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Injured Blademaster"
+NewManaCost = 3
+NewAttack = 4
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Ironforge Rifleman"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Ironfur Grizzly"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Jungle Panther"
+NewManaCost = 3
+NewAttack = 4
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Kill Command"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "King Mukla"
+NewManaCost = 3
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Kirin Tor Mage"
+NewManaCost = 3
+NewAttack = 4
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Lava Burst"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Lightning Storm"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Magma Rager"
+NewManaCost = 3
+NewAttack = 5
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Mana Tide Totem"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Mark of Nature"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Mind Control Tech"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Mirror Entity"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Murloc Warleader"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Perdition's Blade"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Questing Adventurer"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Raging Worgen"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Raid Leader"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Razorfen Hunter"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "SI:7 Agent"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Savage Roar"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Scarlet Crusader"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Sense Demons"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shadow Bolt"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shadow Word: Death"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shadowform"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shattered Sun Cleric"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Shield Block"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Silverback Patriarch"
+NewManaCost = 3
+NewAttack = 1
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Southsea Captain"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Spellbender"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sword of Justice"
+NewManaCost = 3
+NewAttack = 1
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Tauren Warrior"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Thoughtsteal"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Thrallmar Farseer"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Tinkmaster Overspark"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Unbound Elemental"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Unleash the Hounds"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Vaporize"
+NewManaCost = 3
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Void Terror"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Warsong Commander"
+NewManaCost = 3
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Wolfrider"
+NewManaCost = 3
+NewAttack = 3
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Ancient Brewmaster"
+NewManaCost = 4
+NewAttack = 5
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Ancient Mage"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Arathi Weaponsmith"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Auchenai Soulpriest"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Bite"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blessing of Kings"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Chillwind Yeti"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Cone of Cold"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Consecration"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Cult Master"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Dark Iron Dwarf"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Defender of Argus"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Dragonling Mechanic"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Dread Corsair"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Ethereal Arcanist"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Fireball"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Gnomish Inventor"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Hammer of Wrath"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Hellfire"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Houndmaster"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Keeper of the Grove"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Kor'kron Elite"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Leeroy Jenkins"
+NewManaCost = 4
+NewAttack = 6
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Lightspawn"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Mass Dispel"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Master of Disguise"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Mindgames"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Mogu'shan Warden"
+NewManaCost = 4
+NewAttack = 1
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Mortal Strike"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Multi-Shot"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Oasis Snapjaw"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Ogre Magi"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Old Murk-Eye"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Pit Lord"
+NewManaCost = 4
+NewAttack = 5
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Polymorph"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sen'jin Shieldmasta"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Shadow Madness"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Shadowflame"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Silvermoon Guardian"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Soul of the Forest"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Spellbreaker"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Stormwind Knight"
+NewManaCost = 4
+NewAttack = 2
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Summoning Portal"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Swipe"
+NewManaCost = 4
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Truesilver Champion"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Twilight Drake"
+NewManaCost = 4
+NewAttack = 4
+NewHealth = 1
+
+[[Nerfs]]
+CardName = "Violet Teacher"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Water Elemental"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Windspeaker"
+NewManaCost = 4
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Abomination"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Arcanite Reaper"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Assassin's Blade"
+NewManaCost = 5
+NewAttack = 3
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Assassinate"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Azure Drake"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Bane of Doom"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blessed Champion"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Bloodlust"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Booty Bay Bodyguard"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Brawl"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Captain Greenskin"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Darkscale Healer"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Doomguard"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Doomhammer"
+NewManaCost = 5
+NewAttack = 2
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Druid of the Claw"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Earth Elemental"
+NewManaCost = 5
+NewAttack = 7
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Elite Tauren Chieftain"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Explosive Shot"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Faceless Manipulator"
+NewManaCost = 5
+NewAttack = 3
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Fen Creeper"
+NewManaCost = 5
+NewAttack = 3
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Frostwolf Warlord"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Gadgetzan Auctioneer"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Gurubashi Berserker"
+NewManaCost = 5
+NewAttack = 2
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Harrison Jones"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Holy Nova"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Holy Wrath"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Nightblade"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Nourish"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Silver Hand Knight"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Spiteful Smith"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Stampeding Kodo"
+NewManaCost = 5
+NewAttack = 3
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Starfall"
+NewManaCost = 5
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Stormpike Commando"
+NewManaCost = 5
+NewAttack = 4
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Stranglethorn Tiger"
+NewManaCost = 5
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Tundra Rhino"
+NewManaCost = 5
+NewAttack = 2
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Venture Co. Mercenary"
+NewManaCost = 5
+NewAttack = 7
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Archmage"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Argent Commander"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Avenging Wrath"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Blizzard"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Boulderfist Ogre"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Cabal Shadow Priest"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Cairne Bloodhoof"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Dread Infernal"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Fire Elemental"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Force of Nature"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Frost Elemental"
+NewManaCost = 6
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Gelbin Mekkatorque"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Hogger"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Holy Fire"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Illidan Stormrage"
+NewManaCost = 6
+NewAttack = 7
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Kidnapper"
+NewManaCost = 6
+NewAttack = 5
+NewHealth = 3
+
+[[Nerfs]]
+CardName = "Lord of the Arena"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Priestess of Elune"
+NewManaCost = 6
+NewAttack = 5
+NewHealth = 4
+
+[[Nerfs]]
+CardName = "Reckless Rocketeer"
+NewManaCost = 6
+NewAttack = 5
+NewHealth = 2
+
+[[Nerfs]]
+CardName = "Savannah Highmane"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Siphon Soul"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Starfire"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sunwalker"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Sylvanas Windrunner"
+NewManaCost = 6
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Temple Enforcer"
+NewManaCost = 6
+NewAttack = 6
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "The Beast"
+NewManaCost = 6
+NewAttack = 9
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "The Black Knight"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Vanish"
+NewManaCost = 6
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Windfury Harpy"
+NewManaCost = 6
+NewAttack = 4
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Ancient of Lore"
+NewManaCost = 7
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Ancient of War"
+NewManaCost = 7
+NewAttack = 5
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Archmage Antonidas"
+NewManaCost = 7
+NewAttack = 5
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Baron Geddon"
+NewManaCost = 7
+NewAttack = 7
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Core Hound"
+NewManaCost = 7
+NewAttack = 9
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Flamestrike"
+NewManaCost = 7
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Gladiator's Longbow"
+NewManaCost = 7
+NewAttack = 5
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Gorehowl"
+NewManaCost = 7
+NewAttack = 7
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Guardian of Kings"
+NewManaCost = 7
+NewAttack = 5
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Prophet Velen"
+NewManaCost = 7
+NewAttack = 7
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Ravenholdt Assassin"
+NewManaCost = 7
+NewAttack = 7
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Sprint"
+NewManaCost = 7
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Stormwind Champion"
+NewManaCost = 7
+NewAttack = 6
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "War Golem"
+NewManaCost = 7
+NewAttack = 7
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Al'Akir the Windlord"
+NewManaCost = 8
+NewAttack = 3
+NewHealth = 5
+
+[[Nerfs]]
+CardName = "Grommash Hellscream"
+NewManaCost = 8
+NewAttack = 4
+NewHealth = 9
+
+[[Nerfs]]
+CardName = "Gruul"
+NewManaCost = 8
+NewAttack = 7
+NewHealth = 7
+
+[[Nerfs]]
+CardName = "Ironbark Protector"
+NewManaCost = 8
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Lay on Hands"
+NewManaCost = 8
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Ragnaros the Firelord"
+NewManaCost = 8
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Tirion Fordring"
+NewManaCost = 8
+NewAttack = 6
+NewHealth = 6
+
+[[Nerfs]]
+CardName = "Twisting Nether"
+NewManaCost = 8
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Alexstrasza"
+NewManaCost = 9
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Cenarius"
+NewManaCost = 9
+NewAttack = 5
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "King Krush"
+NewManaCost = 9
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Lord Jaraxxus"
+NewManaCost = 9
+NewAttack = 3
+NewHealth = 15
+
+[[Nerfs]]
+CardName = "Malygos"
+NewManaCost = 9
+NewAttack = 4
+NewHealth = 12
+
+[[Nerfs]]
+CardName = "Nozdormu"
+NewManaCost = 9
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Onyxia"
+NewManaCost = 9
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Ysera"
+NewManaCost = 9
+NewAttack = 4
+NewHealth = 12
+
+[[Nerfs]]
+CardName = "Deathwing"
+NewManaCost = 10
+NewAttack = 12
+NewHealth = 12
+
+[[Nerfs]]
+CardName = "Mind Control"
+NewManaCost = 10
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Pyroblast"
+NewManaCost = 10
+NewAttack = 0
+NewHealth = 0
+
+[[Nerfs]]
+CardName = "Sea Giant"
+NewManaCost = 10
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Mountain Giant"
+NewManaCost = 12
+NewAttack = 8
+NewHealth = 8
+
+[[Nerfs]]
+CardName = "Molten Giant"
+NewManaCost = 20
+NewAttack = 8
+NewHealth = 8
+
+
+
