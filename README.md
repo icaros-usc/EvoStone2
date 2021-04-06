@@ -45,6 +45,33 @@ qsub startWorker.sh
 
 The setup script copied your DLL files into the bin directory to make the project standalone. You only need to copy the `TestBed/StrategySearch` directory up to your cluster to run experiments.
 
+## Running DeckSearch Experiment (Distributed on USC HPC)
+
+Running the experiment on USC HPC is a bit more tricky because .NET is not supported natively there. Therefore, you need to first build a singularity container and use the provided script to run the experiment.
+
+First, log into the HPC:
+```
+ssh <USC_ID>@discovery.usc.edu
+```
+
+Then, you have to build the Singularity container. USC HPC natively supports Singularity, so you can use it directly. Run the following to build the container:
+```
+cd TestBed/DeckSearch
+sudo singularity build ubuntu_dotnet ubuntu_dotnet.def
+```
+
+Then, run a python script to clean up left-over files from previous experiments, if any:
+```
+python setup_hpc.py
+```
+
+Finally, run the following the schedule the experiment:
+```
+sh slurm/run_slurm.sh <config_file> <num_evaluators>
+```
+where `<config_file>` is the path to the configuration file and `<num_evaluators>` is the number of evaluators.
+
+
 ## Config Files
 
 There are two types of config files for EvoStone. The first specifies the experiment level parameters (see below).
@@ -60,8 +87,14 @@ NumGames = 200
 Strategy = "NeuralNet"
 
 [Search]
+Category = "Surrogated"
 Type = "MAP-Elites"
-ConfigFilename = "config/me_config.tml"
+ConfigFilename = "config/paladin_me_config.tml"
+NumGeneration = 10000
+NumToEvaluatePerGeneration = 100
+
+[Surrogate]
+Type="FullyConnectedNN"
 
 [Network]
 LayerSizes = [16, 5, 4, 1]
