@@ -129,4 +129,5 @@ echo
 echo \"========== Done ==========\"
 date" > "$WORKER_SCRIPT"
 if [ -z "$DRY_RUN" ]; then sbatch "$WORKER_SCRIPT"; fi
+sleep 0.2
 done
