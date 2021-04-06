@@ -7,9 +7,11 @@ import glob
 import csv
 import cv2
 import os
+import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import MaxNLocator
 matplotlib.use("agg")
 matplotlib.rcParams.update({'font.size': 12})
 
@@ -25,7 +27,9 @@ NUM_FEATURES = None  # total number of features (bc) used in the experiment
 ROW_INDEX = None  # index of feature 1 to plot
 COL_INDEX = None  # index of feature 2 to plot
 ELITE_MAP_NAME = None  # type of feature map used
+METRICS_DIR = "metrics"
 HEAT_MAP_IMAGE_DIR = "heatmaps"
+QD_SCORE_DIR = "qd_score"
 
 # max and min value of fitness
 FITNESS_MIN = -30
@@ -181,9 +185,34 @@ def createMovie(folderPath, filename):
     video.release()
 
 
+def plot_qd_score(rowData, savePath):
+    map_fitnesses = []
+    for mapData in rowData[1:]:
+        map_fitness = 0
+        for cellData in mapData[1:]:
+            splitedData = cellData.split(":")
+            nonFeatureIdx = NUM_FEATURES
+            fitness = float(splitedData[nonFeatureIdx+3])
+            map_fitness += fitness
+        map_fitnesses.append(map_fitness)
+
+    fig, ax = plt.subplots()
+    ax.plot(map_fitnesses)
+    ax.set(xlabel='Number of MAP-Elites run (s)',
+           ylabel='QD-score',
+           xlim=(0, len(map_fitnesses)-1),
+           ylim=(0, None),
+           title=IMAGE_TITLE)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    ax.grid()
+
+    fig.savefig(savePath)
+
+
 def generateAll(logPath):
     with open(logPath, 'r') as csvfile:
-        # Read all the data from the csv file
+        # # Read all the data from the csv file
         allRows = list(csv.reader(csvfile, delimiter=','))
 
         # generate the movie
@@ -198,6 +227,16 @@ def generateAll(logPath):
         imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
             COL_INDEX) + '.png'
         createImage(allRows[-1], os.path.join(tmpImageFolder, imageFilename))
+
+        # # plot QD score
+        plot_qd_score(allRows, os.path.join(tmpQDScoreFolder, "qd-score.png"))
+
+
+def clearDir(dirToClear):
+    if not os.path.exists(dirToClear):
+        os.mkdir(dirToClear)
+    for curFile in glob.glob(dirToClear + '/*'):
+        os.remove(curFile)
 
 
 if __name__ == "__main__":
@@ -225,11 +264,6 @@ if __name__ == "__main__":
                         '--map',
                         help='generate heatmap for elite map or surrogate elite map',
                         default='surrogate_elite_map_log.csv')
-    # parser.add_argument('-l',
-    #                     '--log_dir',
-    #                     help='filepath to the elite map log file',
-    #                     required=False,
-    #                     default=os.path.join((parser.parse_args().log_dir), "elite_map.csv"))
     opt = parser.parse_args()
 
     # read in the name of the algorithm and features to plot
@@ -237,23 +271,28 @@ if __name__ == "__main__":
         os.path.join(opt.log_dir, "experiment_config.tml"))
     features = elite_map_config['Map']['Features']
     ELITE_MAP_NAME = elite_map_config["Map"]["Type"]
-    print(ELITE_MAP_NAME)
 
     # read in parameters
     NUM_FEATURES = len(features)
     map_to_gen = opt.map
     ELITE_MAP_LOG_FILE_NAME = os.path.join(opt.log_dir, map_to_gen)
+
     # Clear out the previous images
-    tmpImageFolder = os.path.join(opt.log_dir, HEAT_MAP_IMAGE_DIR)
-    if not os.path.exists(tmpImageFolder):
-        os.mkdir(tmpImageFolder)
-    for curFile in glob.glob(tmpImageFolder + '/*'):
-        os.remove(curFile)
+    tmpMetricsFolder = os.path.join(opt.log_dir, METRICS_DIR)
+    tmpImageFolder = os.path.join(tmpMetricsFolder, HEAT_MAP_IMAGE_DIR)
+    tmpQDScoreFolder = os.path.join(tmpMetricsFolder, QD_SCORE_DIR)
+    if os.path.isdir(tmpMetricsFolder):
+        shutil.rmtree(tmpMetricsFolder, ignore_errors=True)
+    os.mkdir(tmpMetricsFolder)
+    os.mkdir(tmpImageFolder)
+    os.mkdir(tmpQDScoreFolder)
 
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
         IMAGE_TITLE = experiment_config["Search"]["Category"] + \
             "_" + experiment_config["Search"]["Type"]
+        if hasattr(experiment_config, "Surrogate"):
+            IMAGE_TITLE += experiment_config["Surrogate"]["Type"]
         FEATURE1_LABEL = features[ROW_INDEX]['Name']
         FEATURE2_LABEL = features[COL_INDEX]['Name']
 
