@@ -267,10 +267,10 @@ namespace DeckSearch.Search
             string inboxPath = string.Format(SearchManager._inboxTemplate, workerId);
             SendWork(inboxPath, choiceIndividual);
             _workerRunningTimes[workerId] = DateTime.UtcNow;
-            String timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
             Console.WriteLine(String.Format(
-                "Starting worker {0} at {1}", workerId, timestamp));
+                "{0} | Worker start: {1}", timestamp, workerId));
 
             _individualStable[workerId] = choiceIndividual;
             return 1;
@@ -309,7 +309,11 @@ namespace DeckSearch.Search
                 if (File.Exists(outboxPath) && !File.Exists(inboxPath))
                 {
                     // Wait for the file to finish being written.
-                    Console.WriteLine("Worker done: " + workerId);
+                    String timestamp =
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    Console.WriteLine(
+                        String.Format("{0} | Worker done: {1}",
+                            timestamp, workerId));
 
                     ReceiveResults(outboxPath, _individualStable[workerId]);
                     int originalID = _individualStable[workerId].ID;
