@@ -330,6 +330,7 @@ namespace DeckSearch.Search
 
                     LogIndividual(_individualStable[workerId]);
                     _idleWorkers.Enqueue(workerId);
+                    _workerRunningTimes.Remove(workerId);
                 }
                 else
                 {
