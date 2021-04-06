@@ -35,7 +35,15 @@ namespace DeckSearch.Search
 
         /// <summary>
         /// A dict from ID of the workers to individuals that are evaluated by the workers
+        /// </summary>
         public Dictionary<int, Individual> _individualStable;
+
+
+        /// <summary>
+        /// A dict from ID of the workers to start time of the worker job.
+        /// </summary>
+        public Dictionary<int, DateTime> _workerRunningTimes;
+
 
         /// <summary>
         /// Filename of the configuation file
@@ -120,6 +128,7 @@ namespace DeckSearch.Search
             _runningWorkers = new Queue<int>();
             _idleWorkers = new Queue<int>();
             _individualStable = new Dictionary<int, Individual>();
+            _workerRunningTimes = new Dictionary<int, DateTime>();
 
             // Grab the configuration info
             _configFilename = configFilename;
@@ -255,9 +264,14 @@ namespace DeckSearch.Search
             }
             int workerId = _idleWorkers.Dequeue();
             _runningWorkers.Enqueue(workerId);
-            Console.WriteLine("Starting worker: " + workerId);
             string inboxPath = string.Format(SearchManager._inboxTemplate, workerId);
             SendWork(inboxPath, choiceIndividual);
+            _workerRunningTimes[workerId] = DateTime.UtcNow;
+            String timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            Console.WriteLine(String.Format(
+                "Starting worker {0} at {1}", workerId, timestamp));
+
             _individualStable[workerId] = choiceIndividual;
             return 1;
         }
@@ -320,6 +334,38 @@ namespace DeckSearch.Search
                 else
                 {
                     _runningWorkers.Enqueue(workerId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// If a worker does not return the job in 15 min, worker maybe dead. 
+        /// Resent the job to another worker.
+        /// </summary>
+        public void FindOvertimeWorkers()
+        {
+            var _workerRunningTimesCopy =
+                new Dictionary<int, DateTime>(_workerRunningTimes);
+            foreach(var item in _workerRunningTimesCopy)
+            {
+                int workerId = item.Key;
+                TimeSpan timeDiff = DateTime.UtcNow - item.Value;
+                int timeDiffMillisec = Convert.ToInt32(
+                    timeDiff.TotalMilliseconds);
+                if (timeDiffMillisec >= 15 * 60 * 1000)
+                {
+                    Console.WriteLine(String.Format("Worker {0} might be dead. Redispatching the job...", workerId));
+                    // attempt to resend the job
+                    // may fail for no idle workers
+                    if(Convert.ToBoolean(
+                        DispatchOneJobToWorker(_individualStable[workerId])))
+                    {
+                        Console.WriteLine("Redispatching succeeded.");
+                        _workerRunningTimes.Remove(workerId);
+                    }
+                    else{
+                        Console.WriteLine("Redispatching failed. Will retry.");
+                    }
                 }
             }
         }

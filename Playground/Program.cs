@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
 using Nett;
 
@@ -93,7 +94,9 @@ namespace PlayGround
 
             // test elu_layer on 3D input
 
-            DemoClassicCards(args);
+            // DemoClassicCards(args);
+
+            DemoTimeElapsed();
         }
 
         static public void DemoClassicCards(string[] args)
@@ -149,6 +152,15 @@ namespace PlayGround
             var gameEval = new GameEvaluator(player, opponent);
             var result = gameEval.PlayGame(1);
             Console.WriteLine(result._healthDifference);
+        }
+
+        static void DemoTimeElapsed()
+        {
+            DateTime start = DateTime.UtcNow;
+            Thread.Sleep(2000);
+            DateTime end = DateTime.UtcNow;
+            TimeSpan timeDiff = end - start;
+            Console.WriteLine(Convert.ToInt32(timeDiff.TotalMilliseconds));
         }
     }
 }

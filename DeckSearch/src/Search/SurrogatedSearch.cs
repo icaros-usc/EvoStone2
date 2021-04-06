@@ -249,15 +249,18 @@ namespace DeckSearch.Search
                 int eliteIdx = 0; // index of elite to dispatch, also the number of elites dispatched.
                 while(_searchManager._individualsBuffer.Count < elites.Count)
                 {
+                    _searchManager.FindNewWorkers();
+
                     // need to dispatch elites
                     if(eliteIdx < elites.Count)
                     {
-                        _searchManager.FindNewWorkers();
-                        eliteIdx += _searchManager.DispatchOneJobToWorker(choiceIndividual: new Individual(elites[eliteIdx]));
+                        eliteIdx += _searchManager.DispatchOneJobToWorker(
+                            choiceIndividual: new Individual(elites[eliteIdx]));
                     }
 
                     // wait for workers to finish evaluating all elites
                     _searchManager.FindDoneWorkers(storeBuffer: true, keepIndID: true);
+                    _searchManager.FindOvertimeWorkers();
                     Thread.Sleep(1000);
                 }
                 Console.WriteLine("Finished evaluating {0} elites", _searchManager._individualsBuffer.Count);
