@@ -80,9 +80,7 @@ def createRecordList(mapData, mapDims):
         f1 = float(splitedData[nonFeatureIdx + 4 + ROW_INDEX])
         f2 = float(splitedData[nonFeatureIdx + 4 + COL_INDEX])
 
-        print(splitedData)
         data = [cellRow, cellCol, cellSize, indID, winCount, fitness, f1, f2]
-        print(data)
         if (cellRow, cellCol) in indexPairs:
             indexPairs.remove((cellRow, cellCol))
             trackRmIndexPairs[str(cellRow) + '_' +
