@@ -73,10 +73,12 @@ done
 
 
 # Submit worker scripts.
+mkdir -p "$LOGDIR/worker_logs"
+mkdir -p "$LOGDIR/worker_scripts"
 for (( worker_id = 0; worker_id < $NUM_WORKERS; worker_id++ ))
 do
-WORKER_SCRIPT="$LOGDIR/worker-$worker_id.slurm"
-WORKER_OUT="$LOGDIR/slurm-worker-$worker_id-%j.out"
+WORKER_SCRIPT="$LOGDIR/worker_scripts/worker-$worker_id.slurm"
+WORKER_OUT="$LOGDIR/worker_logs/slurm-worker-$worker_id-%j.out"
 
 echo "\
 #!/bin/bash
