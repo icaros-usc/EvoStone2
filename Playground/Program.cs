@@ -26,8 +26,8 @@ namespace PlayGround
     {
         static void Main(string[] args)
         {
-            // var config = Toml.ReadFile<Configuration>(args[0]);
-            // CardReader.Init(config);
+            var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(args[0]);
+            CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
             // var model = new FullyConnectedNN();
             // var model = new DeepSetModel();
@@ -96,7 +96,9 @@ namespace PlayGround
 
             // DemoClassicCards(args);
 
-            DemoTimeElapsed();
+            // DemoTimeElapsed();
+
+            DemoTFSaver();
         }
 
         static public void DemoClassicCards(string[] args)
@@ -161,6 +163,18 @@ namespace PlayGround
             DateTime end = DateTime.UtcNow;
             TimeSpan timeDiff = end - start;
             Console.WriteLine(Convert.ToInt32(timeDiff.TotalMilliseconds));
+        }
+
+        static void DemoTFSaver()
+        {
+            // save
+            var model = new FullyConnectedNN();
+            model.OfflineFit();
+
+            // // restore
+            // var model = new FullyConnectedNN();
+            // model.LoadModel("train_log/model.ckpt");
+            // model.OfflineFit();
         }
     }
 }

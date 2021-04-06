@@ -6,6 +6,7 @@ using Tensorflow;
 using NumSharp;
 using static Tensorflow.Binding;
 using SabberStoneUtil.DataProcessing;
+using SurrogateModel.Logging;
 
 namespace SurrogateModel.Surrogate
 {
@@ -38,10 +39,11 @@ namespace SurrogateModel.Surrogate
         protected int epoch_idx = 0;
         protected DataLoader dataLoaderTrain = null;
         protected DataLoader dataLoaderTest = null;
+        protected Tensorflow.Saver saver;
 
-        // writers to record training and testing loss
-        protected string TRAINING_LOSS_FILE = "train_log/train_loss_128.txt";
-        protected string TESTING_LOSS_FILE = "train_log/test_loss_128.txt";
+        // writers to record training/testing loss and model save point.
+        protected LossLogger loss_logger;
+        protected string MODEL_SAVE_POINT = "train_log/model.ckpt";
         protected const string OFFLINE_DATA_FILE = "resources/individual_log.csv";
 
         /// <summary>
@@ -56,6 +58,7 @@ namespace SurrogateModel.Surrogate
             this.batch_size = batch_size;
             this.step_size = step_size;
             this.log_length = log_length;
+            this.loss_logger = new LossLogger("train_log/losses.csv");
 
             // set up session, attempt to use all cores
             config = new ConfigProto
@@ -180,6 +183,8 @@ namespace SurrogateModel.Surrogate
             List<double> training_losses = new List<double>();
             List<double> testing_losses = new List<double>();
 
+            saver = tf.train.Saver();
+
             Console.WriteLine("Start training");
             for(int i=0; i<num_epoch; i++)
             {
@@ -194,9 +199,10 @@ namespace SurrogateModel.Surrogate
 
                     if(j % log_length == log_length - 1)
                     {
+                        double train_loss = running_loss/log_length;
                         print($"epoch{epoch_idx}, iter:{j}:");
-                        print($"training_loss = {running_loss/log_length}");
-                        training_losses.Add(running_loss/log_length);
+                        print($"training_loss = {train_loss}");
+                        training_losses.Add(train_loss);
                         running_loss = 0;
 
                         // Test the model
@@ -207,32 +213,18 @@ namespace SurrogateModel.Surrogate
                                             (y_true, test_y)); // targets
                         testing_losses.Add(testing_loss/1.0); // divide by 1 to convert
                         print($"testing_loss = {testing_loss}\n");
+
+                        // save the model
+                        saver.save(sess, MODEL_SAVE_POINT);
+
+                        // write the losses
+                        loss_logger.LogLoss(train_loss, testing_loss/1.0);
                     }
                 }
                 epoch_idx++;
             }
-            WriteLosses(training_losses, TRAINING_LOSS_FILE);
-            WriteLosses(testing_losses, TESTING_LOSS_FILE);
         }
 
-        /// <summary>
-        /// Helper function to write loss to file
-        /// </summary>
-        private void WriteLosses(List<double> losses, string path)
-        {
-            // delete old loss data
-            if(File.Exists(path))
-            {
-                File.Delete(path);
-            }
-            using(StreamWriter sw = File.AppendText(path))
-            {
-                foreach(var loss in losses)
-                {
-                    sw.WriteLine(loss);
-                }
-            }
-        }
 
         /// <summary>
         /// Helper function to get model output given a input tensor
@@ -255,6 +247,12 @@ namespace SurrogateModel.Surrogate
                 }
             }
             return result;
+        }
+
+        public void LoadModel(string fromPath)
+        {
+            saver = tf.train.Saver();
+            saver.restore(sess, fromPath);
         }
 
         /// <summary>

@@ -73,11 +73,13 @@ namespace DeckSearch.Search
             // configurate surrogate model
             if (config.Surrogate.Type == "DeepSetModel")
             {
-                _surrogateModel = new DeepSetModel();
+                _surrogateModel = new DeepSetModel(
+                    log_dir_exp: _searchManager.log_dir_exp);
             }
             else if (config.Surrogate.Type == "FullyConnectedNN")
             {
-                _surrogateModel = new FullyConnectedNN();
+                _surrogateModel = new FullyConnectedNN(
+                    log_dir_exp: _searchManager.log_dir_exp);
             }
             Console.WriteLine("{0} Surrogate model created.", config.Surrogate.Type);
 
