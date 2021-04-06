@@ -1,5 +1,6 @@
-NUM_WORKERS="$1"
-PARAM="$2"
+CONFIG="$1"
+NUM_WORKERS="$2"
+PARAM="$3"
 DRY_RUN=""
 if [ "$PARAM" = "DRY_RUN" ]; then
   echo "Using DRY RUN"
@@ -56,7 +57,7 @@ echo \"========== Setup ==========\"
 
 echo
 echo \"========== Starting Singularity .NET script ==========\"
-singularity exec --cleanenv singularity/ubuntu_dotnet dotnet bin/DeckSearch.dll config/paladin_surr_fcnn_me.tml
+singularity exec --cleanenv singularity/ubuntu_dotnet dotnet bin/DeckSearch.dll $CONFIG
 
 echo
 echo \"========== Done ==========\"
