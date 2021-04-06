@@ -47,7 +47,7 @@ The setup script copied your DLL files into the bin directory to make the projec
 
 ## Running DeckSearch Experiment (Distributed on USC HPC)
 
-Running the experiment on USC HPC is a bit more tricky because .NET is not supported natively there. Therefore, you need to first build a singularity container and use the provided script to run the experiment.
+Running the experiment on USC HPC is a bit more tricky because .NET is not supported natively there. Therefore, you need to first build a [Singularity](https://sylabs.io/docs/) container and use the provided script to run the experiment.
 
 First, log into the HPC:
 ```
@@ -57,8 +57,10 @@ ssh <USC_ID>@discovery.usc.edu
 Then, you have to build the Singularity container. USC HPC natively supports Singularity, so you can use it directly. Run the following to build the container:
 ```
 cd TestBed/DeckSearch
-sudo singularity build ubuntu_dotnet ubuntu_dotnet.def
+sudo singularity build singularity/ubuntu_dotnet singularity/ubuntu_dotnet.def
 ```
+
+You can also build the contrainer locally and copy it to the HPC using `scp`.
 
 Then, run a python script to clean up left-over files from previous experiments, if any:
 ```
