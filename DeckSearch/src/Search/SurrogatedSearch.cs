@@ -52,6 +52,9 @@ namespace DeckSearch.Search
         private int _numMAPElitesRun = 0;
 
 
+        private string _surrogateIndLogDir;
+
+
 
         /// <summary>
         /// Constructor
@@ -62,6 +65,10 @@ namespace DeckSearch.Search
             _searchManager = new SearchManager(config, configFilename);
             _numGeneration = config.Search.NumGeneration;
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
+            _surrogateIndLogDir = System.IO.Path.Combine(
+                _searchManager.log_dir_exp, "surrogate_individuals");
+            System.IO.Directory.CreateDirectory(_surrogateIndLogDir);
+
 
             // configurate surrogate model
             if (config.Surrogate.Type == "DeepSetModel")
@@ -189,8 +196,6 @@ namespace DeckSearch.Search
 
                 // run certain number of iterations of map elites
                 List<Individual> allIndividuals = new List<Individual>();
-                // int generationSize = 2000;
-                // int numIter = 160000/generationSize;
 
                 // clear the maps
                 _searchManager._searchAlgo.ClearMaps();
@@ -228,7 +233,7 @@ namespace DeckSearch.Search
                 _searchManager._searchAlgo.LogSurrogateFeatureMap();
 
                 // log all elites for the current MAP-Elites run
-                string surrogate_log_file = System.IO.Path.Combine(_searchManager.log_dir_exp,
+                string surrogate_log_file = System.IO.Path.Combine(_surrogateIndLogDir,
                      String.Format("surrogate_individual_log{0}.csv",
                                    this._numMAPElitesRun));
                 this._numMAPElitesRun += 1;
