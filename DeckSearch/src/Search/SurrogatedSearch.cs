@@ -202,6 +202,7 @@ namespace DeckSearch.Search
                 // run MAP-Elites on surrogate
                 Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
                     _numGeneration, _numToEvaluatePerGen);
+                int genLogLength = _numGeneration/10;
                 for(int i=0; i<_numGeneration; i++)
                 {
                     // generate one generation of individuals
@@ -220,7 +221,7 @@ namespace DeckSearch.Search
                         _searchManager._searchAlgo.AddToSurrogateFeatureMap(individual);
                         // _searchManager.LogIndividual(individual);
                     }
-                    if ((i+1) % 100 == 0)
+                    if ((i+1) % genLogLength == 0)
                     {
                         Console.WriteLine("Generation {0} completed...", i+1);
                     }
