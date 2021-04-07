@@ -53,7 +53,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// List of individuals that are evaluated by the workers. The list is emptied periodically
         /// </summary>
-        public List<Individual> _individualsBuffer = new List<Individual>();
+        public HashSet<Individual> _individualsBuffer = new HashSet<Individual>();
 
         /// <summary>
         /// Search Algorithm
@@ -74,6 +74,12 @@ namespace DeckSearch.Search
         /// Max fitness of all individuals
         /// </summary>
         private double _maxFitness;
+
+        /// <summary>
+        /// Number of individuals evaluated for each MAP-Elites run.
+        /// This is used for Surrogated Search.
+        /// </summary>
+        public int _numEvaledPerRun;
 
         // Directory names
         private const string ACTIVE_DIRECTORY = "active/";
@@ -110,11 +116,6 @@ namespace DeckSearch.Search
 
         public string log_dir_exp { get; set; }
 
-        /// <summary>
-        // Record the index of the training data file.
-        /// </summary>
-        private int training_idx = 0;
-
         private int _numToEvaluate = 0;
 
         /// <summary>
@@ -129,6 +130,7 @@ namespace DeckSearch.Search
             _idleWorkers = new Queue<int>();
             _individualStable = new Dictionary<int, Individual>();
             _workerRunningTimes = new Dictionary<int, DateTime>();
+            _numEvaledPerRun = 0;
 
             // Grab the configuration info
             _configFilename = configFilename;
@@ -339,6 +341,7 @@ namespace DeckSearch.Search
                     if (storeBuffer)
                     {
                         _individualsBuffer.Add(_individualStable[workerId]); // add evaluated individual to batch
+                        _numEvaledPerRun += 1;
                         Console.WriteLine("Buffer Size: " + _individualsBuffer.Count);
                     }
 
@@ -453,24 +456,6 @@ namespace DeckSearch.Search
                 _championLog.LogIndividual(cur);
             if (didHitMaxFitness)
                 _fittestLog.LogIndividual(cur);
-        }
-
-        /// <summary>
-        /// (deprecated) Function to log training individuals to Surrogate model
-        /// </summary>
-        public void LogTrainingIndividuals()
-        {
-            var _trainingDataLog =
-                new RunningIndividualLog(TRAINING_DATA_LOG_FILENAME_PREFIX + training_idx.ToString() + ".csv");
-            training_idx += 1;
-
-            // Log training data to disk
-            _trainingDataLog.LogIndividuals(_individualsBuffer);
-            Console.WriteLine("Training data written to disk");
-
-            // clear the buffer
-            _individualsBuffer.Clear();
-            Console.WriteLine("Buffer cleared");
         }
 
         /// <summary>

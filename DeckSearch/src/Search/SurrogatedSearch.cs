@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -193,11 +194,7 @@ namespace DeckSearch.Search
             while(_searchManager._searchAlgo.IsRunning())
             {
                 // back prop using individuals in the buffer
-                BackProp(_searchManager._individualsBuffer);
-                _searchManager._individualsBuffer.Clear();
-
-                // run certain number of iterations of map elites
-                List<Individual> allIndividuals = new List<Individual>();
+                BackProp(_searchManager._individualsBuffer.ToList());
 
                 // clear the maps
                 _searchManager._searchAlgo.ClearMaps();
@@ -249,7 +246,7 @@ namespace DeckSearch.Search
                 // evaluate elites
                 Console.WriteLine("Get {0} elites. Start evaluation...", elites.Count);
                 int eliteIdx = 0; // index of elite to dispatch, also the number of elites dispatched.
-                while(_searchManager._individualsBuffer.Count < elites.Count)
+                while(_searchManager._numEvaledPerRun < elites.Count)
                 {
                     _searchManager.FindNewWorkers();
 
@@ -265,7 +262,11 @@ namespace DeckSearch.Search
                     _searchManager.FindOvertimeWorkers();
                     Thread.Sleep(1000);
                 }
-                Console.WriteLine("Finished evaluating {0} elites", _searchManager._individualsBuffer.Count);
+                Console.WriteLine("Finished evaluating {0} elites", _searchManager._numEvaledPerRun);
+                Console.WriteLine(
+                    "Current number of training individuals: {0}",
+                    _searchManager._individualsBuffer.Count);
+                _searchManager._numEvaledPerRun = 0; // reset run per run
             }
 
             // Let the workers know that we are done.
