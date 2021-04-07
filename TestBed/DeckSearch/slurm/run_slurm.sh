@@ -19,7 +19,7 @@ echo "\
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --job-name=EvoStoneSearch
+#SBATCH --job-name=Search
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --tasks-per-node=1
@@ -85,7 +85,7 @@ echo "\
 
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --job-name=EvoStoneEvaluator
+#SBATCH --job-name=Evaluator
 #SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --tasks-per-node=1
