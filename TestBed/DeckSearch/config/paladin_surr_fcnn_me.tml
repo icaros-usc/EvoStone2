@@ -14,8 +14,8 @@ CardSets = ["CORE", "EXPERT1"]
 Category = "Surrogated"
 Type = "MAP-Elites"
 ConfigFilename = "config/paladin_me_config.tml"
-NumGeneration = 10000
-NumToEvaluatePerGeneration = 100
+NumGeneration = 100000
+NumToEvaluatePerGeneration = 10
 
 [Surrogate]
 Type="FullyConnectedNN"
