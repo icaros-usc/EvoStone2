@@ -257,7 +257,7 @@ if __name__ == "__main__":
                         '--step_size',
                         help='step size of the animation to generate',
                         required=False,
-                        default=1)
+                        default=10)
     parser.add_argument('-m',
                         '--map',
                         help='generate heatmap for elite map or surrogate elite map',
