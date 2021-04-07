@@ -180,8 +180,6 @@ namespace SurrogateModel.Surrogate
         protected void train()
         {
             double running_loss = 0;
-            List<double> training_losses = new List<double>();
-            List<double> testing_losses = new List<double>();
 
             saver = tf.train.Saver();
 
@@ -196,31 +194,28 @@ namespace SurrogateModel.Surrogate
                                                 (input, x_input), // features
                                                 (y_true, y_input)); // targets
                     running_loss += training_loss;
-
-                    if(j % log_length == log_length - 1)
-                    {
-                        double train_loss = running_loss/log_length;
-                        print($"epoch{epoch_idx}, iter:{j}:");
-                        print($"training_loss = {train_loss}");
-                        training_losses.Add(train_loss);
-                        running_loss = 0;
-
-                        // Test the model
-                        var (test_x, test_y) = dataLoaderTest.Sample();
-                        var testing_loss = sess.run((loss_op),
-                                            (n_samples, (int)test_x.shape[0]), // per-iteration batch size
-                                            (input, test_x), // features
-                                            (y_true, test_y)); // targets
-                        testing_losses.Add(testing_loss/1.0); // divide by 1 to convert
-                        print($"testing_loss = {testing_loss}\n");
-
-                        // save the model
-                        saver.save(sess, MODEL_SAVE_POINT);
-
-                        // write the losses
-                        loss_logger.LogLoss(train_loss, testing_loss/1.0);
-                    }
                 }
+
+                // do validation at the end of every epoch
+                double train_loss = running_loss/dataLoaderTrain.num_batch;
+                print($"epoch{epoch_idx}:");
+                print($"training_loss = {train_loss}");
+                running_loss = 0;
+
+                // Test the model
+                var (test_x, test_y) = dataLoaderTest.Sample();
+                var testing_loss = sess.run((loss_op),
+                                    (n_samples, (int)test_x.shape[0]), // per-iteration batch size
+                                    (input, test_x), // features
+                                    (y_true, test_y)); // targets
+                print($"testing_loss = {testing_loss}\n");
+
+                // save the model
+                saver.save(sess, MODEL_SAVE_POINT);
+
+                // write the losses
+                // divide by 1 to convert
+                loss_logger.LogLoss(train_loss, testing_loss/1.0);
                 epoch_idx++;
             }
         }
@@ -249,6 +244,9 @@ namespace SurrogateModel.Surrogate
             return result;
         }
 
+        /// <summary>
+        /// Load the model from stored checkpoint.
+        /// </summary>
         public void LoadModel(string fromPath)
         {
             saver = tf.train.Saver();
