@@ -220,7 +220,17 @@ namespace DeckSearch.Search
         public void FindNewWorkers()
         {
             // Look for new workers.
-            string[] hailingFiles = Directory.GetFiles(ACTIVE_DIRECTORY);
+            string[] hailingFiles = new string[]{};
+            try
+            {
+                hailingFiles = Directory.GetFiles(ACTIVE_DIRECTORY);
+            } catch (System.IO.IOException e){
+                Console.WriteLine("IOException catched while reading hailing files. Will retry...");
+                Console.WriteLine("###########");
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("###########");
+                return;
+            }
             foreach (string activeFile in hailingFiles)
             {
                 string prefix = ACTIVE_DIRECTORY + "worker-";
