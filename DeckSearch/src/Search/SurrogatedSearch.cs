@@ -31,6 +31,11 @@ namespace DeckSearch.Search
         private int _numToEvaluatePerGen;
 
         /// <summary>
+        /// Log length of surrogate elite map
+        /// </summary>
+        private int _logLengthPerGen;
+
+        /// <summary>
         /// Surrogate model
         /// </summary>
         private static SurrogateBaseModel _surrogateModel;
@@ -53,7 +58,7 @@ namespace DeckSearch.Search
         private int _numMAPElitesRun = 0;
 
 
-        private string _surrogateIndLogDir;
+        private string _surrogateElitesLogDir;
 
 
 
@@ -66,9 +71,10 @@ namespace DeckSearch.Search
             _searchManager = new SearchManager(config, configFilename);
             _numGeneration = config.Search.NumGeneration;
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
-            _surrogateIndLogDir = System.IO.Path.Combine(
-                _searchManager.log_dir_exp, "surrogate_individuals");
-            System.IO.Directory.CreateDirectory(_surrogateIndLogDir);
+            _logLengthPerGen = config.Search.LogLengthPerGen;
+            _surrogateElitesLogDir = System.IO.Path.Combine(
+                _searchManager.log_dir_exp, "surrogate_elites");
+            System.IO.Directory.CreateDirectory(_surrogateElitesLogDir);
 
 
             // configurate surrogate model
@@ -202,7 +208,9 @@ namespace DeckSearch.Search
                 // run MAP-Elites on surrogate
                 Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
                     _numGeneration, _numToEvaluatePerGen);
-                int genLogLength = _numGeneration/10;
+
+                // verbose exactly 10 times
+                int verboseLogLength = _numGeneration/10;
                 for(int i=0; i<_numGeneration; i++)
                 {
                     // generate one generation of individuals
@@ -221,20 +229,24 @@ namespace DeckSearch.Search
                         _searchManager._searchAlgo.AddToSurrogateFeatureMap(individual);
                         // _searchManager.LogIndividual(individual);
                     }
-                    if ((i+1) % genLogLength == 0)
+                    if ((i+1) % _logLengthPerGen == 0)
+                    {
+                        // update surrogate feature map log
+                        _searchManager._searchAlgo.LogSurrogateFeatureMap();
+                    }
+
+                    if ((i+1) % verboseLogLength == 0)
                     {
                         Console.WriteLine("Generation {0} completed...", i+1);
                     }
                 }
 
+                // get elites to evaluate for real
                 var elites = _searchManager.GetAllElitesFromSurrogateMap();
 
-                // update surrogate feature map log
-                _searchManager._searchAlgo.LogSurrogateFeatureMap();
-
                 // log all elites for the current MAP-Elites run
-                string surrogate_log_file = System.IO.Path.Combine(_surrogateIndLogDir,
-                     String.Format("surrogate_individual_log{0}.csv",
+                string surrogate_log_file = System.IO.Path.Combine(_surrogateElitesLogDir,
+                     String.Format("surrogate_elites_log{0}.csv",
                                    this._numMAPElitesRun));
                 this._numMAPElitesRun += 1;
 
