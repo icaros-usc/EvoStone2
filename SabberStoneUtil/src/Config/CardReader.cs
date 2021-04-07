@@ -74,14 +74,14 @@ namespace SabberStoneUtil.Config
             foreach (Card c in allCards)
             {
                 if (c != Cards.FromName("Default")
-                    // && c.Implemented
+                    && c.Implemented
                     && c.Collectible
                     && c.Type != CardType.HERO
                     && c.Type != CardType.ENCHANTMENT
                     && c.Type != CardType.INVALID
                     && c.Type != CardType.HERO_POWER
                     && c.Type != CardType.TOKEN
-                    // && (c.Class == CardClass.NEUTRAL || c.Class == heroClass)
+                    && (c.Class == CardClass.NEUTRAL || c.Class == heroClass)
                     && !hs.Contains(c))
                 {
                     bool validSet = false;

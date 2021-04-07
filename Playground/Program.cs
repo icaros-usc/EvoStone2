@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
 using Nett;
 
@@ -25,8 +26,8 @@ namespace PlayGround
     {
         static void Main(string[] args)
         {
-            // var config = Toml.ReadFile<Configuration>(args[0]);
-            // CardReader.Init(config);
+            var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(args[0]);
+            CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
             // var model = new FullyConnectedNN();
             // var model = new DeepSetModel();
@@ -93,7 +94,11 @@ namespace PlayGround
 
             // test elu_layer on 3D input
 
-            DemoClassicCards(args);
+            // DemoClassicCards(args);
+
+            // DemoTimeElapsed();
+
+            DemoTFSaver();
         }
 
         static public void DemoClassicCards(string[] args)
@@ -149,6 +154,27 @@ namespace PlayGround
             var gameEval = new GameEvaluator(player, opponent);
             var result = gameEval.PlayGame(1);
             Console.WriteLine(result._healthDifference);
+        }
+
+        static void DemoTimeElapsed()
+        {
+            DateTime start = DateTime.UtcNow;
+            Thread.Sleep(2000);
+            DateTime end = DateTime.UtcNow;
+            TimeSpan timeDiff = end - start;
+            Console.WriteLine(Convert.ToInt32(timeDiff.TotalMilliseconds));
+        }
+
+        static void DemoTFSaver()
+        {
+            // save
+            var model = new FullyConnectedNN();
+            model.OfflineFit();
+
+            // // restore
+            // var model = new FullyConnectedNN();
+            // model.LoadModel("train_log/model.ckpt");
+            // model.OfflineFit();
         }
     }
 }

@@ -35,7 +35,15 @@ namespace DeckSearch.Search
 
         /// <summary>
         /// A dict from ID of the workers to individuals that are evaluated by the workers
+        /// </summary>
         public Dictionary<int, Individual> _individualStable;
+
+
+        /// <summary>
+        /// A dict from ID of the workers to start time of the worker job.
+        /// </summary>
+        public Dictionary<int, DateTime> _workerRunningTimes;
+
 
         /// <summary>
         /// Filename of the configuation file
@@ -120,6 +128,7 @@ namespace DeckSearch.Search
             _runningWorkers = new Queue<int>();
             _idleWorkers = new Queue<int>();
             _individualStable = new Dictionary<int, Individual>();
+            _workerRunningTimes = new Dictionary<int, DateTime>();
 
             // Grab the configuration info
             _configFilename = configFilename;
@@ -211,7 +220,17 @@ namespace DeckSearch.Search
         public void FindNewWorkers()
         {
             // Look for new workers.
-            string[] hailingFiles = Directory.GetFiles(ACTIVE_DIRECTORY);
+            string[] hailingFiles = new string[]{};
+            try
+            {
+                hailingFiles = Directory.GetFiles(ACTIVE_DIRECTORY);
+            } catch (System.IO.IOException e){
+                Console.WriteLine("IOException catched while reading hailing files. Will retry...");
+                Console.WriteLine("###########");
+                Console.WriteLine(e.StackTrace);
+                Console.WriteLine("###########");
+                return;
+            }
             foreach (string activeFile in hailingFiles)
             {
                 string prefix = ACTIVE_DIRECTORY + "worker-";
@@ -255,9 +274,14 @@ namespace DeckSearch.Search
             }
             int workerId = _idleWorkers.Dequeue();
             _runningWorkers.Enqueue(workerId);
-            Console.WriteLine("Starting worker: " + workerId);
             string inboxPath = string.Format(SearchManager._inboxTemplate, workerId);
             SendWork(inboxPath, choiceIndividual);
+            _workerRunningTimes[workerId] = DateTime.UtcNow;
+            String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            Console.WriteLine(String.Format(
+                "{0} | Worker start: {1}", timestamp, workerId));
+
             _individualStable[workerId] = choiceIndividual;
             return 1;
         }
@@ -295,7 +319,11 @@ namespace DeckSearch.Search
                 if (File.Exists(outboxPath) && !File.Exists(inboxPath))
                 {
                     // Wait for the file to finish being written.
-                    Console.WriteLine("Worker done: " + workerId);
+                    String timestamp =
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    Console.WriteLine(
+                        String.Format("{0} | Worker done: {1}",
+                            timestamp, workerId));
 
                     ReceiveResults(outboxPath, _individualStable[workerId]);
                     int originalID = _individualStable[workerId].ID;
@@ -316,10 +344,43 @@ namespace DeckSearch.Search
 
                     LogIndividual(_individualStable[workerId]);
                     _idleWorkers.Enqueue(workerId);
+                    _workerRunningTimes.Remove(workerId);
                 }
                 else
                 {
                     _runningWorkers.Enqueue(workerId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// If a worker does not return the job in 15 min, worker maybe dead. 
+        /// Resent the job to another worker.
+        /// </summary>
+        public void FindOvertimeWorkers()
+        {
+            var _workerRunningTimesCopy =
+                new Dictionary<int, DateTime>(_workerRunningTimes);
+            foreach(var item in _workerRunningTimesCopy)
+            {
+                int workerId = item.Key;
+                TimeSpan timeDiff = DateTime.UtcNow - item.Value;
+                int timeDiffMillisec = Convert.ToInt32(
+                    timeDiff.TotalMilliseconds);
+                if (timeDiffMillisec >= 15 * 60 * 1000)
+                {
+                    Console.WriteLine(String.Format("Worker {0} might be dead. Redispatching the job...", workerId));
+                    // attempt to resend the job
+                    // may fail for no idle workers
+                    if(Convert.ToBoolean(
+                        DispatchOneJobToWorker(_individualStable[workerId])))
+                    {
+                        Console.WriteLine("Redispatching succeeded.");
+                        _workerRunningTimes.Remove(workerId);
+                    }
+                    else{
+                        Console.WriteLine("Redispatching failed. Will retry.");
+                    }
                 }
             }
         }
