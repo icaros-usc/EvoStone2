@@ -38,8 +38,8 @@ if __name__ == '__main__':
     for log_dir, experiment_config in surr_qdplot:
         log_file = os.path.join(log_dir, "surrogate_elite_map_log.csv")
         legend = experiment_config["Search"]["Category"] + \
-           " " + experiment_config["Search"]["Type"] + \
-           " " + experiment_config["Surrogate"]["Type"]
+            " " + experiment_config["Search"]["Type"] + \
+            " " + experiment_config["Surrogate"]["Type"]
 
         with open(log_file, "r") as csvfile:
             rowData = list(csv.reader(csvfile, delimiter=','))
@@ -57,9 +57,9 @@ if __name__ == '__main__':
 
     ax.legend()
     ax.set(xlabel='Number of MAP-Elites run (s)',
-        ylabel='QD-score',
-        xlim=(0, len(map_fitnesses)-1),
-        ylim=(0, None))
+           ylabel='QD-score',
+           xlim=(0, len(map_fitnesses)-1),
+           ylim=(0, None))
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid()
     fig.savefig(image_title)

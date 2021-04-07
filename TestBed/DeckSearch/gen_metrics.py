@@ -30,6 +30,7 @@ ELITE_MAP_NAME = None  # type of feature map used
 METRICS_DIR = "metrics"
 HEAT_MAP_IMAGE_DIR = "heatmaps"
 QD_SCORE_DIR = "qd_score"
+LOSS_DIR = "surrogate_model_losses"
 
 # max and min value of fitness
 FITNESS_MIN = -30
@@ -202,13 +203,24 @@ def plot_qd_score(rowData, savePath):
            ylim=(0, None),
            title=IMAGE_TITLE)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-
     ax.grid()
-
     fig.savefig(savePath)
 
 
-def generateAll(logPath):
+def plot_loss(loss_log_file, savePath):
+    losses_pd = pd.read_csv(loss_log_file)
+    fig, ax = plt.subplots()
+    ax.plot(losses_pd["train_loss"], label="training")
+    ax.plot(losses_pd["test_loss"], label="testing")
+    ax.legend()
+    ax.set(xlabel="epochs",
+           ylabel="Loss")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.grid()
+    fig.savefig(savePath)
+
+
+def generateAll(logPath, loss_log_file):
     with open(logPath, 'r') as csvfile:
         # # Read all the data from the csv file
         allRows = list(csv.reader(csvfile, delimiter=','))
@@ -226,8 +238,12 @@ def generateAll(logPath):
             COL_INDEX) + '.png'
         createImage(allRows[-1], os.path.join(tmpImageFolder, imageFilename))
 
-        # # plot QD score
+        # plot QD score
         plot_qd_score(allRows, os.path.join(tmpQDScoreFolder, "qd-score.png"))
+
+        # plot training/testing loss of surrogate model
+        if loss_log_file is not None:
+            plot_loss(loss_log_file, os.path.join(tmpLossFolder, "loss.png"))
 
 
 def clearDir(dirToClear):
@@ -279,19 +295,31 @@ if __name__ == "__main__":
     tmpMetricsFolder = os.path.join(opt.log_dir, METRICS_DIR)
     tmpImageFolder = os.path.join(tmpMetricsFolder, HEAT_MAP_IMAGE_DIR)
     tmpQDScoreFolder = os.path.join(tmpMetricsFolder, QD_SCORE_DIR)
+    tmpLossFolder = os.path.join(tmpMetricsFolder, LOSS_DIR)
     if os.path.isdir(tmpMetricsFolder):
         shutil.rmtree(tmpMetricsFolder, ignore_errors=True)
     os.mkdir(tmpMetricsFolder)
     os.mkdir(tmpImageFolder)
     os.mkdir(tmpQDScoreFolder)
+    os.mkdir(tmpLossFolder)
 
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
         IMAGE_TITLE = experiment_config["Search"]["Category"] + \
             "_" + experiment_config["Search"]["Type"]
-        if hasattr(experiment_config, "Surrogate"):
+        # get loss file and image title
+        # loss file is only relevant for Surrogated Search
+        loss_log_file = None
+        if "Surrogate" in experiment_config:
             IMAGE_TITLE += experiment_config["Surrogate"]["Type"]
+            if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
+                loss_file_prefix = "fcnn"
+            elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
+                loss_file_prefix = "deepset"
+            loss_log_file = os.path.join(
+                opt.log_dir,
+                "surrogate_train_log",
+                f"{loss_file_prefix}_losses.csv",)
         FEATURE1_LABEL = features[ROW_INDEX]['Name']
         FEATURE2_LABEL = features[COL_INDEX]['Name']
-
-        generateAll(ELITE_MAP_LOG_FILE_NAME)
+        generateAll(ELITE_MAP_LOG_FILE_NAME, loss_log_file)
