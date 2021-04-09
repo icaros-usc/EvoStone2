@@ -19,22 +19,21 @@ namespace SurrogateModel.Surrogate
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
         /// <param name = "log_dir_exp">Path to the log directory.</param>
-        public DeepSetModel(int num_epoch = 10, int batch_size = 32, float step_size = 0.002f, int log_length = 10, string log_dir_exp = "train_log")
-            : base(num_epoch, batch_size, step_size, log_length)
+        public DeepSetModel(
+            int num_epoch = 10,
+            int batch_size = 32,
+            float step_size = 0.002f,
+            int log_length = 10,
+            string log_dir_exp = "train_log")
+            : base(num_epoch,
+                   batch_size,
+                   step_size,
+                   log_length,
+                   log_dir_exp)
         {
             graph = build_graph();
             sess = tf.Session(config);
             sess.run(init); // initialize the graph
-
-            string train_log_dir = System.IO.Path.Combine(log_dir_exp, "surrogate_train_log");
-            System.IO.Directory.CreateDirectory(train_log_dir);
-            MODEL_SAVE_POINT = System.IO.Path.Combine(
-                train_log_dir, "deepset.ckpt");
-
-            // create loss logger
-            string loss_logger_path = System.IO.Path.Combine(
-                train_log_dir, "deepset_losses.csv");
-            this.loss_logger = new LossLogger(loss_logger_path);
         }
 
         /// <summary>
@@ -109,7 +108,7 @@ namespace SurrogateModel.Surrogate
             tf_with(tf.variable_scope(name), delegate
             {
                 // lambda param
-                Tensor lambda_out = fc_layer(input, "Gamma", num_output);
+                Tensor lambda_out = fc_layer(input, "Lambda", num_output);
 
                 // lambda param
                 Tensor input_pooling = null;
@@ -125,7 +124,7 @@ namespace SurrogateModel.Surrogate
                 {
                     throw new System.ArgumentException("per_equi: Specified pooling type does not exist.");
                 }
-                Tensor gamma_out = fc_layer(input_pooling, "Lambda", num_output, bias: false);
+                Tensor gamma_out = fc_layer(input_pooling, "Gamma", num_output, bias: false);
                 output = lambda_out - gamma_out;
             });
             return output;

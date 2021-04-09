@@ -98,7 +98,9 @@ namespace PlayGround
 
             // DemoTimeElapsed();
 
-            DemoTFSaver();
+            // DemoTFSaver();
+
+            // DemoDeepSet();
         }
 
         static public void DemoClassicCards(string[] args)
@@ -175,6 +177,26 @@ namespace PlayGround
             // var model = new FullyConnectedNN();
             // model.LoadModel("train_log/model.ckpt");
             // model.OfflineFit();
+        }
+
+        // test per_equi_layer of DeepSet
+        static void DemoDeepSet()
+        {
+            var model = new DeepSetModel();
+            var sess = tf.Session();
+
+            // Tensor x = tf.placeholder(tf.float32, shape: (3, 2, 2));
+            // Tensor y = model.perm_equi_layer(x, "per_equi1", 4, "mean");
+            // sess.run(tf.global_variables_initializer());
+
+            // // shape (3, 2, 2)
+            // var a = new float[,,] { { { 1, 2 }, { 3, 4 } },
+            //                         { { 5, 6 }, { 7, 8 } },
+            //                         { { 9, 10 }, { 11, 12 } } };
+            // var a_np = np.array(a);
+            // var out_per_a = sess.run((y), (x, a_np));
+            // print(out_per_a);
+            // print(out_per_a.shape);
         }
     }
 }

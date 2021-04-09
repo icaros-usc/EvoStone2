@@ -307,7 +307,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Function to find DeckEvaluator instances that are done with simulation and receieve the result
         /// </summary>
-        public void FindDoneWorkers(bool storeBuffer = false, bool keepIndID = false)
+        public void FindDoneWorkers(bool storeBuffer = false, bool keepIndID = false, bool logFeatureMap = true)
         {
             // Look for individuals that are done.
             int numActiveWorkers = _runningWorkers.Count;
@@ -330,7 +330,12 @@ namespace DeckSearch.Search
                     ReceiveResults(outboxPath, _individualStable[workerId]);
                     int originalID = _individualStable[workerId].ID;
                     _searchAlgo.AddToFeatureMap(_individualStable[workerId]);
-                    _searchAlgo.LogFeatureMap();
+
+                    if (logFeatureMap)
+                    {
+                        _searchAlgo.LogFeatureMap();
+                    }
+
                     // For Surrogate Search we need to keep the ID.
                     if (keepIndID)
                     {

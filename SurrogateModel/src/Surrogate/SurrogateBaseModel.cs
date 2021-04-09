@@ -37,14 +37,16 @@ namespace SurrogateModel.Surrogate
 
         // others
         protected int epoch_idx = 0;
+        protected int num_train_idx = 0;
         protected DataLoader dataLoaderTrain = null;
         protected DataLoader dataLoaderTest = null;
         protected Tensorflow.Saver saver;
 
         // writers to record training/testing loss and model save point.
         protected LossLogger loss_logger;
-        protected string MODEL_SAVE_POINT = "train_log/model.ckpt";
+        // protected string MODEL_SAVE_POINT = "train_log/model.ckpt";
         protected const string OFFLINE_DATA_FILE = "resources/individual_log.csv";
+        protected string train_log_dir;
 
         /// <summary>
         /// Constructor of the Base model
@@ -52,7 +54,12 @@ namespace SurrogateModel.Surrogate
         /// <param name = "num_epoch">Number of epochs to run during training. Default to 10</param>
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
-        public SurrogateBaseModel(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f, int log_length = 10)
+        public SurrogateBaseModel(
+            int num_epoch = 10,
+            int batch_size = 64,
+            float step_size = 0.005f,
+            int log_length = 10,
+            string log_dir_exp = "train_log")
         {
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
@@ -66,6 +73,15 @@ namespace SurrogateModel.Surrogate
                 IntraOpParallelismThreads = 0,
                 InterOpParallelismThreads = 0,
             };
+
+            // create training log dir
+            train_log_dir = System.IO.Path.Combine(log_dir_exp, "surrogate_train_log");
+            System.IO.Directory.CreateDirectory(train_log_dir);
+
+            // create loss logger
+            string loss_logger_path = System.IO.Path.Combine(
+                train_log_dir, "model_losses.csv");
+            this.loss_logger = new LossLogger(loss_logger_path);
         }
 
         /// <summary>
@@ -210,14 +226,21 @@ namespace SurrogateModel.Surrogate
                                     (y_true, test_y)); // targets
                 print($"testing_loss = {testing_loss}\n");
 
-                // save the model
-                saver.save(sess, MODEL_SAVE_POINT);
-
                 // write the losses
                 // divide by 1 to convert
                 loss_logger.LogLoss(train_loss, testing_loss/1.0);
                 epoch_idx++;
             }
+
+            // save the model at the end of each training
+            string model_save_dir = System.IO.Path.Combine(
+                train_log_dir,
+                "surrogate_model",
+                String.Format("model{0}", num_train_idx));
+            System.IO.Directory.CreateDirectory(model_save_dir);
+            saver.save(sess, System.IO.Path.Combine(
+                model_save_dir, "model.ckpt"));
+            num_train_idx++;
         }
 
 
