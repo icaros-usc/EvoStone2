@@ -56,7 +56,7 @@ if __name__ == '__main__':
             ax.plot(map_fitnesses, label=legend)
 
     ax.legend()
-    ax.set(xlabel='Number of MAP-Elites run (s)',
+    ax.set(xlabel='Number of Evaluation(s)',
            ylabel='QD-score',
            xlim=(0, len(map_fitnesses)-1),
            ylim=(0, None))

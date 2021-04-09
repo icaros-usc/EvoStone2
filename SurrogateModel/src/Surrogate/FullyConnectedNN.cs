@@ -22,24 +22,21 @@ namespace SurrogateModel.Surrogate
         /// <param name = "batch_size">Batch size of data.</param>
         /// <param name = "step_size">The step size of adam optimizer.</param>
         /// <param name = "log_dir_exp">Path to the log directory.</param>
-        public FullyConnectedNN(int num_epoch = 10, int batch_size = 64, float step_size = 0.005f, int log_length = 1, string log_dir_exp = "train_log")
-            : base(num_epoch, batch_size, step_size, log_length)
+        public FullyConnectedNN(
+            int num_epoch = 10,
+            int batch_size = 64,
+            float step_size = 0.005f,
+            int log_length = 1,
+            string log_dir_exp = "train_log")
+            : base(num_epoch,
+                   batch_size,
+                   step_size,
+                   log_length,
+                   log_dir_exp)
         {
             graph = build_graph();
             sess = tf.Session(config);
             sess.run(init); // initialize the graph
-
-            // create log directory
-            string train_log_dir = System.IO.Path.Combine(log_dir_exp, "surrogate_train_log");
-            System.IO.Directory.CreateDirectory(train_log_dir);
-            MODEL_SAVE_POINT = System.IO.Path.Combine(
-                train_log_dir, "fcnn.ckpt");
-
-            // create loss logger
-            string loss_logger_path = System.IO.Path.Combine(
-                train_log_dir, "fcnn_losses.csv");
-            this.loss_logger = new LossLogger(loss_logger_path);
-
         }
 
         /// <summary>

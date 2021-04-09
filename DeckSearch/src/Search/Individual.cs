@@ -145,10 +145,7 @@ namespace DeckSearch.Search
                 for (int cnt = 0; cnt < _cardCounts[i]; cnt++)
                     cardList.Add(_cardSet[i].Name);
 
-            var cards = new string[cardList.Count];
-            for (int i = 0; i < cardList.Count; i++)
-                cards[i] = cardList[i];
-            return cards;
+            return cardList.ToArray();
         }
 
         public override string ToString()
@@ -159,7 +156,9 @@ namespace DeckSearch.Search
         // for hashing
         public override int GetHashCode()
         {
-            return ID;
+            List<string> cardIDs = _cardSet.Select(card => card.Id).ToList();
+            cardIDs.Sort();
+            return String.Join(", ", cardIDs.ToArray()).GetHashCode();
         }
 
         public override bool Equals(Object obj)

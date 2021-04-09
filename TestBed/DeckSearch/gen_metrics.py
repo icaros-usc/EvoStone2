@@ -137,7 +137,7 @@ def createImage(rowData, filename):
         numTicks = 5  # 11
         numTicksX = mapDims[ROW_INDEX] // numTicks + 1
         numTicksY = mapDims[COL_INDEX] // numTicks + 1
-        plt.figure(figsize=(3, 3))
+        plt.figure(figsize=(5, 5))
         g = sns.heatmap(
             fitnessMap,
             annot=False,
@@ -197,7 +197,7 @@ def plot_qd_score(rowData, savePath):
 
     fig, ax = plt.subplots()
     ax.plot(map_fitnesses)
-    ax.set(xlabel='Number of MAP-Elites run (s)',
+    ax.set(xlabel='Number of Evaluation(s)',
            ylabel='QD-score',
            xlim=(0, len(map_fitnesses)-1),
            ylim=(0, None),

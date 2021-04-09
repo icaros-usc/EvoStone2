@@ -229,17 +229,31 @@ namespace DeckSearch.Search
                         _searchManager._searchAlgo.AddToSurrogateFeatureMap(individual);
                         // _searchManager.LogIndividual(individual);
                     }
-                    if ((i+1) % _logLengthPerGen == 0)
-                    {
-                        // update surrogate feature map log
-                        _searchManager._searchAlgo.LogSurrogateFeatureMap();
-                    }
+                    // if ((i+1) % _logLengthPerGen == 0)
+                    // {
+                    //     while(true){
+                    //         try{
+                    //             // update surrogate feature map log
+                    //             _searchManager._searchAlgo.LogSurrogateFeatureMap();
+                    //             break;
+                    //         } catch(System.IO.IOException e) {
+                    //             Console.WriteLine("IOException catched while logging. Will retry...");
+                    //             Console.WriteLine("###########");
+                    //             Console.WriteLine(e.StackTrace);
+                    //             Console.WriteLine("###########");
+                    //             _searchManager._searchAlgo.LogSurrogateFeatureMap();
+                    //         }
+                    //     }
+                    // }
 
                     if ((i+1) % verboseLogLength == 0)
                     {
                         Console.WriteLine("Generation {0} completed...", i+1);
                     }
                 }
+
+                // log feature map
+                _searchManager._searchAlgo.LogSurrogateFeatureMap();
 
                 // get elites to evaluate for real
                 var elites = _searchManager.GetAllElitesFromSurrogateMap();
@@ -271,15 +285,21 @@ namespace DeckSearch.Search
                     }
 
                     // wait for workers to finish evaluating all elites
-                    _searchManager.FindDoneWorkers(storeBuffer: true, keepIndID: true);
+                    _searchManager.FindDoneWorkers(storeBuffer: true, keepIndID: true, logFeatureMap: false);
                     _searchManager.FindOvertimeWorkers();
                     Thread.Sleep(1000);
                 }
+                // only log the last feature map
+                _searchManager._searchAlgo.LogFeatureMap();
+
+                // some verbose info
                 Console.WriteLine("Finished evaluating {0} elites", _searchManager._numEvaledPerRun);
                 Console.WriteLine(
                     "Current number of training individuals: {0}",
                     _searchManager._individualsBuffer.Count);
-                _searchManager._numEvaledPerRun = 0; // reset run per run
+
+                // reset run per run
+                _searchManager._numEvaledPerRun = 0;
             }
 
             // Let the workers know that we are done.

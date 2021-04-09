@@ -81,11 +81,11 @@ namespace DeckSearch.Logging
             // change map to log
             this._map = newMap;
 
-			if (createNewLog) {
-				// delete old log and initialize new one
-				File.Delete(_logPath);
-				InitLog();
-			}
+			// if (createNewLog) {
+			// 	// delete old log and initialize new one
+			// 	File.Delete(_logPath);
+			// 	InitLog();
+			// }
         }
     }
 }
