@@ -23,7 +23,7 @@ FEATURE1_LABEL = None  # label of the first feature to plot
 FEATURE2_LABEL = None  # label of the second feature to plot
 IMAGE_TITLE = None  # title of the image, aka name of the algorithm
 STEP_SIZE = None  # step size of the animation to generate
-ELITE_MAP_LOG_FILE_NAME = None  # filepath to the elite map log file
+ELITE_MAP_LOG_FILE_NAMES = None  # filepath to the elite map log file
 NUM_FEATURES = None  # total number of features (bc) used in the experiment
 ROW_INDEX = None  # index of feature 1 to plot
 COL_INDEX = None  # index of feature 2 to plot
@@ -150,18 +150,18 @@ def createImage(rowData, filename):
             linecolor=(0, 0, 0),
         )
         ax.set(title=IMAGE_TITLE, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
-        ax.set_xticks([0.5,10.5,20.5,30.5,40.5])
-        ax.set_xticklabels([0,10,20,30,40], rotation = 0)
+        ax.set_xticks([0.5, 10.5, 20.5, 30.5, 40.5])
+        ax.set_xticklabels([0, 10, 20, 30, 40], rotation=0)
 
-        ax.set_yticks([0.5,10.5,20.5,30.5,40.5])
-        ax.set_yticklabels([0,10,20,30,40][::-1])
+        ax.set_yticks([0.5, 10.5, 20.5, 30.5, 40.5])
+        ax.set_yticklabels([0, 10, 20, 30, 40][::-1])
 
         fig.savefig(filename)
     plt.close('all')
 
 
 def createImages(stepSize, rows, filenameTemplate):
-    for endInterval in range(stepSize, len(rows), stepSize):
+    for endInterval in range(0, len(rows), stepSize):
         print('Generating : {}'.format(endInterval))
         filename = filenameTemplate.format(endInterval)
         createImage(rows[endInterval], filename)
@@ -223,30 +223,41 @@ def plot_loss(loss_log_file, savePath):
     fig.savefig(savePath)
 
 
-def generateAll(logPath, loss_log_file):
-    with open(logPath, 'r') as csvfile:
-        # # Read all the data from the csv file
-        allRows = list(csv.reader(csvfile, delimiter=','))
+def generateAll(elite_map_logs, loss_log_file):
+    for item in elite_map_logs:
+        archive_name, elite_map_log = item
+        print("Plotting", archive_name)
+        with open(elite_map_log, 'r') as csvfile:
+            # create directory
+            curr_archive_dir = os.path.join(tmpMetricsFolder, archive_name)
+            curr_heatmap_dir = os.path.join(curr_archive_dir, "heatmap")
+            curr_qd_dir = os.path.join(curr_archive_dir, "qd_score")
+            os.mkdir(curr_archive_dir)
+            os.mkdir(curr_heatmap_dir)
+            os.mkdir(curr_qd_dir)
 
-        # generate the movie
-        print(tmpImageFolder)
-        template = os.path.join(tmpImageFolder, 'grid_{:05d}.png')
-        createImages(STEP_SIZE, allRows[1:], template)
-        movieFilename = 'fitness_' + str(ROW_INDEX) + '_' + str(
-            COL_INDEX) + '.avi'
-        createMovie(tmpImageFolder, movieFilename)
+            # # Read all the data from the csv file
+            allRows = list(csv.reader(csvfile, delimiter=','))
 
-        # Create the final image we need
-        imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
-            COL_INDEX) + '.png'
-        createImage(allRows[-1], os.path.join(tmpImageFolder, imageFilename))
+            # generate the movie
+            template = os.path.join(curr_heatmap_dir, 'grid_{:05d}.png')
+            createImages(STEP_SIZE, allRows[1:], template)
+            movieFilename = 'fitness_' + str(ROW_INDEX) + '_' + str(
+                COL_INDEX) + '.avi'
+            createMovie(curr_heatmap_dir, movieFilename)
 
-        # plot QD score
-        plot_qd_score(allRows, os.path.join(tmpQDScoreFolder, "qd-score.png"))
+            # Create the final image we need
+            imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
+                COL_INDEX) + '.png'
+            createImage(allRows[-1],
+                        os.path.join(curr_heatmap_dir, imageFilename))
 
-        # plot training/testing loss of surrogate model
-        if loss_log_file is not None:
-            plot_loss(loss_log_file, os.path.join(tmpLossFolder, "loss.png"))
+            # plot QD score
+            plot_qd_score(allRows, os.path.join(curr_qd_dir, "qd-score.png"))
+
+    # plot training/testing loss of surrogate model
+    if loss_log_file is not None:
+        plot_loss(loss_log_file, os.path.join(tmpLossFolder, "loss.png"))
 
 
 def clearDir(dirToClear):
@@ -277,11 +288,6 @@ if __name__ == "__main__":
                         help='step size of the animation to generate',
                         required=False,
                         default=1)
-    parser.add_argument(
-        '-m',
-        '--map',
-        help='generate heatmap for elite map or surrogate elite map',
-        default='surrogate_elite_map_log.csv')
     opt = parser.parse_args()
 
     # read in the name of the algorithm and features to plot
@@ -292,34 +298,39 @@ if __name__ == "__main__":
 
     # read in parameters
     NUM_FEATURES = len(features)
-    map_to_gen = opt.map
-    ELITE_MAP_LOG_FILE_NAME = os.path.join(opt.log_dir, map_to_gen)
 
     # Clear out the previous images
     tmpMetricsFolder = os.path.join(opt.log_dir, METRICS_DIR)
-    tmpImageFolder = os.path.join(tmpMetricsFolder, HEAT_MAP_IMAGE_DIR)
-    tmpQDScoreFolder = os.path.join(tmpMetricsFolder, QD_SCORE_DIR)
     tmpLossFolder = os.path.join(tmpMetricsFolder, LOSS_DIR)
     if os.path.isdir(tmpMetricsFolder):
         shutil.rmtree(tmpMetricsFolder, ignore_errors=True)
     os.mkdir(tmpMetricsFolder)
-    os.mkdir(tmpImageFolder)
-    os.mkdir(tmpQDScoreFolder)
     os.mkdir(tmpLossFolder)
 
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
         IMAGE_TITLE = experiment_config["Search"]["Category"] + \
-            "_" + experiment_config["Search"]["Type"]
+            " " + experiment_config["Search"]["Type"]
         # get image title
-        loss_log_file = None
         if "Surrogate" in experiment_config:
-            IMAGE_TITLE += experiment_config["Surrogate"]["Type"]
+            IMAGE_TITLE += " " + experiment_config["Surrogate"]["Type"]
             loss_log_file = os.path.join(
                 opt.log_dir,
                 "surrogate_train_log",
                 "model_losses.csv",
             )
+            ELITE_MAP_LOG_FILE_NAMES = [
+                ("surrogate_archive",
+                 os.path.join(opt.log_dir, "surrogate_elite_map_log.csv")),
+                ("elites_archive",
+                 os.path.join(opt.log_dir, "elite_map_log.csv"))
+            ]
+        else:
+            loss_log_file = None
+            ELITE_MAP_LOG_FILE_NAMES = [("elites_archive",
+                                         os.path.join(opt.log_dir,
+                                                      "elite_map_log.csv"))]
+
         FEATURE1_LABEL = features[ROW_INDEX]['Name']
         FEATURE2_LABEL = features[COL_INDEX]['Name']
-        generateAll(ELITE_MAP_LOG_FILE_NAME, loss_log_file)
+        generateAll(ELITE_MAP_LOG_FILE_NAMES, loss_log_file)
