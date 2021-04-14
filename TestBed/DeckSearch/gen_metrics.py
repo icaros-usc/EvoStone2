@@ -11,6 +11,8 @@ import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib as mpl
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.ticker import MaxNLocator
 
 matplotlib.use("agg")
@@ -109,7 +111,7 @@ def createRecordMap(dataLabels, recordList):
     return dataDict
 
 
-def createImage(rowData, filename):
+def createImage(rowData, filename, archive_name):
     mapDims = tuple(map(int, rowData[0].split('x')))
     mapData = rowData[1:]
 
@@ -134,37 +136,52 @@ def createImage(rowData, filename):
                                    columns=dataLabels[0],
                                    values='Fitness')
     fitnessMap.sort_index(level=1, ascending=False, inplace=True)
-    # sns.color_palette("flare", as_cmap=True)
-    with sns.axes_style("white"):
-        fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-        sns.heatmap(
-            fitnessMap,
-            annot=False,
-            cmap=COLORMAP,
-            fmt=".0f",
-            square=True,
-            ax=ax,
-            vmin=FITNESS_MIN,
-            vmax=FITNESS_MAX,
-            linewidths=0.005,
-            linecolor=(0, 0, 0),
-        )
-        ax.set(title=IMAGE_TITLE, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
-        ax.set_xticks([0.5, 10.5, 20.5, 30.5, 40.5])
-        ax.set_xticklabels([0, 10, 20, 30, 40], rotation=0)
 
-        ax.set_yticks([0.5, 10.5, 20.5, 30.5, 40.5])
-        ax.set_yticklabels([0, 10, 20, 30, 40][::-1])
+    # make the plot
+    fig, ax = plt.subplots(1, 1, figsize=(8, 8))
+    ax_divider = make_axes_locatable(ax)
+    cbar_ax = ax_divider.append_axes("right", size="7%", pad="10%")
+    sns.heatmap(
+        fitnessMap,
+        annot=False,
+        cmap=COLORMAP,
+        fmt=".0f",
+        square=True,
+        ax=ax,
+        vmin=FITNESS_MIN,
+        vmax=FITNESS_MAX,
+        cbar_ax=cbar_ax,
+        linewidths=0.003,
+        rasterized=False,
+    )
 
-        fig.savefig(filename)
+    if archive_name == "surrogate_archive":
+        title = IMAGE_TITLE + " Surrogate Elite Archive"
+    elif archive_name == "elites_archive":
+        title = IMAGE_TITLE + " Elite Archive"
+    else:
+        raise ValueError("Invalid archive name")
+
+    ax.set(title=title, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
+
+    ax.set_xticks([0, 10, 20, 30, 40])
+    ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
+
+    ax.set_yticks([0, 20, 40])
+    ax.set_yticklabels([1, 4, 7][::-1])
+
+    set_spines_visible(ax)
+    ax.figure.tight_layout()
+
+    fig.savefig(filename)
     plt.close('all')
 
 
-def createImages(stepSize, rows, filenameTemplate):
+def createImages(stepSize, rows, filenameTemplate, archive_name):
     for endInterval in range(0, len(rows), stepSize):
         print('Generating : {}'.format(endInterval))
         filename = filenameTemplate.format(endInterval)
-        createImage(rows[endInterval], filename)
+        createImage(rows[endInterval], filename, archive_name)
 
 
 def createMovie(folderPath, filename):
@@ -188,7 +205,7 @@ def createMovie(folderPath, filename):
     video.release()
 
 
-def plot_qd_score(rowData, savePath):
+def plot_qd_score(rowData, savePath, archive_name):
     map_fitnesses = []
     for mapData in rowData[1:]:
         map_fitness = 0
@@ -201,11 +218,21 @@ def plot_qd_score(rowData, savePath):
 
     fig, ax = plt.subplots()
     ax.plot(map_fitnesses)
-    ax.set(xlabel='Number of MAP-Elites Run(s)',
+
+    if archive_name == "surrogate_archive":
+        xlabel = "Number of MAP-Elites Run(s)"
+        title = IMAGE_TITLE + " Surrogate Elite Archive"
+    elif archive_name == "elites_archive":
+        xlabel = "Number of Evaluation(s)"
+        title = IMAGE_TITLE + " Elite Archive"
+    else:
+        raise ValueError("Invalid archive name")
+
+    ax.set(xlabel=xlabel,
            ylabel='QD-score',
            xlim=(0, len(map_fitnesses) - 1),
            ylim=(0, None),
-           title=IMAGE_TITLE)
+           title=title)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid()
     fig.savefig(savePath)
@@ -226,6 +253,13 @@ def plot_loss(loss_log_file, savePath):
 def generateAll(elite_map_logs, loss_log_file):
     for item in elite_map_logs:
         archive_name, elite_map_log = item
+        if archive_name == "surrogate_archive":
+            step_size = 1
+        elif archive_name == "elites_archive":
+            step_size = STEP_SIZE
+        else:
+            raise ValueError("Invalid archive name")
+
         print("Plotting", archive_name)
         with open(elite_map_log, 'r') as csvfile:
             # create directory
@@ -241,7 +275,7 @@ def generateAll(elite_map_logs, loss_log_file):
 
             # generate the movie
             template = os.path.join(curr_heatmap_dir, 'grid_{:05d}.png')
-            createImages(STEP_SIZE, allRows[1:], template)
+            createImages(step_size, allRows[1:], template, archive_name)
             movieFilename = 'fitness_' + str(ROW_INDEX) + '_' + str(
                 COL_INDEX) + '.avi'
             createMovie(curr_heatmap_dir, movieFilename)
@@ -250,10 +284,13 @@ def generateAll(elite_map_logs, loss_log_file):
             imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
                 COL_INDEX) + '.png'
             createImage(allRows[-1],
-                        os.path.join(curr_heatmap_dir, imageFilename))
+                        os.path.join(curr_heatmap_dir, imageFilename),
+                        archive_name)
 
             # plot QD score
-            plot_qd_score(allRows, os.path.join(curr_qd_dir, "qd-score.png"))
+            plot_qd_score(allRows,
+                          os.path.join(curr_qd_dir, "qd-score.png"),
+                          archive_name)
 
     # plot training/testing loss of surrogate model
     if loss_log_file is not None:
@@ -265,6 +302,11 @@ def clearDir(dirToClear):
         os.mkdir(dirToClear)
     for curFile in glob.glob(dirToClear + '/*'):
         os.remove(curFile)
+
+
+def set_spines_visible(ax: mpl.axis.Axis):
+    for pos in ["top", "right", "bottom", "left"]:
+        ax.spines[pos].set_visible(True)
 
 
 if __name__ == "__main__":
