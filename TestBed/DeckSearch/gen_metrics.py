@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.ticker import MaxNLocator
+
 matplotlib.use("agg")
 matplotlib.rcParams.update({'font.size': 12})
 
@@ -31,6 +32,7 @@ METRICS_DIR = "metrics"
 HEAT_MAP_IMAGE_DIR = "heatmaps"
 QD_SCORE_DIR = "qd_score"
 LOSS_DIR = "surrogate_model_losses"
+COLORMAP = "viridis"  # Colormap for everything.
 
 # max and min value of fitness
 FITNESS_MIN = -30
@@ -75,9 +77,9 @@ def createRecordList(mapData, mapDims):
         cellCol = indexes[COL_INDEX]
         nonFeatureIdx = NUM_FEATURES
         cellSize = int(splitedData[nonFeatureIdx])
-        indID = int(splitedData[nonFeatureIdx+1])
-        winCount = int(splitedData[nonFeatureIdx+2])
-        fitness = float(splitedData[nonFeatureIdx+3])
+        indID = int(splitedData[nonFeatureIdx + 1])
+        winCount = int(splitedData[nonFeatureIdx + 2])
+        fitness = float(splitedData[nonFeatureIdx + 3])
         f1 = float(splitedData[nonFeatureIdx + 4 + ROW_INDEX])
         f2 = float(splitedData[nonFeatureIdx + 4 + COL_INDEX])
 
@@ -132,26 +134,28 @@ def createImage(rowData, filename):
                                    columns=dataLabels[0],
                                    values='Fitness')
     fitnessMap.sort_index(level=1, ascending=False, inplace=True)
-    sns.color_palette("flare", as_cmap=True)
+    # sns.color_palette("flare", as_cmap=True)
     with sns.axes_style("white"):
-        numTicks = 5  # 11
-        numTicksX = mapDims[ROW_INDEX] // numTicks + 1
-        numTicksY = mapDims[COL_INDEX] // numTicks + 1
-        plt.figure(figsize=(5, 5))
-        g = sns.heatmap(
+        fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+        sns.heatmap(
             fitnessMap,
             annot=False,
-            cmap="flare_r",
+            cmap=COLORMAP,
             fmt=".0f",
-            xticklabels=numTicksX,
-            yticklabels=numTicksY,
+            square=True,
+            ax=ax,
             vmin=FITNESS_MIN,
             vmax=FITNESS_MAX,
+            linewidths=0.005,
+            linecolor=(0, 0, 0),
         )
-        fig = g.get_figure()
-        # plt.axis('off')
-        g.set(title=IMAGE_TITLE, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
-        plt.tight_layout()
+        ax.set(title=IMAGE_TITLE, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
+        ax.set_xticks([0.5,10.5,20.5,30.5,40.5])
+        ax.set_xticklabels([0,10,20,30,40], rotation = 0)
+
+        ax.set_yticks([0.5,10.5,20.5,30.5,40.5])
+        ax.set_yticklabels([0,10,20,30,40][::-1])
+
         fig.savefig(filename)
     plt.close('all')
 
@@ -191,7 +195,7 @@ def plot_qd_score(rowData, savePath):
         for cellData in mapData[1:]:
             splitedData = cellData.split(":")
             nonFeatureIdx = NUM_FEATURES
-            fitness = float(splitedData[nonFeatureIdx+3])
+            fitness = float(splitedData[nonFeatureIdx + 3])
             map_fitness += fitness
         map_fitnesses.append(map_fitness)
 
@@ -199,7 +203,7 @@ def plot_qd_score(rowData, savePath):
     ax.plot(map_fitnesses)
     ax.set(xlabel='Number of Evaluation(s)',
            ylabel='QD-score',
-           xlim=(0, len(map_fitnesses)-1),
+           xlim=(0, len(map_fitnesses) - 1),
            ylim=(0, None),
            title=IMAGE_TITLE)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -213,8 +217,7 @@ def plot_loss(loss_log_file, savePath):
     ax.plot(losses_pd["train_loss"], label="training")
     ax.plot(losses_pd["test_loss"], label="testing")
     ax.legend()
-    ax.set(xlabel="epochs",
-           ylabel="Loss")
+    ax.set(xlabel="epochs", ylabel="Loss")
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid()
     fig.savefig(savePath)
@@ -273,11 +276,12 @@ if __name__ == "__main__":
                         '--step_size',
                         help='step size of the animation to generate',
                         required=False,
-                        default=10)
-    parser.add_argument('-m',
-                        '--map',
-                        help='generate heatmap for elite map or surrogate elite map',
-                        default='surrogate_elite_map_log.csv')
+                        default=1)
+    parser.add_argument(
+        '-m',
+        '--map',
+        help='generate heatmap for elite map or surrogate elite map',
+        default='surrogate_elite_map_log.csv')
     opt = parser.parse_args()
 
     # read in the name of the algorithm and features to plot
@@ -307,19 +311,15 @@ if __name__ == "__main__":
         STEP_SIZE = int(opt.step_size)
         IMAGE_TITLE = experiment_config["Search"]["Category"] + \
             "_" + experiment_config["Search"]["Type"]
-        # get loss file and image title
-        # loss file is only relevant for Surrogated Search
+        # get image title
         loss_log_file = None
         if "Surrogate" in experiment_config:
             IMAGE_TITLE += experiment_config["Surrogate"]["Type"]
-            if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
-                loss_file_prefix = "fcnn"
-            elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
-                loss_file_prefix = "deepset"
             loss_log_file = os.path.join(
                 opt.log_dir,
                 "surrogate_train_log",
-                f"{loss_file_prefix}_losses.csv",)
+                "model_losses.csv",
+            )
         FEATURE1_LABEL = features[ROW_INDEX]['Name']
         FEATURE2_LABEL = features[COL_INDEX]['Name']
         generateAll(ELITE_MAP_LOG_FILE_NAME, loss_log_file)

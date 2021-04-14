@@ -1,6 +1,7 @@
 import argparse
 import os
 import csv
+import numpy as np
 import matplotlib.pyplot as plt
 from gen_metrics import read_in_surr_config
 from matplotlib.ticker import MaxNLocator
@@ -24,7 +25,6 @@ if __name__ == '__main__':
         experiment_config, elite_map_config = read_in_surr_config(
             os.path.join(log_dir, "experiment_config.tml"))
         search_category = experiment_config["Search"]["Category"]
-        print(search_category)
         # ELITE_MAP_LOG_FILE_NAME = os.path.join(log_dir, map_to_gen)
         if search_category == "Distributed":
             dist_qdplot.append((log_dir, experiment_config))
@@ -34,7 +34,8 @@ if __name__ == '__main__':
     # plot QD score of surrogate searchs alltogether
     image_title = "Surrogated Search QD-score"
     legends = []
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(7,5))
+    max_len = -np.inf
     for log_dir, experiment_config in surr_qdplot:
         log_file = os.path.join(log_dir, "surrogate_elite_map_log.csv")
         legend = experiment_config["Search"]["Category"] + \
@@ -54,11 +55,12 @@ if __name__ == '__main__':
                 map_fitnesses.append(map_fitness)
             legends.append(legend)
             ax.plot(map_fitnesses, label=legend)
+            max_len = max(max_len, len(map_fitnesses))
 
     ax.legend()
     ax.set(xlabel='Number of Evaluation(s)',
            ylabel='QD-score',
-           xlim=(0, len(map_fitnesses)-1),
+           xlim=(0, max_len-1),
            ylim=(0, None))
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid()
