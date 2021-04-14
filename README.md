@@ -67,7 +67,7 @@ Then, run a python script to clean up left-over files from previous experiments,
 python setup_hpc.py
 ```
 
-Finally, run the following the schedule the experiment:
+Finally, run the following to schedule the experiment:
 ```
 sh slurm/run_slurm.sh <config_file> <num_evaluators>
 ```
