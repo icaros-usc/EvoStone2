@@ -75,7 +75,10 @@ namespace DeckSearch.Search
       int NumIndividualsEvaled() { return 0; }
 
 
-      void ClearMaps() { }
+      void ClearSurrogateMap() { }
+
+
+      int InitialPopulation() { return 0; }
 
    }
 }

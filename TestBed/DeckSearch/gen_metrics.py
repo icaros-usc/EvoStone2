@@ -201,7 +201,7 @@ def plot_qd_score(rowData, savePath):
 
     fig, ax = plt.subplots()
     ax.plot(map_fitnesses)
-    ax.set(xlabel='Number of Evaluation(s)',
+    ax.set(xlabel='Number of MAP-Elites Run(s)',
            ylabel='QD-score',
            xlim=(0, len(map_fitnesses) - 1),
            ylim=(0, None),

@@ -71,6 +71,7 @@ namespace DeckSearch.Search
             _searchManager = new SearchManager(config, configFilename);
             _numGeneration = config.Search.NumGeneration;
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
+            _numSurrogateEvals = _searchManager._searchAlgo.InitialPopulation();
             _logLengthPerGen = config.Search.LogLengthPerGen;
             _surrogateElitesLogDir = System.IO.Path.Combine(
                 _searchManager.log_dir_exp, "surrogate_elites");
@@ -197,13 +198,32 @@ namespace DeckSearch.Search
             _searchManager.AnnounceWorkersStart();
             Console.WriteLine("Begin Surrogated Search...");
 
+            // generate initial population
+            while(!_searchManager._searchAlgo.InitialPopulationEvaluated())
+            {
+                // dispatch jobs until the number reaches
+                // initial population size
+                _searchManager.FindNewWorkers();
+
+                if(!_searchManager._searchAlgo.InitialPopulationDispatched())
+                {
+                    _searchManager.DispatchJobsToWorkers();
+                }
+
+                // wait for workers to finish evaluating initial population
+                _searchManager.FindDoneWorkers(
+                    storeBuffer: true,
+                    logFeatureMap: true);
+                Thread.Sleep(1000);
+            }
+
             while(_searchManager._searchAlgo.IsRunning())
             {
                 // back prop using individuals in the buffer
                 BackProp(_searchManager._individualsBuffer.ToList());
 
-                // clear the maps
-                _searchManager._searchAlgo.ClearMaps();
+                // clear the surrogate map
+                _searchManager._searchAlgo.ClearSurrogateMap();
 
                 // run MAP-Elites on surrogate
                 Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
@@ -211,6 +231,7 @@ namespace DeckSearch.Search
 
                 // verbose exactly 10 times
                 int verboseLogLength = _numGeneration/10;
+
                 for(int i=0; i<_numGeneration; i++)
                 {
                     // generate one generation of individuals
@@ -285,12 +306,13 @@ namespace DeckSearch.Search
                     }
 
                     // wait for workers to finish evaluating all elites
-                    _searchManager.FindDoneWorkers(storeBuffer: true, keepIndID: true, logFeatureMap: false);
+                    _searchManager.FindDoneWorkers(
+                        storeBuffer: true,
+                        keepIndID: true,
+                        logFeatureMap: true);
                     _searchManager.FindOvertimeWorkers();
                     Thread.Sleep(1000);
                 }
-                // only log the last feature map
-                _searchManager._searchAlgo.LogFeatureMap();
 
                 // some verbose info
                 Console.WriteLine("Finished evaluating {0} elites", _searchManager._numEvaledPerRun);

@@ -137,6 +137,12 @@ namespace DeckSearch.Search
 
             // set up log directory
             String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            log_dir_base += "_" + config.Search.Category +
+                            "_" + config.Search.Type;
+            if(config.Surrogate != null)
+            {
+                log_dir_base += "_" + config.Surrogate.Type;
+            }
             String log_dir_exp = System.IO.Path.Combine(LOG_DIRECTORY, log_dir_base);
             this.log_dir_exp = log_dir_exp;
             System.IO.Directory.CreateDirectory(log_dir_exp);

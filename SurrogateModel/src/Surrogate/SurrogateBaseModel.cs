@@ -27,7 +27,7 @@ namespace SurrogateModel.Surrogate
         protected Operation train_op = null;
         protected Operation init = null;
         protected Tensor loss_op = null;
-        protected Tensor n_samples; // Remember number of batches for each iteration to calculate mse error
+        protected Tensor n_samples; // number of samples for each batch to calculate mse error
 
         // hyperparams
         protected int num_epoch;

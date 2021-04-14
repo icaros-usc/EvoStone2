@@ -156,9 +156,7 @@ namespace DeckSearch.Search
         // for hashing
         public override int GetHashCode()
         {
-            List<string> cardIDs = _cardSet.Select(card => card.Id).ToList();
-            cardIDs.Sort();
-            return String.Join(", ", cardIDs.ToArray()).GetHashCode();
+            return this.ToString().GetHashCode();
         }
 
         public override bool Equals(Object obj)
