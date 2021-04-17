@@ -101,6 +101,10 @@ namespace PlayGround
             // DemoTFSaver();
 
             // DemoDeepSet();
+
+            // Demo2DSlicing();
+
+            DemoGradient();
         }
 
         static public void DemoClassicCards(string[] args)
@@ -197,6 +201,29 @@ namespace PlayGround
             // var out_per_a = sess.run((y), (x, a_np));
             // print(out_per_a);
             // print(out_per_a.shape);
+        }
+
+        static void Demo2DSlicing()
+        {
+            var a = np.random.rand(new int[] {2, 2});
+            print(a);
+            print(a[Slice.All, Slice.Index(1)]);
+        }
+
+        static void DemoGradient()
+        {
+            var model = new DeepSetModel();
+            var sess = tf.Session();
+
+            var x_input = np.random.rand(new int[] {2, 30, 178});
+
+            // print(model.input);
+            // print(model.model_output);
+
+            var grad_func = tf.gradients(model.input, model.model_output);
+            var gradients = sess.run(grad_func, (model.input, x_input));
+
+            // print(gradients);
         }
     }
 }

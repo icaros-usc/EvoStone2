@@ -21,9 +21,9 @@ namespace SurrogateModel.Surrogate
 
         // Tensors and Operations to be evaluated in the graph
         protected Session sess;
-        protected Tensor input = null;
+        public Tensor input {protected set; get;} = null;
         protected Tensor y_true = null;
-        protected Tensor model_output = null;
+        public Tensor model_output {protected set; get;} = null;
         protected Operation train_op = null;
         protected Operation init = null;
         protected Tensor loss_op = null;
@@ -91,12 +91,14 @@ namespace SurrogateModel.Surrogate
         {
             // if there is only one data point, use it both
             // for training and testing
-            if (X.shape[0] <= 1){
+            if (X.shape[0] <= 1)
+            {
                 dataLoaderTrain = new DataLoader(X, y, 1, shuffle: false);
                 dataLoaderTest = new DataLoader(X, y, 1, shuffle: false);
             }
 
-            else{
+            else
+            {
                 // use first 90% of data for training
                 int train_test_split = (int)(X.shape[0] * 0.9);
 
@@ -125,11 +127,11 @@ namespace SurrogateModel.Surrogate
         {
             Tensor output = null;
             int input_rank = input.shape.Length;
-            int num_input = input.shape[input_rank-1];
+            int num_input = input.shape[input_rank - 1];
 
             // obtain real output shape [-1, *, num_output]
             int[] real_output_shape = input.shape;
-            real_output_shape[input_rank-1] = num_output;
+            real_output_shape[input_rank - 1] = num_output;
 
             tf_with(tf.variable_scope(name), delegate
             {
@@ -144,12 +146,12 @@ namespace SurrogateModel.Surrogate
                     b = tf.get_variable("b", shape: num_output, initializer: tf.constant_initializer(0));
                 }
 
-                if(input_rank > 2)
+                if (input_rank > 2)
                 {
-                    input = tf.reshape(input, new int[]{-1, num_input});
+                    input = tf.reshape(input, new int[] { -1, num_input });
                 }
                 output = tf.matmul(input, w) + b;
-                if(input_rank > 2)
+                if (input_rank > 2)
                 {
                     output = tf.reshape(output, real_output_shape);
                 }
@@ -166,7 +168,8 @@ namespace SurrogateModel.Surrogate
         protected Tensor elu_layer(Tensor input, String name, double alpha = 1.0)
         {
             Tensor output = null;
-            tf_with(tf.variable_scope(name), delegate{
+            tf_with(tf.variable_scope(name), delegate
+            {
                 var mask_greater = tf.cast(tf.greater_equal(input, 0), tf.float32) * input;
                 var mask_smaller = tf.cast(tf.less(input, 0), tf.float32) * input;
                 var middle = alpha * (tf.exp(mask_smaller) - 1);
@@ -190,7 +193,7 @@ namespace SurrogateModel.Surrogate
             return _loss_op;
         }
 
-                /// <summary>
+        /// <summary>
         /// Traning loop of the model
         /// </summary>
         protected void train()
@@ -200,9 +203,9 @@ namespace SurrogateModel.Surrogate
             saver = tf.train.Saver();
 
             Console.WriteLine("Start training");
-            for(int i=0; i<num_epoch; i++)
+            for (int i = 0; i < num_epoch; i++)
             {
-                for(int j=0; j<dataLoaderTrain.num_batch; j++)
+                for (int j = 0; j < dataLoaderTrain.num_batch; j++)
                 {
                     var (x_input, y_input) = dataLoaderTrain.Sample();
                     var (_, training_loss) = sess.run((train_op, loss_op), // operations
@@ -213,7 +216,7 @@ namespace SurrogateModel.Surrogate
                 }
 
                 // do validation at the end of every epoch
-                double train_loss = running_loss/dataLoaderTrain.num_batch;
+                double train_loss = running_loss / dataLoaderTrain.num_batch;
                 print($"epoch{epoch_idx}:");
                 print($"training_loss = {train_loss}");
                 running_loss = 0;
@@ -228,7 +231,7 @@ namespace SurrogateModel.Surrogate
 
                 // write the losses
                 // divide by 1 to convert
-                loss_logger.LogLoss(train_loss, testing_loss/1.0);
+                loss_logger.LogLoss(train_loss, testing_loss / 1.0);
                 epoch_idx++;
             }
 
@@ -257,11 +260,11 @@ namespace SurrogateModel.Surrogate
             // convert result to double array
             double[,] result;
             result = new double[output.shape[0], output.shape[1]];
-            for(int i=0; i<output.shape[0]; i++)
+            for (int i = 0; i < output.shape[0]; i++)
             {
-                for(int j=0; j<output.shape[1]; j++)
+                for (int j = 0; j < output.shape[1]; j++)
                 {
-                    result[i,j] = (double)(float)output[i,j]; // need to cast twice because the model use float
+                    result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
                 }
             }
             return result;
@@ -274,6 +277,16 @@ namespace SurrogateModel.Surrogate
         {
             saver = tf.train.Saver();
             saver.restore(sess, fromPath);
+        }
+
+
+        public NDArray Forward(Tensor x_input)
+        {
+            // get the model output
+            var output = sess.run((model_output), // operations
+                                (n_samples, (int)x_input.shape[0]), // batch size
+                                (input, x_input)); // features
+            return output;
         }
 
         /// <summary>
