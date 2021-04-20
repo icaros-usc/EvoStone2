@@ -183,6 +183,20 @@ namespace SabberStoneUtil.DataProcessing
             WriteDeckEncoding(cardsEncoding, outPath);
         }
 
+        public static List<string[]> ReadElitesLogAsList(String elitesLogPath)
+        {
+            List<string[]> rowData = new List<string[]>();
+            var elitesLogFile = File.ReadAllLines(elitesLogPath);
+            var elitesLogList = new List<string>(elitesLogFile);
+
+            foreach (var rowMapData in elitesLogList)
+            {
+                var mapData = rowMapData.Split(',');
+                rowData.Add(mapData);
+            }
+            return rowData;
+        }
+
         // ***************** End I/O Functions *******************
 
         // ************ Preprocess Card/Deck Encoding from Data **************
