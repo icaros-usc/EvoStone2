@@ -14,6 +14,8 @@ using SabberStoneUtil.Config;
 using SabberStoneUtil.Decks;
 using SabberStoneUtil.Messaging;
 
+using DeckSearch.Search;
+
 using DeckEvaluator.Config;
 using DeckEvaluator.Evaluation;
 
@@ -42,6 +44,56 @@ namespace Analysis
                 return -1;
         }
 
+        public static string getModelPath(string expLogDir)
+        {
+            string modelDir = System.IO.Path.Combine(
+                expLogDir,
+                "surrogate_train_log",
+                "surrogate_model"
+            );
+            int idx = 0;
+            string modelSavePath = System.IO.Path.Combine(
+                modelDir,
+                String.Format("model{0}", idx)
+            );
+            while (System.IO.Directory.Exists(modelSavePath))
+            {
+                idx += 1;
+                modelSavePath = System.IO.Path.Combine(
+                    modelDir,
+                    String.Format("model{0}", idx)
+                );
+            }
+
+            modelSavePath = System.IO.Path.Combine(
+                modelDir,
+                String.Format("model{0}", idx - 1),
+                "model.ckpt"
+            );
+
+            return modelSavePath;
+        }
+
+        public static void EvaluateOnSurrogate(
+            List<LogIndividual> logIndividuals,
+            SurrogateBaseModel model,
+            string currSurrIndLogDir,
+            int idx)
+        {
+            var result = model.Predict(logIndividuals);
+
+            // store result
+            var stats = new OverallStatistics();
+            stats.AverageHealthDifference = result[0, 0];
+            stats.NumTurns = result[0, 1];
+            stats.HandSize = result[0, 2];
+
+            // write result
+            string gameLogPath = System.IO.Path.Combine(
+                currSurrIndLogDir, String.Format("remove_card{0}.tml", idx));
+            Toml.WriteFile<OverallStatistics>(stats, gameLogPath);
+        }
+
         static void Main(string[] args)
         {
             // get exp log
@@ -57,7 +109,7 @@ namespace Analysis
             // create log directory for analysis
             string analysisLogDir = System.IO.Path.Combine(
                 expLogDir, "remove_card_analysis");
-            if(System.IO.Directory.Exists(analysisLogDir))
+            if (System.IO.Directory.Exists(analysisLogDir))
             {
                 System.IO.Directory.Delete(analysisLogDir, recursive: true);
             }
@@ -65,6 +117,20 @@ namespace Analysis
             // init card set
             var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(expConfigPath);
             CardReader.Init(config);
+
+            // load model
+            string modelSavePath = getModelPath(expLogDir);
+            // configurate surrogate model
+            SurrogateBaseModel model = null;
+            if (config.Surrogate.Type == "DeepSetModel")
+            {
+                model = new DeepSetModel();
+            }
+            else if (config.Surrogate.Type == "FullyConnectedNN")
+            {
+                model = new FullyConnectedNN();
+            }
+            model.LoadModel(modelSavePath);
 
             // read all logged individuals
             List<LogIndividual> inds = DataProcessor.readLogIndividuals(indsLogPath).ToList();
@@ -104,10 +170,18 @@ namespace Analysis
             foreach (var logIndividual in elitesToAnalyze)
             {
                 // create directory for current elite
-                string currIndLogDir = System.IO.Path.Combine(
-                    analysisLogDir,
+                string realSimDir = System.IO.Path.Combine(
+                    analysisLogDir, "real_sim");
+                string surrogateSimDir = System.IO.Path.Combine(
+                    analysisLogDir, "surrogate_sim");
+                string currSimIndLogDir = System.IO.Path.Combine(
+                    realSimDir,
                     String.Format("elite#{0}", logIndividual.IndividualID));
-                System.IO.Directory.CreateDirectory(currIndLogDir);
+                string currSurrIndLogDir = System.IO.Path.Combine(
+                    surrogateSimDir,
+                    String.Format("elite#{0}", logIndividual.IndividualID));
+                System.IO.Directory.CreateDirectory(currSimIndLogDir);
+                System.IO.Directory.CreateDirectory(currSurrIndLogDir);
 
                 // create player deck
                 List<string> deck = logIndividual.Deck.Split("*").ToList();
@@ -160,13 +234,23 @@ namespace Analysis
                     results.PlayerDeck.CardList = incompleteDeck.ToArray();
                     results.OverallStats = overallStats;
                     results.StrategyStats = stratStats;
-                    string gameLogPath = System.IO.Path.Combine(currIndLogDir, String.Format("remove_card{0}.tml", j));
+                    string gameLogPath =
+                        System.IO.Path.Combine(
+                            currSimIndLogDir,
+                            String.Format("remove_card{0}.tml", j));
                     Toml.WriteFile<ResultsMessage>(results, gameLogPath);
+
+                    // evaluate on surrogate for comparasons
+                    var inCompLogIndividuals = new List<LogIndividual>();
+                    var inCompLogIndividual = new LogIndividual();
+                    inCompLogIndividual.Deck = String.Join("*", incompleteDeck);
+                    inCompLogIndividuals.Add(inCompLogIndividual);
+                    EvaluateOnSurrogate(
+                        inCompLogIndividuals,
+                        model,
+                        currSurrIndLogDir, j);
                 }
             }
-
-
-
         }
     }
 }

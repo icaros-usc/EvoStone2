@@ -385,6 +385,15 @@ namespace SabberStoneUtil.DataProcessing
                     cardEmbedding[cardIndex[deckCards[j]]] = 1;
                     deckEmbedding[j] = cardEmbedding;
                 }
+                if (deckCards.Length < 30)
+                {
+                    for(int k=0; k<30-deckCards.Length; k++)
+                    {
+                        double[] cardEmbedding = new double[numCards];
+                        deckEmbedding[deckCards.Length + k] = cardEmbedding;
+                    }
+                }
+
                 deckEmbeddings[i] = deckEmbedding;
             }
 
