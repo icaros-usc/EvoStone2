@@ -96,7 +96,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Helper function to convert Individual instance to LogIndividual instance that is used for SurrogateModel
         /// </summary>
-        private LogIndividual ConvertIndividual(Individual individual, bool includeStats = true)
+        static private LogIndividual ConvertIndividual(Individual individual, bool includeStats = true)
         {
             LogIndividual logIndividual = new LogIndividual();
             logIndividual.Deck = string.Join("*", individual.GetCards());
@@ -126,7 +126,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Helper function to convert a List of Individuals to a List of LogIndividuals
         /// </summary>
-        private List<LogIndividual> ConvertIndividuals(List<Individual> individuals, bool includeStats = true)
+        static private List<LogIndividual> ConvertIndividuals(List<Individual> individuals, bool includeStats = true)
         {
             List<LogIndividual> logIndividuals = new List<LogIndividual>();
             foreach(var individual in individuals)
@@ -145,16 +145,17 @@ namespace DeckSearch.Search
             var result = _surrogateModel.Predict(logIndividuals);
 
             // update statistics of individuals
-            foreach (var individual in individuals)
+            for(int i = 0; i < individuals.Count; i++)
             {
+                var individual = individuals[i];
                 individual.ID = this._numSurrogateEvals;
                 this._numSurrogateEvals += 1;
 
                 // same evaluated stats
                 individual.OverallData = new OverallStatistics();
-                individual.OverallData.AverageHealthDifference = result[0,0];
-                individual.OverallData.NumTurns = result[0,1];
-                individual.OverallData.HandSize = result[0,2];
+                individual.OverallData.AverageHealthDifference = result[i,0];
+                individual.OverallData.NumTurns = result[i,1];
+                individual.OverallData.HandSize = result[i,2];
 
                 // save fitness
                 individual.Fitness = individual.OverallData.AverageHealthDifference;
