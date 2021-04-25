@@ -288,8 +288,7 @@ def generateAll(elite_map_logs, loss_log_file):
                         archive_name)
 
             # plot QD score
-            plot_qd_score(allRows,
-                          os.path.join(curr_qd_dir, "qd-score.png"),
+            plot_qd_score(allRows, os.path.join(curr_qd_dir, "qd-score.png"),
                           archive_name)
 
     # plot training/testing loss of surrogate model
@@ -351,11 +350,11 @@ if __name__ == "__main__":
 
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
-        IMAGE_TITLE = experiment_config["Search"]["Category"] + \
-            " " + experiment_config["Search"]["Type"]
         # get image title
         if "Surrogate" in experiment_config:
-            IMAGE_TITLE += " " + experiment_config["Surrogate"]["Type"]
+            IMAGE_TITLE = experiment_config["Surrogate"]["Type"] +\
+                           " Surrogate " +\
+                           experiment_config["Search"]["Type"]
             loss_log_file = os.path.join(
                 opt.log_dir,
                 "surrogate_train_log",
@@ -368,6 +367,7 @@ if __name__ == "__main__":
                  os.path.join(opt.log_dir, "elite_map_log.csv"))
             ]
         else:
+            IMAGE_TITLE = "MAP-Elites"
             loss_log_file = None
             ELITE_MAP_LOG_FILE_NAMES = [("elites_archive",
                                          os.path.join(opt.log_dir,

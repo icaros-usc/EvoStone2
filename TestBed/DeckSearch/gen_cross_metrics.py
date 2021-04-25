@@ -67,7 +67,7 @@ def ridge_plot(df, legend_col_name, data_col_name):
     g.set_titles("")
     g.set(yticks=[])
     g.despine(bottom=True, left=True)
-    g.savefig("elites_dist.png")
+    g.savefig(image_title + " elites_dist.png")
 
 
 if __name__ == '__main__':
@@ -94,16 +94,22 @@ if __name__ == '__main__':
         "legends": [],
         "fitnesses": [],
     }
-    fig, ax = plt.subplots(figsize=(7, 5))
-    fig1, ax1 = plt.subplots(figsize=(7, 5))
+    qd_fig, qd_ax = plt.subplots(figsize=(7, 5))
+    num_elites_fig, num_elites_ax = plt.subplots(figsize=(7, 5))
+    ccdf_fig, ccdf_ax = plt.subplots(figsize=(7, 5))
 
-    max_len = -np.inf
+    min_len = np.inf
     for log_dir, experiment_config in qdplots:
         log_file = os.path.join(log_dir, "elite_map_log.csv")
-        legend = experiment_config["Search"]["Category"] + \
-            " " + experiment_config["Search"]["Type"]
+        # legend = experiment_config["Search"]["Category"] + \
+        #     " " + experiment_config["Search"]["Type"]
+        legend = ""
         if experiment_config["Search"]["Category"] == "Surrogated":
-            legend += " " + experiment_config["Surrogate"]["Type"]
+            legend += experiment_config["Surrogate"]["Type"] + \
+                      " Surrogate " +\
+                      experiment_config["Search"]["Type"]
+        elif experiment_config["Search"]["Category"] == "Distributed":
+            legend += experiment_config["Search"]["Type"]
 
         with open(log_file, "r") as csvfile:
             rowData = list(csv.reader(csvfile, delimiter=','))
@@ -121,13 +127,13 @@ if __name__ == '__main__':
                 qd_scores.append(qd_score)
 
             legends.append(legend)
-            max_len = max(max_len, len(qd_scores))
+            min_len = min(min_len, len(qd_scores))
 
             # plot qd score
-            ax.plot(qd_scores, label=legend)
+            qd_ax.plot(qd_scores, label=legend)
 
             # plot num elites
-            ax1.plot(num_elites, label=legend)
+            num_elites_ax.plot(num_elites, label=legend)
 
             # get the fitness values from the last archive for ridge plot
             curr_last_fitnesses = []
@@ -138,26 +144,51 @@ if __name__ == '__main__':
             elites_dists["legends"] += [legend] * num_elites
             elites_dists["fitnesses"] += curr_last_fitnesses
 
+            # get number of elites for CCDF plot
+            performance_x = []
+            max_fit = int(np.ceil(np.max(curr_last_fitnesses))) + 1
+            min_fit = int(np.min(curr_last_fitnesses))
+            num_elites_ccdf = []
+            curr_last_fitnesses = np.asarray(curr_last_fitnesses)
+            for fitness in range(min_fit, max_fit):
+                num_elites_ccdf.append((curr_last_fitnesses > fitness).sum())
+
+            # plot CCDF
+            ccdf_ax.plot(np.arange(min_fit, max_fit),
+                         num_elites_ccdf,
+                         label=legend)
+
     # finalize qd score plot
-    ax.legend()
-    ax.set(xlabel='Number of Evaluation(s)',
-           ylabel='QD-score',
-           xlim=(0, max_len - 1),
-           ylim=(0, None))
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.grid()
-    fig.savefig(image_title + " QD-score")
+    qd_ax.legend()
+    qd_ax.set(xlabel='Number of Evaluation(s)',
+              ylabel='QD-score',
+              xlim=(0, min_len - 1),
+              ylim=(0, None))
+    qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    qd_ax.grid()
+    qd_fig.savefig(image_title + " QD-score")
 
     # finalize num elites plot
-    ax1.legend()
-    ax1.set(xlabel='Number of Evaluation(s)',
-            ylabel='Number of Elites',
-            xlim=(0, max_len - 1),
-            ylim=(0, None))
-    ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax1.grid()
-    fig1.savefig(image_title + " Num elites")
+    num_elites_ax.legend()
+    num_elites_ax.set(xlabel='Number of Evaluation(s)',
+                      ylabel='Number of Elites',
+                      xlim=(0, min_len - 1),
+                      ylim=(0, None))
+    num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    num_elites_ax.grid()
+    num_elites_fig.savefig(image_title + " Num elites")
 
     # ridge plot
     fitness_ridge_df = pd.DataFrame(elites_dists)
     ridge_plot(fitness_ridge_df, "legends", "fitnesses")
+
+    # finalize ccdf plot
+    ccdf_ax.legend(facecolor='white')
+    ccdf_ax.set(
+        xlabel='Performance',
+        ylabel='Number of elites',
+        # xlim=(0, min_len - 1),
+        ylim=(0, None))
+    ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ccdf_ax.grid()
+    ccdf_fig.savefig(image_title + " CCDF")
