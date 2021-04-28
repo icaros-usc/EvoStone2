@@ -218,6 +218,8 @@ namespace DeckSearch.Search
                 Thread.Sleep(1000);
             }
 
+            _searchManager._numEvaledPerRun = 0;
+
             while(_searchManager._searchAlgo.IsRunning())
             {
                 // back prop using individuals in the buffer
