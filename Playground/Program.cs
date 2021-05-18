@@ -29,9 +29,9 @@ namespace PlayGround
             var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(args[0]);
             CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
-            // var model = new FullyConnectedNN();
+            var model = new FullyConnectedNN();
             // var model = new DeepSetModel();
-            // model.OfflineFit();
+            model.OfflineFit();
             // Console.WriteLine(DataProcessor.numCards);
 
             // // shape (3, 2, 2)
@@ -104,7 +104,7 @@ namespace PlayGround
 
             // Demo2DSlicing();
 
-            DemoGradient();
+            // DemoGradient();
         }
 
         static public void DemoClassicCards(string[] args)

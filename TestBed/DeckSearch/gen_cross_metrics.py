@@ -19,7 +19,9 @@ def get_fitness_from_cell(cell_data):
 
 
 def ridge_plot(df, legend_col_name, data_col_name):
-    sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
+    sns.set_theme(style="white",
+                  rc={"axes.facecolor": (0, 0, 0, 0)},
+                  font_scale=1.8)
 
     # Initialize the FacetGrid object
     pal = sns.cubehelix_palette(10, rot=-.25, light=.7)
@@ -67,7 +69,7 @@ def ridge_plot(df, legend_col_name, data_col_name):
     g.set_titles("")
     g.set(yticks=[])
     g.despine(bottom=True, left=True)
-    g.savefig(image_title + " elites_dist.png")
+    g.savefig(image_title + " elites_dist.pdf")
 
 
 if __name__ == '__main__':
@@ -85,7 +87,7 @@ if __name__ == '__main__':
         experiment_config, elite_map_config = read_in_surr_config(
             os.path.join(log_dir, "experiment_config.tml"))
         search_category = experiment_config["Search"]["Category"]
-        qdplots.append((log_dir, experiment_config))
+        qdplots.append((log_dir, experiment_config, elite_map_config))
 
     # plot QD score of surrogate searchs alltogether
     image_title = "Surrogated & Distributed Search"
@@ -94,22 +96,32 @@ if __name__ == '__main__':
         "legends": [],
         "fitnesses": [],
     }
-    qd_fig, qd_ax = plt.subplots(figsize=(7, 5))
-    num_elites_fig, num_elites_ax = plt.subplots(figsize=(7, 5))
-    ccdf_fig, ccdf_ax = plt.subplots(figsize=(7, 5))
+    numerical_measures = {
+        "algo": [],
+        "max_fitness": [],
+        "cell_filled": [],
+        "qd_score": [],
+    }
+    qd_fig, qd_ax = plt.subplots(figsize=(8, 6))
+    num_elites_fig, num_elites_ax = plt.subplots(figsize=(8, 6))
+    ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
 
     min_len = np.inf
-    for log_dir, experiment_config in qdplots:
+    for log_dir, experiment_config, elite_map_config in qdplots:
         log_file = os.path.join(log_dir, "elite_map_log.csv")
         # legend = experiment_config["Search"]["Category"] + \
         #     " " + experiment_config["Search"]["Type"]
         legend = ""
         if experiment_config["Search"]["Category"] == "Surrogated":
-            legend += experiment_config["Surrogate"]["Type"] + \
-                      " Surrogate " +\
-                      experiment_config["Search"]["Type"]
+            if experiment_config["Search"]["Type"] == "MAP-Elites":
+                legend += experiment_config["Surrogate"]["Type"] + " DSA-ME"
         elif experiment_config["Search"]["Category"] == "Distributed":
             legend += experiment_config["Search"]["Type"]
+
+        numerical_measures["algo"].append(legend)
+
+        # read in resolutions of elite map
+        total_num_cell = np.power(elite_map_config["Map"]["StartSize"], 2)
 
         with open(log_file, "r") as csvfile:
             rowData = list(csv.reader(csvfile, delimiter=','))
@@ -121,10 +133,19 @@ if __name__ == '__main__':
 
                 # get qd score
                 qd_score = 0
+                max_fitness = -np.inf
                 for cellData in mapData[1:]:
                     fitness = get_fitness_from_cell(cellData)
                     qd_score += fitness
+                    if fitness > max_fitness:
+                        max_fitness = fitness
                 qd_scores.append(qd_score)
+
+            # we only want the last one
+            numerical_measures["qd_score"].append(qd_score)
+            numerical_measures["max_fitness"].append(max_fitness)
+            numerical_measures["cell_filled"].append(
+                len(rowData[-1]) / total_num_cell * 100)
 
             legends.append(legend)
             min_len = min(min_len, len(qd_scores))
@@ -159,36 +180,36 @@ if __name__ == '__main__':
                          label=legend)
 
     # finalize qd score plot
-    qd_ax.legend()
-    qd_ax.set(xlabel='Number of Evaluation(s)',
-              ylabel='QD-score',
-              xlim=(0, min_len - 1),
-              ylim=(0, None))
+    qd_ax.legend(loc='upper left', fontsize='xx-large')
+    qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
+    qd_ax.set_ylabel('QD-score', fontsize=20)
+    qd_ax.set(xlim=(0, min_len - 1), ylim=(0, None))
     qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     qd_ax.grid()
-    qd_fig.savefig(image_title + " QD-score")
+    qd_fig.savefig(image_title + " QD-score.pdf")
 
     # finalize num elites plot
-    num_elites_ax.legend()
-    num_elites_ax.set(xlabel='Number of Evaluation(s)',
-                      ylabel='Number of Elites',
-                      xlim=(0, min_len - 1),
-                      ylim=(0, None))
+    num_elites_ax.legend(loc='upper left', fontsize='xx-large')
+    num_elites_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
+    num_elites_ax.set_ylabel('Number of Elites', fontsize=20)
+    num_elites_ax.set(xlim=(0, min_len - 1), ylim=(0, None))
     num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     num_elites_ax.grid()
-    num_elites_fig.savefig(image_title + " Num elites")
+    num_elites_fig.savefig(image_title + " Num elites.pdf")
+
+    # finalize ccdf plot
+    ccdf_ax.legend(facecolor='white', loc='upper left', fontsize='xx-large')
+    ccdf_ax.set_xlabel('Performance', fontsize=20)
+    ccdf_ax.set_ylabel('Number of Elites', fontsize=20)
+    ccdf_ax.set(ylim=(0, None))
+    ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ccdf_ax.grid()
+    ccdf_fig.savefig(image_title + " CCDF.pdf")
 
     # ridge plot
     fitness_ridge_df = pd.DataFrame(elites_dists)
     ridge_plot(fitness_ridge_df, "legends", "fitnesses")
 
-    # finalize ccdf plot
-    ccdf_ax.legend(facecolor='white')
-    ccdf_ax.set(
-        xlabel='Performance',
-        ylabel='Number of elites',
-        # xlim=(0, min_len - 1),
-        ylim=(0, None))
-    ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ccdf_ax.grid()
-    ccdf_fig.savefig(image_title + " CCDF")
+    # write numerical results
+    numerical_measures_df = pd.DataFrame(numerical_measures)
+    numerical_measures_df.to_csv("numerical_measures.csv")
