@@ -15,6 +15,7 @@ using SabberStoneUtil.Config;
 using DeckSearch.Logging;
 using DeckSearch.Search.MapElites;
 using DeckSearch.Search.EvolutionStrategy;
+using DeckSearch.Search.RandomSearch;
 
 namespace DeckSearch.Search
 {
@@ -158,7 +159,8 @@ namespace DeckSearch.Search
             Console.WriteLine("Algo: " + config.Search.Type);
             if (config.Search.Type.Equals("MAP-Elites"))
             {
-                var searchConfig = Toml.ReadFile<MapElitesParams>(config.Search.ConfigFilename);
+                var searchConfig = Toml.ReadFile<MapElitesParams>(
+                    config.Search.ConfigFilename);
                 _numToEvaluate = searchConfig.Search.NumToEvaluate;
                 _searchAlgo = new MapElitesAlgorithm(searchConfig, log_dir_exp);
             }
@@ -168,6 +170,15 @@ namespace DeckSearch.Search
                 var searchConfig = Toml.ReadFile<EvolutionStrategyParams>(config.Search.ConfigFilename);
                 _numToEvaluate = searchConfig.Search.NumToEvaluate;
                 _searchAlgo = new EvolutionStrategyAlgorithm(searchConfig);
+            }
+
+            else if (config.Search.Type.Equals("RandomSearch"))
+            {
+                var searchConfig = Toml.ReadFile<RandomSearchParams>(
+                    config.Search.ConfigFilename);
+                _numToEvaluate = searchConfig.Search.NumToEvaluate;
+                _searchAlgo = new RandomSearchAlgorithm(
+                    searchConfig, log_dir_exp);
             }
         }
 
