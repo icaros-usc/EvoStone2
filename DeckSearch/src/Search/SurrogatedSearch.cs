@@ -89,6 +89,11 @@ namespace DeckSearch.Search
                 _surrogateModel = new FullyConnectedNN(
                     log_dir_exp: _searchManager.log_dir_exp);
             }
+            else if (config.Surrogate.Type == "LinearModel")
+            {
+                _surrogateModel = new LinearModel(
+                    log_dir_exp: _searchManager.log_dir_exp);
+            }
             Console.WriteLine("{0} Surrogate model created.", config.Surrogate.Type);
 
         }
