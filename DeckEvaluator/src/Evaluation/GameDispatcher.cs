@@ -15,7 +15,7 @@ using SabberStoneUtil.Messaging;
 
 namespace DeckEvaluator.Evaluation
 {
-   class GameDispatcher
+   public class GameDispatcher
    {
       // A list of all the games you are tasked with evaluating.
       private PlayerSetup _player;

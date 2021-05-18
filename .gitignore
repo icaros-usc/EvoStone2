@@ -21,6 +21,9 @@ SurrogateModel/obj/
 Playground/bin/
 Playground/obj/
 
+Analysis/bin/
+Analysis/obj/
+
 TestBed/DeckSearch/bin/
 TestBed/DeckSearch/active/
 TestBed/DeckSearch/logs/
@@ -33,4 +36,6 @@ TestBed/DeckSearch/singularity/ubuntu_dotnet
 TestBed/DeckSearch/slurm/logs/
 TestBed/DeckSearch/slurm/logs/
 TestBed/DeckSearch/*.png
+TestBed/DeckSearch/*.pdf
+TestBed/DeckSearch/*.csv
 TestBed/DeckSearch/__pycache__

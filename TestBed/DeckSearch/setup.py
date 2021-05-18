@@ -16,9 +16,10 @@ ss_path = '../../DeckSearch/bin/Release/netcoreapp3.1/publish/*'
 de_path = '../../DeckEvaluator/bin/Release/netcoreapp2.1/publish/*'
 model_path = '../../SurrogateModel/bin/Release/netcoreapp3.1/publish/*'
 play_path = '../../Playground/bin/Release/netcoreapp3.1/publish/*'
+analysis_path = '../../Analysis/bin/Release/netcoreapp3.1/publish/*'
 bin_dir = 'bin/'
 
-paths = [ssu_path, ss_path, de_path, model_path, play_path]
+paths = [ssu_path, ss_path, de_path, model_path, play_path, analysis_path]
 
 for cur_dir in paths:
    for cur_file in glob.glob(cur_dir):

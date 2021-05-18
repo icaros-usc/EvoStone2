@@ -141,6 +141,7 @@ def createImage(rowData, filename, archive_name):
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))
     ax_divider = make_axes_locatable(ax)
     cbar_ax = ax_divider.append_axes("right", size="7%", pad="10%")
+    sns.set(font_scale=1.8, style="ticks")
     sns.heatmap(
         fitnessMap,
         annot=False,
@@ -153,16 +154,19 @@ def createImage(rowData, filename, archive_name):
         cbar_ax=cbar_ax,
         linewidths=0.003,
         rasterized=False,
+        annot_kws={"size": 20},
     )
 
     if archive_name == "surrogate_archive":
-        title = IMAGE_TITLE + " Surrogate Elite Archive"
+        title = IMAGE_TITLE + " Surrogate Archive"
     elif archive_name == "elites_archive":
-        title = IMAGE_TITLE + " Elite Archive"
+        title = IMAGE_TITLE + " Archive"
     else:
         raise ValueError("Invalid archive name")
 
-    ax.set(title=title, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
+    # ax.set(title=title, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
+    ax.set_xlabel(FEATURE1_LABEL)
+    ax.set_ylabel(FEATURE2_LABEL)
 
     ax.set_xticks([0, 10, 20, 30, 40])
     ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
@@ -240,17 +244,23 @@ def plot_qd_score(rowData, savePath, archive_name):
 
 def plot_loss(loss_log_file, savePath):
     losses_pd = pd.read_csv(loss_log_file)
-    fig, ax = plt.subplots()
-    ax.plot(losses_pd["train_loss"], label="training")
-    ax.plot(losses_pd["test_loss"], label="testing")
-    ax.legend()
-    ax.set(xlabel="epochs", ylabel="Loss")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(losses_pd["train_loss"], label="Training")
+    ax.plot(losses_pd["test_loss"], label="Testing")
+    ax.legend(loc='upper left', fontsize="xx-large")
+    ax.set_xlabel("Number of Epochs", fontsize=20)
+    ax.set_ylabel("MSE Loss", fontsize=20)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.set(xlim=(0, None), ylim=(0, 20))
     ax.grid()
     fig.savefig(savePath)
 
 
 def generateAll(elite_map_logs, loss_log_file):
+    # plot training/testing loss of surrogate model
+    if loss_log_file is not None:
+        plot_loss(loss_log_file, os.path.join(tmpLossFolder, "loss.pdf"))
+
     for item in elite_map_logs:
         archive_name, elite_map_log = item
         if archive_name == "surrogate_archive":
@@ -282,19 +292,14 @@ def generateAll(elite_map_logs, loss_log_file):
 
             # Create the final image we need
             imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
-                COL_INDEX) + '.png'
+                COL_INDEX) + '.pdf'
             createImage(allRows[-1],
                         os.path.join(curr_heatmap_dir, imageFilename),
                         archive_name)
 
             # plot QD score
-            plot_qd_score(allRows,
-                          os.path.join(curr_qd_dir, "qd-score.png"),
+            plot_qd_score(allRows, os.path.join(curr_qd_dir, "qd-score.pdf"),
                           archive_name)
-
-    # plot training/testing loss of surrogate model
-    if loss_log_file is not None:
-        plot_loss(loss_log_file, os.path.join(tmpLossFolder, "loss.png"))
 
 
 def clearDir(dirToClear):
@@ -351,11 +356,11 @@ if __name__ == "__main__":
 
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
-        IMAGE_TITLE = experiment_config["Search"]["Category"] + \
-            " " + experiment_config["Search"]["Type"]
         # get image title
         if "Surrogate" in experiment_config:
-            IMAGE_TITLE += " " + experiment_config["Surrogate"]["Type"]
+            IMAGE_TITLE = experiment_config["Surrogate"]["Type"] +\
+                           " Surrogate " +\
+                           experiment_config["Search"]["Type"]
             loss_log_file = os.path.join(
                 opt.log_dir,
                 "surrogate_train_log",
@@ -368,6 +373,7 @@ if __name__ == "__main__":
                  os.path.join(opt.log_dir, "elite_map_log.csv"))
             ]
         else:
+            IMAGE_TITLE = "MAP-Elites"
             loss_log_file = None
             ELITE_MAP_LOG_FILE_NAMES = [("elites_archive",
                                          os.path.join(opt.log_dir,

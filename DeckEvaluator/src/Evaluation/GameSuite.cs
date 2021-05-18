@@ -9,7 +9,7 @@ using DeckEvaluator.Config;
 
 namespace DeckEvaluator.Evaluation
 {
-   class GameSuite
+   public class GameSuite
    {
       private OpponentParams[] _opponentTypes;
       private DeckPoolManager _deckPools;
