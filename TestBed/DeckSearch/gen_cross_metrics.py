@@ -18,6 +18,23 @@ def get_fitness_from_cell(cell_data):
     return fitness
 
 
+def get_label(experiment_config):
+    legend = ""
+    if experiment_config["Search"]["Category"] == "Surrogated":
+        if experiment_config["Search"]["Type"] == "MAP-Elites":
+            if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
+                legend += "FCNN" + " DSA-ME"
+            elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
+                legend += "Deep-set" + " DSA-ME"
+            elif experiment_config["Surrogate"]["Type"] == "LinearModel":
+                legend += "Linear" + " DSA-ME"
+            else:
+                legend += experiment_config["Surrogate"]["Type"] + " DSA-ME"
+    elif experiment_config["Search"]["Category"] == "Distributed":
+        legend += experiment_config["Search"]["Type"]
+    return legend
+
+
 def ridge_plot(df, legend_col_name, data_col_name):
     sns.set_theme(style="white",
                   rc={"axes.facecolor": (0, 0, 0, 0)},
@@ -111,12 +128,7 @@ if __name__ == '__main__':
         log_file = os.path.join(log_dir, "elite_map_log.csv")
         # legend = experiment_config["Search"]["Category"] + \
         #     " " + experiment_config["Search"]["Type"]
-        legend = ""
-        if experiment_config["Search"]["Category"] == "Surrogated":
-            if experiment_config["Search"]["Type"] == "MAP-Elites":
-                legend += experiment_config["Surrogate"]["Type"] + " DSA-ME"
-        elif experiment_config["Search"]["Category"] == "Distributed":
-            legend += experiment_config["Search"]["Type"]
+        legend = get_label(experiment_config)
 
         numerical_measures["algo"].append(legend)
 
@@ -180,31 +192,47 @@ if __name__ == '__main__':
                          label=legend)
 
     # finalize qd score plot
-    qd_ax.legend(loc='upper left', fontsize='xx-large')
+    qd_ax.legend(loc='lower left',
+                 fontsize='x-large',
+                 bbox_to_anchor=(0,1.02,1,0.2),
+                 borderaxespad=0,
+                 ncol=2,
+                 mode="expand")
     qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
     qd_ax.set_ylabel('QD-score', fontsize=20)
     qd_ax.set(xlim=(0, min_len - 1), ylim=(0, None))
     qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     qd_ax.grid()
-    qd_fig.savefig(image_title + " QD-score.pdf")
+    qd_fig.savefig(image_title + " QD-score.pdf", bbox_inches="tight")
 
     # finalize num elites plot
-    num_elites_ax.legend(loc='upper left', fontsize='xx-large')
+    num_elites_ax.legend(loc='lower left',
+                         fontsize='x-large',
+                         bbox_to_anchor=(0,1.02,1,0.2),
+                         borderaxespad=0,
+                         ncol=2,
+                         mode="expand")
     num_elites_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
     num_elites_ax.set_ylabel('Number of Elites', fontsize=20)
     num_elites_ax.set(xlim=(0, min_len - 1), ylim=(0, None))
     num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     num_elites_ax.grid()
-    num_elites_fig.savefig(image_title + " Num elites.pdf")
+    num_elites_fig.savefig(image_title + " Num elites.pdf", bbox_inches="tight")
 
     # finalize ccdf plot
-    ccdf_ax.legend(facecolor='white', loc='upper left', fontsize='xx-large')
+    ccdf_ax.legend(facecolor='white',
+                   loc='lower left',
+                   fontsize='x-large',
+                   bbox_to_anchor=(0,1.02,1,0.2),
+                   borderaxespad=0,
+                   ncol=2,
+                   mode="expand")
     ccdf_ax.set_xlabel('Performance', fontsize=20)
     ccdf_ax.set_ylabel('Number of Elites', fontsize=20)
     ccdf_ax.set(ylim=(0, None))
     ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ccdf_ax.grid()
-    ccdf_fig.savefig(image_title + " CCDF.pdf")
+    ccdf_fig.savefig(image_title + " CCDF.pdf", bbox_inches="tight")
 
     # ridge plot
     fitness_ridge_df = pd.DataFrame(elites_dists)
