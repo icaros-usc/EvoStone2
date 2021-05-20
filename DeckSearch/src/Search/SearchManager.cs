@@ -261,7 +261,11 @@ namespace DeckSearch.Search
                     string label = activeFile.Substring(start, end - start);
                     int workerId = Int32.Parse(label);
                     _idleWorkers.Enqueue(workerId);
-                    _individualStable.Add(workerId, null);
+                    // avoid key error
+                    if (!_individualStable.ContainsKey(workerId))
+                    {
+                        _individualStable.Add(workerId, null);
+                    }
                     File.Delete(activeFile);
                     Console.WriteLine("Found worker " + workerId);
                 }
