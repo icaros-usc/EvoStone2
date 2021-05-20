@@ -265,9 +265,16 @@ namespace DeckSearch.Search
                     if (!_individualStable.ContainsKey(workerId))
                     {
                         _individualStable.Add(workerId, null);
+                        Console.WriteLine("Found worker " + workerId);
                     }
-                    File.Delete(activeFile);
-                    Console.WriteLine("Found worker " + workerId);
+                    try{
+                        File.Delete(activeFile);
+                    } catch (Exception e)
+                    {
+                        Console.WriteLine("Exception while deleting: {0}",
+                                          e.GetType().ToString());
+                        Console.WriteLine(e.StackTrace);
+                    }
                 }
             }
         }
