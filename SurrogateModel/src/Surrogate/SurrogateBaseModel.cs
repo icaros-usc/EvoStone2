@@ -280,13 +280,22 @@ namespace SurrogateModel.Surrogate
         }
 
 
-        public NDArray Forward(Tensor x_input)
+        public NDArray Forward(NDArray x_input)
         {
             // get the model output
             var output = sess.run((model_output), // operations
                                 (n_samples, (int)x_input.shape[0]), // batch size
                                 (input, x_input)); // features
             return output;
+        }
+
+        public NDArray TakeGradient(NDArray x_input)
+        {
+            var grad_func = tf.gradients(model_output, input);
+            var gradients = sess.run((grad_func),
+                                     (n_samples, (int)x_input.shape[0]), // batch size
+                                     (input, x_input));
+            return gradients;
         }
 
         /// <summary>
