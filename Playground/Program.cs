@@ -29,9 +29,9 @@ namespace PlayGround
             var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(args[0]);
             CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
-            var model = new FullyConnectedNN();
+            // var model = new FullyConnectedNN();
             // var model = new DeepSetModel();
-            model.OfflineFit();
+            // model.OfflineFit();
             // Console.WriteLine(DataProcessor.numCards);
 
             // // shape (3, 2, 2)
@@ -105,6 +105,8 @@ namespace PlayGround
             // Demo2DSlicing();
 
             // DemoGradient();
+
+            DemoSavedModel();
         }
 
         static public void DemoClassicCards(string[] args)
@@ -183,6 +185,24 @@ namespace PlayGround
             // model.OfflineFit();
         }
 
+        static void DemoSavedModel()
+        {
+            // save
+            // var model = new FullyConnectedNN();
+            // model.OfflineFit();
+
+            // restore
+            // var model = new LinearModel();
+            // model.LoadModel("logs/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000/surrogate_train_log/surrogate_model/model0/model.ckpt");
+
+
+            var model = new DeepSetModel();
+            model.LoadModel("logs/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000/surrogate_train_log/surrogate_model/model18/model.ckpt");
+
+            print(model.Forward(np.ones(new int[]{2, 30, 178})));
+            // model.OfflineFit();
+        }
+
         // test per_equi_layer of DeepSet
         static void DemoDeepSet()
         {
@@ -213,17 +233,30 @@ namespace PlayGround
         static void DemoGradient()
         {
             var model = new DeepSetModel();
-            var sess = tf.Session();
+            // var sess = tf.Session();
 
             var x_input = np.random.rand(new int[] {2, 30, 178});
+            // print(model.Forward(x_input));
 
-            // print(model.input);
-            // print(model.model_output);
+            print(model.input);
+            print(model.model_output);
 
-            var grad_func = tf.gradients(model.input, model.model_output);
-            var gradients = sess.run(grad_func, (model.input, x_input));
+            print(model.TakeGradient(x_input));
+
+            // using var g = tf.GradientTape();
 
             // print(gradients);
+
+            // var a = tf.constant(1f);
+            // var b = tf.tanh(a);
+            // var g = tf.gradients(b, a);
+            // using (var sess = tf.Session())
+            // {
+            //     var result = sess.run(g);
+            //     var actual = result[0].GetData<float>()[0];
+            //     print(result);
+            //     // self.assertEquals(0.41997434127f, actual);
+            // }
         }
     }
 }
