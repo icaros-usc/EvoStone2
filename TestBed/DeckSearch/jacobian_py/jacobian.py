@@ -1,60 +1,115 @@
+import os
+import json
+import toml
+import argparse
 import tensorflow as tf
-from surrogate_model import FCNN, DeepSet, LinearModel
+import pandas as pd
 import numpy as np
+from surrogate_model import FCNN, DeepSet, LinearModel
+
+# read in card index
+with open('jacobian_py/paladin_card_index.json') as f:
+    card_index = json.load(f)
 
 
-def calc_jacobian_matrix(model, x, load_from):
+def get_latest_model_checkpoint(log_dir):
+    model_save_point_dir = os.path.join(log_dir, "surrogate_train_log",
+                                        "surrogate_model")
+    idx = 0
+    while os.path.isdir(os.path.join(model_save_point_dir, f"model{idx}")):
+        idx += 1
 
-    with tf.Session() as sess:
-        # sess.run(init)
-        # x = np.ones((2, 178))
+    return os.path.join(
+        os.path.join(model_save_point_dir, f"model{idx-1}", "model.ckpt"))
 
-        # read in model
-        saver = tf.train.Saver()
-        saver.restore(sess, load_from)
 
-        out = sess.run(model.output, feed_dict={model.input: x})
-        print("Forward result on ones:")
-        print(out)
+def get_vec_encoding(deck):
+    x = np.zeros(len(card_index))
+    for card in deck:
+        idx = card_index[card]
+        x[idx] += 1
+    return x.reshape((1, -1))
 
-        jacobian_matrix = []
-        for i in range(3):
-            grad = tf.gradients(model.output[:, i], model.input)
-            gradients = sess.run(grad, feed_dict={model.input: x})
-            ori_shape = gradients[0].shape
-            new_shape = (ori_shape[0], 1, *ori_shape[1:])
-            curr_grad = gradients[0].reshape(new_shape)
-            jacobian_matrix.append(curr_grad)
 
-        jacobian_matrix = np.concatenate(jacobian_matrix, axis=1)
-        return jacobian_matrix
+def get_deepset_encoding(deck):
+    pass
+
+
+def calc_jacobian_matrix(model, x):
+    """
+    Calculates the jacobian matrix of the model with input x.
+    """
+    jacobian_matrix = []
+    for i in range(3):
+        grad = tf.gradients(model.output[:, i], model.input)
+        gradients = sess.run(grad, feed_dict={model.input: x})
+        ori_shape = gradients[0].shape
+        new_shape = (ori_shape[0], 1, *ori_shape[1:])
+        curr_grad = gradients[0].reshape(new_shape)
+        jacobian_matrix.append(curr_grad)
+
+    jacobian_matrix = np.concatenate(jacobian_matrix, axis=1)
+    return jacobian_matrix
 
 
 if __name__ == "__main__":
-    # linear_model = LinearModel()
-    # x = np.ones((2, 178))
-    # jacobian_matrix = calc_jacobian_matrix(
-    #     linear_model,
-    #     x,
-    #     "logs/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000/surrogate_train_log/surrogate_model/model0/model.ckpt"
-    # )
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l',
+                        '--log_dir',
+                        help='path to the experiment log file',
+                        required=True)
+    opt = parser.parse_args()
+    log_dir = opt.log_dir
+    rm_card_analysis_dir = os.path.join(log_dir, "remove_card_analysis")
+    if not os.path.isdir(rm_card_analysis_dir):
+        raise ValueError("Remove card analysis not finished.")
+        exit(1)
 
-    # fcnn = FCNN()
-    # x = np.ones((2, 178))
-    # jacobian_matrix = calc_jacobian_matrix(
-    #     fcnn,
-    #     x,
-    #     "logs/2021-04-21_18-49-56_Surrogated_MAP-Elites_FullyConnectedNN_10000/surrogate_train_log/surrogate_model/model19/model.ckpt"
-    # )
+    # read in all individuals
+    individuals = pd.read_csv(os.path.join(log_dir, "individual_log.csv"))
 
-    deepset = DeepSet()
-    x = np.ones((2, 30, 178))
-    jacobian_matrix = calc_jacobian_matrix(
-        deepset,
-        x,
-        "logs/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000/surrogate_train_log/surrogate_model/model18/model.ckpt"
-    )
+    # get all elites to do analysis
+    real_sim_dir = os.path.join(rm_card_analysis_dir, "real_sim")
+    all_elite_decks = []
+    for elite_dir in os.listdir(real_sim_dir):
+        elite_id = int(elite_dir.split("#")[1])
+        elite_deck_str = individuals[individuals["Individual"] ==
+                                     elite_id].iloc[0]["Deck"]
+        elite_deck = elite_deck_str.split("*")
+        all_elite_decks.append((elite_id, elite_deck))
 
+    # read in model
+    exp_config = toml.load(os.path.join(log_dir, "experiment_config.tml"))
+    model = None
+    if exp_config["Search"]["Category"] == "Surrogated":
+        model_type = exp_config["Surrogate"]["Type"]
+        if model_type == "FullyConnectedNN":
+            model = FCNN()
+        elif model_type == "DeepSetModel":
+            model = DeepSet()
+        elif model_type == "LinearModel":
+            model = LinearModel()
+        else:
+            raise ValueError("Unsupported model type.")
+            exit(1)
+    else:
+        raise ValueError("Not DSA-ME.")
+        exit(1)
 
-    print(jacobian_matrix[0,1])
-    print(jacobian_matrix.shape)
+    # get latest model
+    model_checkpoint = get_latest_model_checkpoint(log_dir)
+
+    with tf.Session() as sess:
+        # load model params
+        saver = tf.train.Saver()
+        saver.restore(sess, model_checkpoint)
+
+        for elite_id, elite_deck in all_elite_decks:
+            x = get_vec_encoding(elite_deck)
+            print(x)
+
+            jacobian_matrix = calc_jacobian_matrix(model, x)
+
+            print("Jacobian matrix of Fitness value:")
+            print(jacobian_matrix[0, 0])
+            print(jacobian_matrix.shape)
