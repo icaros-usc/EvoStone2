@@ -75,6 +75,12 @@ namespace SabberStoneUtil.DataProcessing
         }
 
         // ****************** I/O Functions ******************
+        public static void WriteCardIndex()
+        {
+            string jsonCardIndex = JsonSerializer.Serialize(cardIndex);
+            Console.WriteLine(jsonCardIndex);
+        }
+
 
         private static void PrintCardInfo(Card card)
         {
