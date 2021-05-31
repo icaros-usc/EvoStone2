@@ -1,6 +1,7 @@
 import os
 import json
 import toml
+import copy
 import argparse
 import tensorflow as tf
 import pandas as pd
@@ -10,6 +11,8 @@ from surrogate_model import FCNN, DeepSet, LinearModel
 # read in card index
 with open('jacobian_py/paladin_card_index.json') as f:
     card_index = json.load(f)
+
+card_name = {idx: name for name, idx in card_index.items()}
 
 
 def get_latest_model_checkpoint(log_dir):
@@ -85,8 +88,8 @@ if __name__ == "__main__":
         model_type = exp_config["Surrogate"]["Type"]
         if model_type == "FullyConnectedNN":
             model = FCNN()
-        elif model_type == "DeepSetModel":
-            model = DeepSet()
+        # elif model_type == "DeepSetModel":
+        #     model = DeepSet()
         elif model_type == "LinearModel":
             model = LinearModel()
         else:
@@ -113,3 +116,24 @@ if __name__ == "__main__":
             print("Jacobian matrix of Fitness value:")
             print(jacobian_matrix[0, 0])
             print(jacobian_matrix.shape)
+
+            # get the order of cards
+            fitness_jacobian = copy.deepcopy(jacobian_matrix[0, 0])
+            top_card_index = fitness_jacobian.argsort()
+
+            card_names_by_pw = []
+            num_cards = []
+            card_values = []
+            for idx in np.flip(top_card_index):
+                if x[0, idx] != 0:
+                    card_names_by_pw.append(card_name[idx])
+                    num_cards.append(x[0, idx])
+                    card_values.append(fitness_jacobian[idx])
+            print("'Value' of card (Large to small):")
+            print(card_values)
+            print("Cards:")
+            print(card_names_by_pw)
+            print("Number of cards:")
+            print(num_cards)
+
+            # get the order from remove card analysis
