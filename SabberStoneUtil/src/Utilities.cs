@@ -2,7 +2,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System;
 
-namespace DeckSearch
+namespace SabberStoneUtil
 {
     public static class Utilities
     {

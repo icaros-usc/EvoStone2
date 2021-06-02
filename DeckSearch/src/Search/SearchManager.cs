@@ -5,6 +5,7 @@ using System.Text;
 
 using Nett;
 
+using SabberStoneUtil;
 using SabberStoneUtil.Decks;
 using SabberStoneUtil.Messaging;
 using SabberStoneUtil.Config;

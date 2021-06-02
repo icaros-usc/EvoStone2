@@ -8,6 +8,7 @@ using DeckSearch;
 using SabberStoneCore.Model;
 
 // using MapSabber.Messaging;
+using SabberStoneUtil;
 using SabberStoneUtil.Decks;
 using SabberStoneUtil.Messaging;
 

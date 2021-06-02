@@ -5,6 +5,7 @@ using System.Text;
 
 using Nett;
 
+using SabberStoneUtil;
 using SabberStoneUtil.Config;
 
 using DeckSearch.Logging;
@@ -101,7 +102,8 @@ namespace DeckSearch.Search
             InitLogs(log_dir_exp);
 
             // Set up search algorithm
-            Console.WriteLine("Algo: " + config.Search.Type);
+            Utilities.WriteLineWithTimestamp(
+                "Search Algorithm: " + config.Search.Type);
             if (config.Search.Type.Equals("MAP-Elites"))
             {
                 var searchConfig = Toml.ReadFile<MapElitesParams>(
@@ -196,7 +198,7 @@ namespace DeckSearch.Search
                 {
                     _individualsBuffer.Add(stableInd); // add evaluated individual to batch
                     numEvaledPerRun += 1;
-                    Console.WriteLine(
+                    Utilities.WriteLineWithTimestamp(
                         "Buffer Size: " + _individualsBuffer.Count);
                 }
                 LogIndividual(stableInd, () =>
