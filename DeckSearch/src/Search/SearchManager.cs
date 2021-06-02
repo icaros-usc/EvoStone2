@@ -87,25 +87,6 @@ namespace DeckSearch.Search
 
             // Grab the configuration info
             _configFilename = configFilename;
-
-            // // set up log directory
-            // String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            // log_dir_base += "_" + config.Search.Category +
-            //                 "_" + config.Search.Type;
-            // if (config.Surrogate != null)
-            // {
-            //     log_dir_base += "_" + config.Surrogate.Type;
-            // }
-            // String log_dir_exp = System.IO.Path.Combine(LOG_DIRECTORY, log_dir_base);
-            // this.log_dir_exp = log_dir_exp;
-            // System.IO.Directory.CreateDirectory(log_dir_exp);
-
-            // // write the config file to the log directory for future reference
-            // string config_out_path = System.IO.Path.Combine(log_dir_exp, "experiment_config.tml");
-            // Toml.WriteFile<Configuration>(config, config_out_path);
-
-            // // Setup the logs to record the data on individuals
-            // InitLogs(log_dir_exp);
         }
 
 
@@ -173,7 +154,8 @@ namespace DeckSearch.Search
                     if (!_individualStable.ContainsKey(workerId))
                     {
                         _individualStable.Add(workerId, null);
-                        Console.WriteLine("Found worker " + workerId);
+                        Utilities.WriteLineWithTimestamp(
+                            String.Format("Found worker: {0} ", workerId));
                     }
                     try
                     {
@@ -205,10 +187,8 @@ namespace DeckSearch.Search
             string inboxPath = string.Format(_inboxTemplate, workerId);
             SendWork(inboxPath, choiceIndividual);
             _workerRunningTimes[workerId] = DateTime.UtcNow;
-            String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-            Console.WriteLine(String.Format(
-                "{0} | Worker start: {1}", timestamp, workerId));
+            Utilities.WriteLineWithTimestamp(
+                String.Format("Worker start: {0}", workerId));
 
             _individualStable[workerId] = choiceIndividual;
             return 1;
@@ -247,11 +227,8 @@ namespace DeckSearch.Search
                 if (File.Exists(outboxPath) && !File.Exists(inboxPath))
                 {
                     // Wait for the file to finish being written.
-                    String timestamp =
-                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    Console.WriteLine(
-                        String.Format("{0} | Worker done: {1}",
-                            timestamp, workerId));
+                    Utilities.WriteLineWithTimestamp(
+                        String.Format("Worker done: {0}", workerId));
 
                     ReceiveResults(outboxPath, _individualStable[workerId]);
                     ProcessResult(_individualStable[workerId]);
@@ -282,18 +259,21 @@ namespace DeckSearch.Search
                     timeDiff.TotalMilliseconds);
                 if (timeDiffMillisec >= 15 * 60 * 1000)
                 {
-                    Console.WriteLine(String.Format("Worker {0} might be dead. Redispatching the job...", workerId));
+                    Utilities.WriteLineWithTimestamp(
+                        String.Format("Worker {0} might be dead. Redispatching the job...", workerId));
                     // attempt to resend the job
                     // may fail for no idle workers
                     if (Convert.ToBoolean(
                         DispatchOneJobToWorker(_individualStable[workerId])))
                     {
-                        Console.WriteLine("Redispatching succeeded.");
+                        Utilities.WriteLineWithTimestamp(
+                            String.Format("Redispatching worker {0} succeeded.", workerId));
                         _workerRunningTimes.Remove(workerId);
                     }
                     else
                     {
-                        Console.WriteLine("Redispatching failed. Will retry.");
+                        Utilities.WriteLineWithTimestamp(
+                            String.Format("Redispatching worker {0} failed. Will retry.", workerId));
                     }
                 }
             }
