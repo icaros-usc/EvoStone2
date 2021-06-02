@@ -13,7 +13,7 @@ subprocess.call(['dotnet', 'publish', '--configuration', 'Release', '../..'])
 
 ssu_path = '../../SabberStoneUtil/bin/Release/netstandard2.0/publish/*'
 ss_path = '../../DeckSearch/bin/Release/netcoreapp3.1/publish/*'
-de_path = '../../DeckEvaluator/bin/Release/netcoreapp2.1/publish/*'
+de_path = '../../DeckEvaluator/bin/Release/netcoreapp3.1/publish/*'
 model_path = '../../SurrogateModel/bin/Release/netcoreapp3.1/publish/*'
 play_path = '../../Playground/bin/Release/netcoreapp3.1/publish/*'
 analysis_path = '../../Analysis/bin/Release/netcoreapp3.1/publish/*'

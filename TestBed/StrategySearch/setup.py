@@ -12,8 +12,8 @@ for cur_dir in dirs:
 subprocess.call(['dotnet', 'publish', '--configuration', 'Release', '../..'])
 
 ssu_path = '../../SabberStoneUtil/bin/Release/netstandard2.0/publish/*'
-ss_path = '../../StrategySearch/bin/Release/netcoreapp2.1/publish/*'
-de_path = '../../DeckEvaluator/bin/Release/netcoreapp2.1/publish/*'
+ss_path = '../../StrategySearch/bin/Release/netcoreapp3.1/publish/*'
+de_path = '../../DeckEvaluator/bin/Release/netcoreapp3.1/publish/*'
 bin_dir = 'bin/'
 
 paths = [ssu_path, ss_path, de_path]

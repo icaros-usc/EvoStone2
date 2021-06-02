@@ -40,3 +40,5 @@ TestBed/DeckSearch/*.pdf
 TestBed/DeckSearch/*.csv
 TestBed/DeckSearch/__pycache__
 TestBed/DeckSearch/jacobian_py/__pycache__
+
+TestBed/StrategySearch/bin/
