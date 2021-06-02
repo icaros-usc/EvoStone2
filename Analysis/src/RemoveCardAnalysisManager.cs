@@ -36,6 +36,8 @@ namespace Analysis
 
         private int numEvaled;
 
+        private SurrogateBaseModel model;
+
         public static int CompareCellData(string s1, string s2)
         {
             string[] splitedData = s1.Split(":");
@@ -81,12 +83,17 @@ namespace Analysis
         }
 
         public static void EvaluateOnSurrogate(
-            List<LogIndividual> logIndividuals,
+            List<string> incompleteDeck,
             SurrogateBaseModel model,
             string currSurrIndLogDir,
             string cardRemoved)
         {
-            var result = model.Predict(logIndividuals);
+            // evaluate on surrogate for comparasons
+            var inCompLogIndividuals = new List<LogIndividual>();
+            var inCompLogIndividual = new LogIndividual();
+            inCompLogIndividual.Deck = String.Join("*", incompleteDeck);
+            inCompLogIndividuals.Add(inCompLogIndividual);
+            var result = model.Predict(inCompLogIndividuals);
 
             // store result
             var stats = new OverallStatistics();
@@ -129,7 +136,7 @@ namespace Analysis
             string modelSavePath = getModelPath(expLogDir);
 
             // configurate surrogate model
-            SurrogateBaseModel model = null;
+            model = null;
             if (config.Surrogate.Type == "DeepSetModel")
             {
                 model = new DeepSetModel();
@@ -149,7 +156,7 @@ namespace Analysis
             lastMap.RemoveAt(0);
             lastMap.Sort(CompareCellData); // ascending order
             elitesToAnalyze = new List<LogIndividual>();
-            foreach (string cellData in lastMap.Take(10))
+            foreach (string cellData in lastMap)
             {
                 string[] splitedData = cellData.Split(":");
                 double fitness = Convert.ToDouble(splitedData[5]);
@@ -159,9 +166,13 @@ namespace Analysis
             }
 
             // construct incomp decks
+            Console.WriteLine("Generating incomplete decks and running them on surrogate model...");
             allIncompDeckInds = GenerateIncompleteDeckInds();
             numToEval = allIncompDeckInds.Count;
             numEvaled = 0;
+
+            Console.WriteLine("Incomplete decks constructed.");
+            Console.WriteLine("Evaluated all incomplete decks on surrogate model.");
         }
 
 
@@ -198,6 +209,13 @@ namespace Analysis
                     incompDeckInd.ParentID = elite.IndividualID;
                     incompDeckInd.CardRemoved = uniqueCard;
                     allIncompDeckInds.Enqueue(incompDeckInd);
+
+                    // Evaluate current incomp deck on surrogate
+                    EvaluateOnSurrogate(
+                        incompDeck,
+                        model,
+                        currSurrIndLogDir,
+                        uniqueCard);
                 }
             }
             return allIncompDeckInds;
