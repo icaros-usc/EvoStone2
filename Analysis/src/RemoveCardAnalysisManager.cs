@@ -240,7 +240,8 @@ namespace Analysis
                                       stableInd.CardRemoved));
                 Toml.WriteFile<ResultsMessage>(results, gameLogPath);
 
-                LogIndividual(stableInd, () => {
+                LogIndividual(stableInd, () =>
+                {
                     numEvaled += 1;
                     Console.WriteLine("Eval ({0}/{1})", numEvaled, numToEval);
                     Console.WriteLine("Elite ID: {0}", stableInd.ParentID);
