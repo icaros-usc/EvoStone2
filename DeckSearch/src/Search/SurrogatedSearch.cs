@@ -43,7 +43,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Search Manager to communicate with DeckEvaluators
         /// </summary>
-        private SearchManager _searchManager;
+        private DeckSearchManager _searchManager;
 
 
         private RunningIndividualLog _individualLog;
@@ -68,10 +68,10 @@ namespace DeckSearch.Search
         /// <param name = "configFilename">name of the configuation file</param>
         public SurrogatedSearch(Configuration config, string configFilename)
         {
-            _searchManager = new SearchManager(config, configFilename);
+            _searchManager = new DeckSearchManager(config, configFilename);
             _numGeneration = config.Search.NumGeneration;
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
-            _numSurrogateEvals = _searchManager._searchAlgo.InitialPopulation();
+            _numSurrogateEvals = _searchManager.searchAlgo.InitialPopulation();
             _logLengthPerGen = config.Search.LogLengthPerGen;
             _surrogateElitesLogDir = System.IO.Path.Combine(
                 _searchManager.log_dir_exp, "surrogate_elites");
@@ -205,15 +205,15 @@ namespace DeckSearch.Search
             Console.WriteLine("Begin Surrogated Search...");
 
             // generate initial population
-            while(!_searchManager._searchAlgo.InitialPopulationEvaluated())
+            while(!_searchManager.searchAlgo.InitialPopulationEvaluated())
             {
                 // dispatch jobs until the number reaches
                 // initial population size
                 _searchManager.FindNewWorkers();
 
-                if(!_searchManager._searchAlgo.InitialPopulationDispatched())
+                if(!_searchManager.searchAlgo.InitialPopulationDispatched())
                 {
-                    _searchManager.DispatchJobsToWorkers();
+                    _searchManager.DispatchSearchJobsToWorkers();
                 }
 
                 // wait for workers to finish evaluating initial population
@@ -223,15 +223,15 @@ namespace DeckSearch.Search
                 Thread.Sleep(1000);
             }
 
-            _searchManager._numEvaledPerRun = 0;
+            _searchManager.numEvaledPerRun = 0;
 
-            while(_searchManager._searchAlgo.IsRunning())
+            while(_searchManager.searchAlgo.IsRunning())
             {
                 // back prop using individuals in the buffer
                 BackProp(_searchManager._individualsBuffer.ToList());
 
                 // clear the surrogate map
-                _searchManager._searchAlgo.ClearSurrogateMap();
+                _searchManager.searchAlgo.ClearSurrogateMap();
 
                 // run MAP-Elites on surrogate
                 Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
@@ -246,7 +246,7 @@ namespace DeckSearch.Search
                     List<Individual> currGeneration = new List<Individual>();
                     for(int j=0; j<_numToEvaluatePerGen; j++)
                     {
-                        Individual choiceIndividual = _searchManager._searchAlgo.GenerateIndividualFromSurrogateMap(CardReader._cardSet);
+                        Individual choiceIndividual = _searchManager.searchAlgo.GenerateIndividualFromSurrogateMap(CardReader._cardSet);
                         currGeneration.Add(choiceIndividual);
                     }
                     EvaluateOnSurrogate(currGeneration);
@@ -255,7 +255,7 @@ namespace DeckSearch.Search
                     // add evaluated individuals to feature map and outer feature map
                     foreach(var individual in currGeneration)
                     {
-                        _searchManager._searchAlgo.AddToSurrogateFeatureMap(individual);
+                        _searchManager.searchAlgo.AddToSurrogateFeatureMap(individual);
                         // _searchManager.LogIndividual(individual);
                     }
                     // if ((i+1) % _logLengthPerGen == 0)
@@ -282,7 +282,7 @@ namespace DeckSearch.Search
                 }
 
                 // log feature map
-                _searchManager._searchAlgo.LogSurrogateFeatureMap();
+                _searchManager.searchAlgo.LogSurrogateFeatureMap();
 
                 // get elites to evaluate for real
                 var elites = _searchManager.GetAllElitesFromSurrogateMap();
@@ -302,7 +302,7 @@ namespace DeckSearch.Search
                 // evaluate elites
                 Console.WriteLine("Get {0} elites. Start evaluation...", elites.Count);
                 int eliteIdx = 0; // index of elite to dispatch, also the number of elites dispatched.
-                while(_searchManager._numEvaledPerRun < elites.Count)
+                while(_searchManager.numEvaledPerRun < elites.Count)
                 {
                     _searchManager.FindNewWorkers();
 
@@ -323,13 +323,13 @@ namespace DeckSearch.Search
                 }
 
                 // some verbose info
-                Console.WriteLine("Finished evaluating {0} elites", _searchManager._numEvaledPerRun);
+                Console.WriteLine("Finished evaluating {0} elites", _searchManager.numEvaledPerRun);
                 Console.WriteLine(
                     "Current number of training individuals: {0}",
                     _searchManager._individualsBuffer.Count);
 
                 // reset run per run
-                _searchManager._numEvaledPerRun = 0;
+                _searchManager.numEvaledPerRun = 0;
             }
 
             // Let the workers know that we are done.

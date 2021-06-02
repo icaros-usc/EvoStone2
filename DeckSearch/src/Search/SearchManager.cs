@@ -27,23 +27,23 @@ namespace DeckSearch.Search
         /// <summary>
         /// A queue of running workers that are running deck evaluation
         /// </summary>
-        public Queue<int> _runningWorkers;
+        protected Queue<int> _runningWorkers { get; private set; }
 
         /// <summary>
         /// A queue of idle workers that could dispatch evaluation jobs to
         /// </summary>
-        public Queue<int> _idleWorkers;
+        protected Queue<int> _idleWorkers { get; private set; }
 
         /// <summary>
         /// A dict from ID of the workers to individuals that are evaluated by the workers
         /// </summary>
-        public Dictionary<int, Individual> _individualStable;
+        protected Dictionary<int, Individual> _individualStable { get; private set; }
 
 
         /// <summary>
         /// A dict from ID of the workers to start time of the worker job.
         /// </summary>
-        public Dictionary<int, DateTime> _workerRunningTimes;
+        protected Dictionary<int, DateTime> _workerRunningTimes { get; private set; }
 
 
         /// <summary>
@@ -52,72 +52,54 @@ namespace DeckSearch.Search
         public string _configFilename { get; private set; }
 
         /// <summary>
-        /// List of individuals that are evaluated by the workers. The list is emptied periodically
-        /// </summary>
-        public HashSet<Individual> _individualsBuffer = new HashSet<Individual>();
-
-        /// <summary>
         /// Search Algorithm
         /// </summary>
-        public SearchAlgorithm _searchAlgo;
+        // public SearchAlgorithm _searchAlgo;
 
         // Logging objects
-        private RunningIndividualLog _individualLog;
-        private RunningIndividualLog _championLog;
-        private RunningIndividualLog _fittestLog;
+        protected RunningIndividualLog _individualLog { get; private set; }
+        protected RunningIndividualLog _championLog { get; private set; }
+        protected RunningIndividualLog _fittestLog { get; private set; }
 
         /// <summary>
         /// Max number of win counts of all individuals
         /// </summary>
-        private double _maxWins;
+        protected double _maxWins { get; private set; }
 
         /// <summary>
         /// Max fitness of all individuals
         /// </summary>
-        private double _maxFitness;
-
-        /// <summary>
-        /// Number of individuals evaluated for each MAP-Elites run.
-        /// This is used for Surrogated Search.
-        /// </summary>
-        public int _numEvaledPerRun;
+        protected double _maxFitness { get; private set; }
 
         // Directory names
         private const string ACTIVE_DIRECTORY = "active/";
         private const string LOG_DIRECTORY = "logs/";
-        private const string TRAIN_LOG_DIRECTORY = "train_log/";
         private const string BOXES_DIRECTORY = "boxes/";
 
 
         /// <summary>
-        /// Prefix of the file path to write the trianing data for Surrogated Search
-        /// </summary>
-        private const string TRAINING_DATA_LOG_FILENAME_PREFIX =
-           TRAIN_LOG_DIRECTORY + "training_data";
-
-        /// <summary>
         /// File path for the Search Manager to send evaluation job to the evaluators
         /// </summary>
-        public const string _inboxTemplate = BOXES_DIRECTORY
+        protected const string _inboxTemplate = BOXES_DIRECTORY
                + "deck-{0,4:D4}-inbox.tml";
 
         /// <summary>
         /// File path for the Search Manager to receive evaluation result from the evaluators
         /// </summary>
-        public const string _outboxTemplate = BOXES_DIRECTORY
+        protected const string _outboxTemplate = BOXES_DIRECTORY
                + "deck-{0,4:D4}-outbox.tml";
 
         /// <summary>
         /// File path to write a file so that the workers know that a search is available
         /// </summary>
-        public const string _activeSearchPath = ACTIVE_DIRECTORY
+        protected const string _activeSearchPath = ACTIVE_DIRECTORY
                + "search.txt";
 
 
 
-        public string log_dir_exp { get; set; }
+        public string log_dir_exp { get; private set; }
 
-        private int _numToEvaluate = 0;
+        // private int _numToEvaluate = 0;
 
         /// <summary>
         /// Constructor
@@ -131,7 +113,7 @@ namespace DeckSearch.Search
             _idleWorkers = new Queue<int>();
             _individualStable = new Dictionary<int, Individual>();
             _workerRunningTimes = new Dictionary<int, DateTime>();
-            _numEvaledPerRun = 0;
+            // _numEvaledPerRun = 0;
 
             // Grab the configuration info
             _configFilename = configFilename;
@@ -140,7 +122,7 @@ namespace DeckSearch.Search
             String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             log_dir_base += "_" + config.Search.Category +
                             "_" + config.Search.Type;
-            if(config.Surrogate != null)
+            if (config.Surrogate != null)
             {
                 log_dir_base += "_" + config.Surrogate.Type;
             }
@@ -154,32 +136,6 @@ namespace DeckSearch.Search
 
             // Setup the logs to record the data on individuals
             InitLogs(log_dir_exp);
-
-            // Set up search algorithm
-            Console.WriteLine("Algo: " + config.Search.Type);
-            if (config.Search.Type.Equals("MAP-Elites"))
-            {
-                var searchConfig = Toml.ReadFile<MapElitesParams>(
-                    config.Search.ConfigFilename);
-                _numToEvaluate = searchConfig.Search.NumToEvaluate;
-                _searchAlgo = new MapElitesAlgorithm(searchConfig, log_dir_exp);
-            }
-
-            else if (config.Search.Type.Equals("EvolutionStrategy"))
-            {
-                var searchConfig = Toml.ReadFile<EvolutionStrategyParams>(config.Search.ConfigFilename);
-                _numToEvaluate = searchConfig.Search.NumToEvaluate;
-                _searchAlgo = new EvolutionStrategyAlgorithm(searchConfig);
-            }
-
-            else if (config.Search.Type.Equals("RandomSearch"))
-            {
-                var searchConfig = Toml.ReadFile<RandomSearchParams>(
-                    config.Search.ConfigFilename);
-                _numToEvaluate = searchConfig.Search.NumToEvaluate;
-                _searchAlgo = new RandomSearchAlgorithm(
-                    searchConfig, log_dir_exp);
-            }
         }
 
         /// <summary>
@@ -207,7 +163,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Helper function to write text to specified stream
         /// </summary>
-        public static void WriteText(Stream fs, string s)
+        private static void WriteText(Stream fs, string s)
         {
             s += "\n";
             byte[] info = new UTF8Encoding(true).GetBytes(s);
@@ -239,11 +195,13 @@ namespace DeckSearch.Search
         public void FindNewWorkers()
         {
             // Look for new workers.
-            string[] hailingFiles = new string[]{};
+            string[] hailingFiles = new string[] { };
             try
             {
                 hailingFiles = Directory.GetFiles(ACTIVE_DIRECTORY);
-            } catch (System.IO.IOException e){
+            }
+            catch (System.IO.IOException e)
+            {
                 Console.WriteLine("IOException catched while reading hailing files. Will retry...");
                 Console.WriteLine("###########");
                 Console.WriteLine(e.StackTrace);
@@ -267,9 +225,11 @@ namespace DeckSearch.Search
                         _individualStable.Add(workerId, null);
                         Console.WriteLine("Found worker " + workerId);
                     }
-                    try{
+                    try
+                    {
                         File.Delete(activeFile);
-                    } catch (Exception e)
+                    }
+                    catch (Exception e)
                     {
                         Console.WriteLine("Exception while deleting: {0}",
                                           e.GetType().ToString());
@@ -279,18 +239,6 @@ namespace DeckSearch.Search
             }
         }
 
-        /// <summary>
-        /// Function to dispatch multiple simulation jobs to DeckEvaluator through File IO
-        /// </summary>
-        public void DispatchJobsToWorkers()
-        {
-            // Dispatch jobs to the available workers.
-            while (_idleWorkers.Count > 0 && !_searchAlgo.IsBlocking())
-            {
-                Individual choiceIndividual = _searchAlgo.GenerateIndividual(CardReader._cardSet);
-                DispatchOneJobToWorker(choiceIndividual);
-            }
-        }
 
         /// <summary>
         /// Function to dispatch one simulation job to DeckEvaluator
@@ -304,7 +252,7 @@ namespace DeckSearch.Search
             }
             int workerId = _idleWorkers.Dequeue();
             _runningWorkers.Enqueue(workerId);
-            string inboxPath = string.Format(SearchManager._inboxTemplate, workerId);
+            string inboxPath = string.Format(_inboxTemplate, workerId);
             SendWork(inboxPath, choiceIndividual);
             _workerRunningTimes[workerId] = DateTime.UtcNow;
             String timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -335,15 +283,15 @@ namespace DeckSearch.Search
         /// <summary>
         /// Function to find DeckEvaluator instances that are done with simulation and receieve the result
         /// </summary>
-        public void FindDoneWorkers(bool storeBuffer = false, bool keepIndID = false, bool logFeatureMap = true)
+        public void FindDoneWorkers(System.Action<Individual> ProcessResult)
         {
             // Look for individuals that are done.
             int numActiveWorkers = _runningWorkers.Count;
             for (int i = 0; i < numActiveWorkers; i++)
             {
                 int workerId = _runningWorkers.Dequeue();
-                string inboxPath = string.Format(SearchManager._inboxTemplate, workerId);
-                string outboxPath = string.Format(SearchManager._outboxTemplate, workerId);
+                string inboxPath = string.Format(DeckSearchManager._inboxTemplate, workerId);
+                string outboxPath = string.Format(DeckSearchManager._outboxTemplate, workerId);
 
                 // Test if this worker is done.
                 if (File.Exists(outboxPath) && !File.Exists(inboxPath))
@@ -356,29 +304,8 @@ namespace DeckSearch.Search
                             timestamp, workerId));
 
                     ReceiveResults(outboxPath, _individualStable[workerId]);
-                    int originalID = _individualStable[workerId].ID;
-                    _searchAlgo.AddToFeatureMap(_individualStable[workerId]);
+                    ProcessResult(_individualStable[workerId]);
 
-                    if (logFeatureMap)
-                    {
-                        _searchAlgo.LogFeatureMap();
-                    }
-
-                    // For Surrogate Search we need to keep the ID.
-                    if (keepIndID)
-                    {
-                        _individualStable[workerId].ID = originalID;
-                    }
-
-                    // store done individual to a tmp buffer
-                    if (storeBuffer)
-                    {
-                        _individualsBuffer.Add(_individualStable[workerId]); // add evaluated individual to batch
-                        _numEvaledPerRun += 1;
-                        Console.WriteLine("Buffer Size: " + _individualsBuffer.Count);
-                    }
-
-                    LogIndividual(_individualStable[workerId]);
                     _idleWorkers.Enqueue(workerId);
                     _workerRunningTimes.Remove(workerId);
                 }
@@ -390,14 +317,14 @@ namespace DeckSearch.Search
         }
 
         /// <summary>
-        /// If a worker does not return the job in 15 min, worker maybe dead. 
+        /// If a worker does not return the job in 15 min, worker maybe dead.
         /// Resent the job to another worker.
         /// </summary>
         public void FindOvertimeWorkers()
         {
             var _workerRunningTimesCopy =
                 new Dictionary<int, DateTime>(_workerRunningTimes);
-            foreach(var item in _workerRunningTimesCopy)
+            foreach (var item in _workerRunningTimesCopy)
             {
                 int workerId = item.Key;
                 TimeSpan timeDiff = DateTime.UtcNow - item.Value;
@@ -408,13 +335,14 @@ namespace DeckSearch.Search
                     Console.WriteLine(String.Format("Worker {0} might be dead. Redispatching the job...", workerId));
                     // attempt to resend the job
                     // may fail for no idle workers
-                    if(Convert.ToBoolean(
+                    if (Convert.ToBoolean(
                         DispatchOneJobToWorker(_individualStable[workerId])))
                     {
                         Console.WriteLine("Redispatching succeeded.");
                         _workerRunningTimes.Remove(workerId);
                     }
-                    else{
+                    else
+                    {
                         Console.WriteLine("Redispatching failed. Will retry.");
                     }
                 }
@@ -424,7 +352,7 @@ namespace DeckSearch.Search
         /// <summary>
         /// Heper function to receive results from DeckEvaluators
         /// </summary>
-        private void ReceiveResults(string workerOutboxPath, Individual cur)
+        protected void ReceiveResults(string workerOutboxPath, Individual cur)
         {
             // Read the message and then delete the file.
             var results = Toml.ReadFile<ResultsMessage>(workerOutboxPath);
@@ -442,14 +370,14 @@ namespace DeckSearch.Search
         /// <summary>
         /// Function to log the info of a individual evaluated by DeckEvaluators
         /// </summary>
-        public void LogIndividual(Individual cur)
+        protected void LogIndividual(
+            Individual cur,
+            System.Action LogProgress)
         {
             var os = cur.OverallData;
             Console.WriteLine("------------------");
-            Console.WriteLine(string.Format("Eval ({0}/{1}): {2}",
-                              _searchAlgo.NumIndividualsEvaled(),
-                              _numToEvaluate,
-                              string.Join("", cur.ToString())));
+            LogProgress();
+            Console.WriteLine("Solution Deck: " + cur.ToString());
             Console.WriteLine("Win Count: " + os.WinCount);
             Console.WriteLine("Average Health Difference: "
                               + os.AverageHealthDifference);
@@ -489,47 +417,6 @@ namespace DeckSearch.Search
                 _championLog.LogIndividual(cur);
             if (didHitMaxFitness)
                 _fittestLog.LogIndividual(cur);
-        }
-
-        /// <summary>
-        /// Helper function to determine wether current algorithm is Map-Elites
-        private bool IsMapElitesAlgo()
-        {
-            if (_searchAlgo.GetType().Equals(typeof(MapElitesAlgorithm)))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// For Map-Elite algorithm, get all elites from the FeatureMap
-        /// </summary>
-        /// <param name="num">Number of elites to choose. Return all if -1.
-        /// </param>
-
-        public List<Individual> GetAllElitesFromSurrogateMap(int num=-1)
-        {
-            if (!IsMapElitesAlgo())
-            {
-                Console.WriteLine("Warning: {0} does not have elites!", _searchAlgo.GetType());
-                return null;
-            }
-
-            var elites = _searchAlgo.GetAllElitesFromSurrogateMap();
-
-            if (num == -1)
-            {
-                return elites;
-            }
-
-            var random = new Random();
-            List<Individual> choiceElites = new List<Individual>();
-            while (choiceElites.Count < num)
-            {
-                choiceElites.Add(elites[random.Next(elites.Count)]);
-            }
-            return choiceElites;
         }
     }
 }

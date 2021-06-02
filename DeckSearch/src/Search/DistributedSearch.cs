@@ -12,7 +12,7 @@ namespace DeckSearch.Search
     class DistributedSearch
     {
         // Search Manager
-        private SearchManager _searchManager;
+        private DeckSearchManager _searchManager;
 
         /// <summary>
         /// Constructor
@@ -20,7 +20,7 @@ namespace DeckSearch.Search
         /// <param name = "configFilename">name of the configuation file</param>
         public DistributedSearch(Configuration config, string configFilename)
         {
-            _searchManager = new SearchManager(config, configFilename);
+            _searchManager = new DeckSearchManager(config, configFilename);
         }
 
         public void Run()
@@ -29,10 +29,10 @@ namespace DeckSearch.Search
             _searchManager.AnnounceWorkersStart();
 
             Console.WriteLine("Begin Distributed Search...");
-            while (_searchManager._searchAlgo.IsRunning())
+            while (_searchManager.searchAlgo.IsRunning())
             {
                 _searchManager.FindNewWorkers();
-                _searchManager.DispatchJobsToWorkers();
+                _searchManager.DispatchSearchJobsToWorkers();
                 _searchManager.FindDoneWorkers();
                 Thread.Sleep(1000);
             }
