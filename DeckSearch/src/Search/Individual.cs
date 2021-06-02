@@ -13,7 +13,7 @@ using SabberStoneUtil.Messaging;
 
 namespace DeckSearch.Search
 {
-    class Individual
+    public class Individual
     {
         public Individual() { }
         public Individual(Individual other)
@@ -67,12 +67,25 @@ namespace DeckSearch.Search
 
         public double Fitness { get; set; }
         public double[] Features { get; set; }
+        public string CardRemoved; // used by remove card analysis
 
         public Individual(int[] cardCounts, List<Card> cardSet)
         {
             _cardCounts = cardCounts;
             _cardSet = cardSet;
             ParentID = -1;
+        }
+
+        public Individual(List<string> deck, List<Card> cardSet)
+        {
+            _cardSet = cardSet;
+            ParentID = -1;
+            _cardCounts = new int[cardSet.Count];
+            foreach (var cardName in deck)
+            {
+                int idx = cardSet.FindIndex(c => c.Name == cardName);
+                _cardCounts[idx]++;
+            }
         }
 
         public double GetStatByName(string name)

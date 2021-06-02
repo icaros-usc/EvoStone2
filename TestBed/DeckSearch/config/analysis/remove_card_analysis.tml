@@ -3,5 +3,5 @@ OpponentDeckSuite = "resources/decks/suites/starterMeta.tml"
 DeckPools = ["resources/decks/pools/starterDecks.tml"]
 
 [[Evaluation.PlayerStrategies]]
-NumGames = 200
+NumGames = 20
 Strategy = "Control"
