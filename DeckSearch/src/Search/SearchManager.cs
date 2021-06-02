@@ -16,7 +16,7 @@ namespace DeckSearch.Search
     /// <summary>
     /// A helper class to communicate with DeckEvaluator through File IO
     /// </summary>
-    class SearchManager
+    public class SearchManager
     {
         /// <summary>
         /// A queue of running workers that are running deck evaluation
@@ -45,29 +45,9 @@ namespace DeckSearch.Search
         /// </summary>
         public string _configFilename { get; private set; }
 
-        /// <summary>
-        /// Search Algorithm
-        /// </summary>
-        // public SearchAlgorithm _searchAlgo;
-
-        // Logging objects
-        protected RunningIndividualLog _individualLog { get; private set; }
-        protected RunningIndividualLog _championLog { get; private set; }
-        protected RunningIndividualLog _fittestLog { get; private set; }
-
-        /// <summary>
-        /// Max number of win counts of all individuals
-        /// </summary>
-        protected double _maxWins { get; private set; }
-
-        /// <summary>
-        /// Max fitness of all individuals
-        /// </summary>
-        protected double _maxFitness { get; private set; }
 
         // Directory names
         private const string ACTIVE_DIRECTORY = "active/";
-        private const string LOG_DIRECTORY = "logs/";
         private const string BOXES_DIRECTORY = "boxes/";
 
 
@@ -91,7 +71,6 @@ namespace DeckSearch.Search
 
 
 
-        public string log_dir_exp { get; private set; }
 
         // private int _numToEvaluate = 0;
 
@@ -99,60 +78,37 @@ namespace DeckSearch.Search
         /// Constructor
         /// </summary>
         /// <param name = "configFilename">name of the configuation file</param>
-        public SearchManager(Configuration config, string configFilename)
+        public SearchManager(string configFilename)
         {
-            _maxWins = 0;
-            _maxFitness = Int32.MinValue;
             _runningWorkers = new Queue<int>();
             _idleWorkers = new Queue<int>();
             _individualStable = new Dictionary<int, Individual>();
             _workerRunningTimes = new Dictionary<int, DateTime>();
-            // _numEvaledPerRun = 0;
 
             // Grab the configuration info
             _configFilename = configFilename;
 
-            // set up log directory
-            String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            log_dir_base += "_" + config.Search.Category +
-                            "_" + config.Search.Type;
-            if (config.Surrogate != null)
-            {
-                log_dir_base += "_" + config.Surrogate.Type;
-            }
-            String log_dir_exp = System.IO.Path.Combine(LOG_DIRECTORY, log_dir_base);
-            this.log_dir_exp = log_dir_exp;
-            System.IO.Directory.CreateDirectory(log_dir_exp);
+            // // set up log directory
+            // String log_dir_base = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            // log_dir_base += "_" + config.Search.Category +
+            //                 "_" + config.Search.Type;
+            // if (config.Surrogate != null)
+            // {
+            //     log_dir_base += "_" + config.Surrogate.Type;
+            // }
+            // String log_dir_exp = System.IO.Path.Combine(LOG_DIRECTORY, log_dir_base);
+            // this.log_dir_exp = log_dir_exp;
+            // System.IO.Directory.CreateDirectory(log_dir_exp);
 
-            // write the config file to the log directory for future reference
-            string config_out_path = System.IO.Path.Combine(log_dir_exp, "experiment_config.tml");
-            Toml.WriteFile<Configuration>(config, config_out_path);
+            // // write the config file to the log directory for future reference
+            // string config_out_path = System.IO.Path.Combine(log_dir_exp, "experiment_config.tml");
+            // Toml.WriteFile<Configuration>(config, config_out_path);
 
-            // Setup the logs to record the data on individuals
-            InitLogs(log_dir_exp);
+            // // Setup the logs to record the data on individuals
+            // InitLogs(log_dir_exp);
         }
 
-        /// <summary>
-        /// Helper function to initialize the logging related objects
-        /// </summary>
-        private void InitLogs(string log_dir_exp)
-        {
-            // File path to log all individuals
-            string INDIVIDUAL_LOG_FILENAME = System.IO.Path.Combine(log_dir_exp, "individual_log.csv");
 
-            // File path to log the champion individuals
-            string CHAMPION_LOG_FILENAME = System.IO.Path.Combine(log_dir_exp, "champion_log.csv");
-
-            // File path to log the fittest individuals
-            string FITTEST_LOG_FILENAME = System.IO.Path.Combine(log_dir_exp, "fittest_log.csv");
-
-            _individualLog =
-               new RunningIndividualLog(INDIVIDUAL_LOG_FILENAME);
-            _championLog =
-               new RunningIndividualLog(CHAMPION_LOG_FILENAME);
-            _fittestLog =
-               new RunningIndividualLog(FITTEST_LOG_FILENAME);
-        }
 
         /// <summary>
         /// Helper function to write text to specified stream
@@ -396,21 +352,6 @@ namespace DeckSearch.Search
             }
 
             Console.WriteLine("\n");
-
-            // Save stats
-            bool didHitMaxWins =
-               cur.OverallData.WinCount > _maxWins;
-            bool didHitMaxFitness =
-               cur.Fitness > _maxFitness;
-            _maxWins = Math.Max(_maxWins, cur.OverallData.WinCount);
-            _maxFitness = Math.Max(_maxFitness, cur.Fitness);
-
-            // Log the individuals
-            _individualLog.LogIndividual(cur);
-            if (didHitMaxWins)
-                _championLog.LogIndividual(cur);
-            if (didHitMaxFitness)
-                _fittestLog.LogIndividual(cur);
         }
     }
 }

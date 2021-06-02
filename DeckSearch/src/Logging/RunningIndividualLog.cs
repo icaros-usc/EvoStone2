@@ -11,7 +11,7 @@ using DeckSearch.Search;
 
 namespace DeckSearch.Logging
 {
-   class RunningIndividualLog
+   public class RunningIndividualLog
    {
       private string _logPath;
       private bool _isInitiated;
