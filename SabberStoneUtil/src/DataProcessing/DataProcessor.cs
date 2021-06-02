@@ -71,7 +71,9 @@ namespace SabberStoneUtil.DataProcessing
             }
             cardEmbeddingSize = rawEmbeddings[0].embedding.Length;
 
-            Console.WriteLine("Number of cards in search space: {0}", numCards);
+            Utilities.WriteLineWithTimestamp(
+                String.Format("Number of cards in search space: {0}",
+                              numCards));
         }
 
         // ****************** I/O Functions ******************

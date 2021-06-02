@@ -9,6 +9,7 @@ using Nett;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 
+using SabberStoneUtil;
 using SabberStoneUtil.Decks;
 using SabberStoneUtil.Messaging;
 
@@ -23,7 +24,7 @@ namespace DeckEvaluator
       {
          string nodeName = args[0];
          int nodeId = Int32.Parse(args[0]);
-         Console.WriteLine("Node Id: "+nodeId);
+         Utilities.WriteLineWithTimestamp("Node Id: "+nodeId);
 
          // These files are for asyncronous communication between this
          // worker and it's scheduler.
@@ -43,13 +44,13 @@ namespace DeckEvaluator
          string activeSearchPath = activeDirectory + "search.txt";
          if (!File.Exists(activeSearchPath))
          {
-            Console.WriteLine("No search has been found.");
+            Utilities.WriteLineWithTimestamp("No search has been found.");
             return;
          }
 
          // The opponent deck doesn't change so we can load it here.
          string[] textLines = File.ReadAllLines(activeSearchPath);
-         Console.WriteLine("Config File: " + textLines[1]);
+         Utilities.WriteLineWithTimestamp("Config File: " + textLines[1]);
          var config = Toml.ReadFile<Configuration>(textLines[1]);
 
          // Apply nerfs if nerfs are available
@@ -79,7 +80,8 @@ namespace DeckEvaluator
             // Wait until we have some work.
             while (!File.Exists(inboxPath) && File.Exists(activeSearchPath))
             {
-               Console.WriteLine("Waiting... ("+nodeId+")");
+               Utilities.WriteLineWithTimestamp(
+                  String.Format("Waiting... ({0})", nodeId));
                Thread.Sleep(5000);
             }
 
@@ -178,7 +180,7 @@ namespace DeckEvaluator
          string msg = string.Format("Nerfing ({0}) to ({1}, {2}/{3})",
                nerf.CardName, nerf.NewManaCost,
                nerf.NewAttack, nerf.NewHealth);
-         Console.WriteLine(msg);
+         Utilities.WriteLineWithTimestamp(msg);
       }
 
       private static void RecordDeckProperties(Deck deck,

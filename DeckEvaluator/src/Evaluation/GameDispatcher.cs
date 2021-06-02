@@ -11,6 +11,7 @@ using SabberStoneCore.Model;
 
 using SabberStoneCoreAi.Score;
 
+using SabberStoneUtil;
 using SabberStoneUtil.Messaging;
 
 namespace DeckEvaluator.Evaluation
@@ -63,7 +64,7 @@ namespace DeckEvaluator.Evaluation
 
       private void runGame(int gameId, GameEvaluator ev)
       {
-         Console.WriteLine("Starting game: "+gameId);
+         Utilities.WriteLineWithTimestamp("Starting game: "+gameId);
 
          // Run a game
          GameEvaluator.GameResult result = ev.PlayGame(gameId);
@@ -94,7 +95,7 @@ namespace DeckEvaluator.Evaluation
             _totalStrategyAlignment += result._strategyAlignment;
          }
 
-         Console.WriteLine("Finished game: "+gameId);
+         Utilities.WriteLineWithTimestamp("Finished game: "+gameId);
 
          // Rest every game.
          Thread.Sleep(1000);
@@ -112,17 +113,26 @@ namespace DeckEvaluator.Evaluation
          }
          catch (System.InvalidCastException)
          {
-            Console.WriteLine("InvalidCastException catched. Restarting game {0}", gameId);
+            Utilities.WriteLineWithTimestamp(
+               String.Format(
+                  "InvalidCastException catched. Restarting game {0}", 
+                  gameId));
             queueGame(gameId);
          }
          catch (System.NullReferenceException)
          {
-            Console.WriteLine("NullReferenceException catched. Restarting game {0}", gameId);
+            Utilities.WriteLineWithTimestamp(
+               String.Format(
+                  "NullReferenceException catched. Restarting game {0}",
+                  gameId));
             queueGame(gameId);
          }
          catch (System.Exception)
          {
-            Console.WriteLine("Unknown Exception catched. Restarting game {0}", gameId);
+            Utilities.WriteLineWithTimestamp(
+               String.Format(
+                  "Unknown Exception catched. Restarting game {0}",
+                  gameId));
             queueGame(gameId);
          }
       }

@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using SurrogateModel.Surrogate;
 using DeckSearch.Search.MapElites;
 using DeckSearch.Logging;
-using DeckSearch;
 
+using SabberStoneUtil;
 using SabberStoneUtil.Config;
 using SabberStoneUtil.DataProcessing;
 using SabberStoneUtil.Messaging;
@@ -94,7 +94,9 @@ namespace DeckSearch.Search
                 _surrogateModel = new LinearModel(
                     log_dir_exp: _searchManager.log_dir_exp);
             }
-            Console.WriteLine("{0} Surrogate model created.", config.Surrogate.Type);
+            Utilities.WriteLineWithTimestamp(
+                String.Format("{0} Surrogate model created.",
+                              config.Surrogate.Type));
 
         }
 
@@ -176,7 +178,8 @@ namespace DeckSearch.Search
         private void BackProp(List<Individual> individuals)
         {
             if (individuals.Count == 0) {
-                Console.WriteLine("Buffer is empty. Skipping backprop...");
+                Utilities.WriteLineWithTimestamp(
+                    "Buffer is empty. Skipping backprop...");
                 return;
             }
             var logIndividuals = ConvertIndividuals(individuals);
@@ -192,7 +195,7 @@ namespace DeckSearch.Search
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
+            Utilities.WriteLineWithTimestamp("RunTime " + elapsedTime);
         }
 
         /// <summary>
@@ -202,7 +205,7 @@ namespace DeckSearch.Search
         {
             // let the workers know that searchAlgo is avialble
             _searchManager.AnnounceWorkersStart();
-            Console.WriteLine("Begin Surrogated Search...");
+            Utilities.WriteLineWithTimestamp("Begin Surrogated Search...");
 
             // generate initial population
             while(!_searchManager.searchAlgo.InitialPopulationEvaluated())
@@ -234,8 +237,9 @@ namespace DeckSearch.Search
                 _searchManager.searchAlgo.ClearSurrogateMap();
 
                 // run MAP-Elites on surrogate
-                Console.WriteLine("Running {0} generations of Map-Elites, each with {1} individuals",
-                    _numGeneration, _numToEvaluatePerGen);
+                Utilities.WriteLineWithTimestamp(
+                    String.Format("Running {0} generations of Map-Elites, each with {1} individuals",
+                                  _numGeneration, _numToEvaluatePerGen));
 
                 // verbose exactly 10 times
                 int verboseLogLength = _numGeneration/10;
@@ -256,28 +260,12 @@ namespace DeckSearch.Search
                     foreach(var individual in currGeneration)
                     {
                         _searchManager.searchAlgo.AddToSurrogateFeatureMap(individual);
-                        // _searchManager.LogIndividual(individual);
                     }
-                    // if ((i+1) % _logLengthPerGen == 0)
-                    // {
-                    //     while(true){
-                    //         try{
-                    //             // update surrogate feature map log
-                    //             _searchManager._searchAlgo.LogSurrogateFeatureMap();
-                    //             break;
-                    //         } catch(System.IO.IOException e) {
-                    //             Console.WriteLine("IOException catched while logging. Will retry...");
-                    //             Console.WriteLine("###########");
-                    //             Console.WriteLine(e.StackTrace);
-                    //             Console.WriteLine("###########");
-                    //             _searchManager._searchAlgo.LogSurrogateFeatureMap();
-                    //         }
-                    //     }
-                    // }
 
                     if ((i+1) % verboseLogLength == 0)
                     {
-                        Console.WriteLine("Generation {0} completed...", i+1);
+                        Utilities.WriteLineWithTimestamp(
+                            String.Format("Generation {0} completed...", i+1));
                     }
                 }
 
@@ -300,7 +288,9 @@ namespace DeckSearch.Search
                 }
 
                 // evaluate elites
-                Console.WriteLine("Get {0} elites. Start evaluation...", elites.Count);
+                Utilities.WriteLineWithTimestamp(
+                    String.Format("Get {0} elites. Start evaluation...",
+                                  elites.Count));
                 int eliteIdx = 0; // index of elite to dispatch, also the number of elites dispatched.
                 while(_searchManager.numEvaledPerRun < elites.Count)
                 {
@@ -323,10 +313,12 @@ namespace DeckSearch.Search
                 }
 
                 // some verbose info
-                Console.WriteLine("Finished evaluating {0} elites", _searchManager.numEvaledPerRun);
-                Console.WriteLine(
-                    "Current number of training individuals: {0}",
-                    _searchManager._individualsBuffer.Count);
+                Utilities.WriteLineWithTimestamp(
+                    String.Format("Finished evaluating {0} elites",
+                                  _searchManager.numEvaledPerRun));
+                Utilities.WriteLineWithTimestamp(
+                    String.Format("Current number of training individuals: {0}",
+                                  _searchManager._individualsBuffer.Count));
 
                 // reset run per run
                 _searchManager.numEvaledPerRun = 0;

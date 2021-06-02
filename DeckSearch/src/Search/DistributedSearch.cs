@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 
+using SabberStoneUtil;
 using SabberStoneUtil.Config;
 
 namespace DeckSearch.Search
@@ -28,7 +29,7 @@ namespace DeckSearch.Search
             // let the workers know that searchAlgo is avialble
             _searchManager.AnnounceWorkersStart();
 
-            Console.WriteLine("Begin Distributed Search...");
+            Utilities.WriteLineWithTimestamp("Begin Distributed Search...");
             while (_searchManager.searchAlgo.IsRunning())
             {
                 _searchManager.FindNewWorkers();

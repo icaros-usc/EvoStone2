@@ -11,6 +11,7 @@ using DeckSearch.Search;
 
 using SurrogateModel.Surrogate;
 
+using SabberStoneUtil;
 using SabberStoneUtil.DataProcessing;
 using SabberStoneUtil.Config;
 using SabberStoneUtil.Decks;
@@ -166,13 +167,13 @@ namespace Analysis
             }
 
             // construct incomp decks
-            Console.WriteLine("Generating incomplete decks and running them on surrogate model...");
+            Utilities.WriteLineWithTimestamp("Generating incomplete decks and running them on surrogate model...");
             allIncompDeckInds = GenerateIncompleteDeckInds();
             numToEval = allIncompDeckInds.Count;
             numEvaled = 0;
 
-            Console.WriteLine("Incomplete decks constructed.");
-            Console.WriteLine("Evaluated all incomplete decks on surrogate model.");
+            Utilities.WriteLineWithTimestamp("Incomplete decks constructed.");
+            Utilities.WriteLineWithTimestamp("Evaluated all incomplete decks on surrogate model.");
         }
 
 

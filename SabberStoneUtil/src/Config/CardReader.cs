@@ -39,14 +39,15 @@ namespace SabberStoneUtil.Config
                 if (curClass.ToString().Equals(className))
                     return curClass;
 
-            Console.WriteLine("Card class " + className
-                              + " not a valid hero class.");
+            Utilities.WriteLineWithTimestamp(
+                "Card class " + className + " not a valid hero class.");
             return CardClass.NEUTRAL;
         }
 
         public static CardSet[] GetSetsFromNames(string[] cardSets)
         {
-            Console.WriteLine(String.Join(" ", cardSets));
+            Utilities.WriteLineWithTimestamp(
+                "Using card sets: " + String.Join(" ", cardSets));
             var sets = new CardSet[cardSets.Length];
 
             for (int i = 0; i < cardSets.Length; i++)
@@ -59,9 +60,11 @@ namespace SabberStoneUtil.Config
         }
 
 
-        private static void printCards(List<Card> cards) {
+        private static void printCards(List<Card> cards)
+        {
             Console.WriteLine("Card set size = " + cards.Count);
-            foreach (Card c in cards) {
+            foreach (Card c in cards)
+            {
                 Console.WriteLine(c.Name);
             }
         }
