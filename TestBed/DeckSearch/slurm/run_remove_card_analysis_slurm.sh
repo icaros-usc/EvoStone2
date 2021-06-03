@@ -13,7 +13,7 @@ LOGDIR="./slurm/logs/slurm_${DATE}"
 echo "SLURM Log directory: ${LOGDIR}"
 mkdir -p "$LOGDIR"
 ANALYSIS_SCRIPT="$LOGDIR/analysis.slurm"
-ANALYSIS_OUT="$LOGDIR/analysis-analysis-%j.out"
+ANALYSIS_OUT="$LOGDIR/slurm-analysis-%j.out"
 
 # Submit analysis script.
 echo "\
