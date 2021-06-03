@@ -225,7 +225,7 @@ namespace Analysis
 
         public void DispatchEvalJobsToWorkers()
         {
-            while (_idleWorkers.Count > 0)
+            while (_idleWorkers.Count > 0 && allIncompDeckInds.Count > 0)
             {
                 Individual choiceIndividual = allIncompDeckInds.Dequeue();
                 if (DispatchOneJobToWorker(choiceIndividual) == 0)
@@ -270,6 +270,6 @@ namespace Analysis
             });
         }
 
-        public bool Running() => allIncompDeckInds.Count > 0;
+        public bool Running() => numEvaled < numToEval;
     }
 }
