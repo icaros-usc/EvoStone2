@@ -24,6 +24,7 @@ namespace Analysis
                 _rcaManager.FindNewWorkers();
                 _rcaManager.DispatchEvalJobsToWorkers();
                 _rcaManager.FindDoneWorkers();
+                _rcaManager.FindOvertimeWorkers();
                 Thread.Sleep(1000);
             }
 
