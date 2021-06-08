@@ -23,22 +23,50 @@ namespace Analysis
 {
     public class RemoveCardAnalysisManager : SearchManager
     {
+        /// <summary>
+        /// List of elites to run analysis.
+        /// </summary>
         private List<LogIndividual> elitesToAnalyze;
 
+        /// <summary>
+        /// Log directory of the remove card analysis.
+        /// </summary>
         private string analysisLogDir;
 
+        /// <summary>
+        /// Log directory of evaluations run for real.
+        /// </summary>
         private const string REAL_SIM_DIR = "real_sim";
 
+        /// <summary>
+        /// Log directory of evaluations run on surrogate model.
+        /// </summary>
         private const string SURR_SIM_DIR = "surrogate_sim";
 
+        /// <summary>
+        /// All incomplete decks to run evaluations.
+        /// </summary>
         private Queue<Individual> allIncompDeckInds;
 
+        /// <summary>
+        /// Total number of evaluations
+        /// </summary>
         private int numToEval;
 
+        /// <summary>
+        /// Number of evaluations finished.
+        /// </summary>
         private int numEvaled;
 
+        /// <summary>
+        /// Surrogate model trained from DSA-ME experiment.
+        /// </summary>
         private SurrogateBaseModel model;
 
+        /// <summary>
+        /// Function to compare cell data logged in elite map by
+        /// their fitness.
+        /// </summary>
         public static int CompareCellData(string s1, string s2)
         {
             string[] splitedData = s1.Split(":");
@@ -53,6 +81,9 @@ namespace Analysis
                 return -1;
         }
 
+        /// <summary>
+        /// Get the latest surrogate model checkpoint.
+        /// </summary>
         public static string getModelPath(string expLogDir)
         {
             string modelDir = System.IO.Path.Combine(
@@ -83,6 +114,9 @@ namespace Analysis
             return modelSavePath;
         }
 
+        /// <summary>
+        /// Evaluate solution decks on surrogate model.
+        /// </summary>
         public static void EvaluateOnSurrogate(
             List<string> incompleteDeck,
             SurrogateBaseModel model,
@@ -108,7 +142,9 @@ namespace Analysis
             Toml.WriteFile<OverallStatistics>(stats, gameLogPath);
         }
 
-
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public RemoveCardAnalysisManager(
             string expLogDir,
             string configFilename
@@ -185,7 +221,9 @@ namespace Analysis
             Utilities.WriteLineWithTimestamp("Evaluated all incomplete decks on surrogate model.");
         }
 
-
+        /// <summary>
+        /// Generate all incomplete decks to run evaluations with.
+        /// </summary>
         private Queue<Individual> GenerateIncompleteDeckInds()
         {
             allIncompDeckInds = new Queue<Individual>();
@@ -231,7 +269,9 @@ namespace Analysis
             return allIncompDeckInds;
         }
 
-
+        /// <summary>
+        /// Dispatch evaluation tasks.
+        /// </summary>
         public void DispatchEvalJobsToWorkers()
         {
             while (_idleWorkers.Count > 0 && allIncompDeckInds.Count > 0)
@@ -244,7 +284,9 @@ namespace Analysis
             }
         }
 
-
+        /// <summary>
+        /// Find done evaluations.
+        /// </summary>
         public void FindDoneWorkers()
         {
             base.FindDoneWorkers((stableInd) =>
@@ -279,6 +321,9 @@ namespace Analysis
             });
         }
 
+        /// <summary>
+        /// Returns true if some evaluations are not completed.
+        /// </summary>
         public bool Running() => numEvaled < numToEval;
     }
 }
