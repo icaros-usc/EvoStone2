@@ -94,6 +94,11 @@ namespace DeckSearch.Search
                 _surrogateModel = new LinearModel(
                     log_dir_exp: _searchManager.log_dir_exp);
             }
+            else
+            {
+                throw new System.ArgumentException(
+                    "Invalid model type: {0}", config.Surrogate.Type);
+            }
             Utilities.WriteLineWithTimestamp(
                 String.Format("{0} Surrogate model created.",
                               config.Surrogate.Type));

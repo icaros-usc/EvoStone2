@@ -146,6 +146,15 @@ namespace Analysis
             {
                 model = new FullyConnectedNN();
             }
+            else if (config.Surrogate.Type == "LinearModel")
+            {
+                model = new LinearModel();
+            }
+            else
+            {
+                throw new System.ArgumentException(
+                    "Invalid model type: {0}", config.Surrogate.Type);
+            }
             model.LoadModel(modelSavePath);
 
             // read all logged individuals
