@@ -138,7 +138,8 @@ namespace Analysis
 
             // write result
             string gameLogPath = System.IO.Path.Combine(
-                currSurrIndLogDir, String.Format("remove_card{0}.tml", cardRemoved));
+                currSurrIndLogDir,
+                String.Format("remove_card-{0}.tml", cardRemoved));
             Toml.WriteFile<OverallStatistics>(stats, gameLogPath);
         }
 
