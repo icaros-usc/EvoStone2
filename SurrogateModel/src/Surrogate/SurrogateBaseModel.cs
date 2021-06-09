@@ -33,7 +33,6 @@ namespace SurrogateModel.Surrogate
         protected int num_epoch;
         public int batch_size { get; protected set; }
         protected float step_size;
-        protected int log_length;
 
         // others
         protected int epoch_idx = 0;
@@ -45,7 +44,7 @@ namespace SurrogateModel.Surrogate
         // writers to record training/testing loss and model save point.
         protected LossLogger loss_logger;
         // protected string MODEL_SAVE_POINT = "train_log/model.ckpt";
-        protected const string OFFLINE_DATA_FILE = "resources/individual_log.csv";
+        protected string offline_data_file = "resources/individual_log.csv";
         protected string train_log_dir;
 
         /// <summary>
@@ -58,14 +57,13 @@ namespace SurrogateModel.Surrogate
             int num_epoch = 10,
             int batch_size = 64,
             float step_size = 0.005f,
-            int log_length = 10,
-            string log_dir_exp = "train_log")
+            string log_dir_exp = "train_log",
+            string offline_data_file = "resources/individual_log.csv")
         {
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
             this.step_size = step_size;
-            this.log_length = log_length;
-            this.loss_logger = new LossLogger("train_log/losses.csv");
+            this.offline_data_file = offline_data_file;
 
             // set up session, attempt to use all cores
             config = new ConfigProto
@@ -308,6 +306,10 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         public abstract double[,] Predict(List<LogIndividual> logIndividuals);
 
+        /// <summary>
+        /// Offline fit the model using data in the offline data file.
+        /// </summary>
+        public abstract void OfflineFit();
 
     }
 }
