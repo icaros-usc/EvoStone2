@@ -39,6 +39,6 @@ TestBed/DeckSearch/*.png
 TestBed/DeckSearch/*.pdf
 TestBed/DeckSearch/*.csv
 TestBed/DeckSearch/__pycache__
-TestBed/DeckSearch/jacobian_py/__pycache__
+TestBed/DeckSearch/model_analysis/__pycache__
 
 TestBed/StrategySearch/bin/
