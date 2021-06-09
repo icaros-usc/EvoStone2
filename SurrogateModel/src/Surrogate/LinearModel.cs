@@ -26,13 +26,13 @@ namespace SurrogateModel.Surrogate
             int num_epoch = 10,
             int batch_size = 64,
             float step_size = 0.005f,
-            int log_length = 1,
-            string log_dir_exp = "train_log")
+            string log_dir_exp = "train_log",
+            string offline_data_file = "resources/individual_log.csv")
             : base(num_epoch,
                    batch_size,
                    step_size,
-                   log_length,
-                   log_dir_exp)
+                   log_dir_exp,
+                   offline_data_file)
         {
             graph = build_graph();
             sess = tf.Session(config);
@@ -49,7 +49,7 @@ namespace SurrogateModel.Surrogate
         {
             if (!online)
             {
-                (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckOnehotFromFile(OFFLINE_DATA_FILE);
+                (cardsEncoding, deckStats) = DataProcessor.PreprocessDeckOnehotFromFile(offline_data_file);
             }
             var X = np.array(cardsEncoding);
             X += np.random.normal(0, 1, X.shape) * 0.0001; // add random noise
@@ -98,7 +98,7 @@ namespace SurrogateModel.Surrogate
         /// <summary>
         /// offline fit the model using generated data
         /// </summary>
-        public void OfflineFit()
+        public override void OfflineFit()
         {
             prepare_data();
             train();
