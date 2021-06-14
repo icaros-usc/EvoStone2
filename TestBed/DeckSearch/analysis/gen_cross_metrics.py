@@ -5,9 +5,9 @@ import numpy as np
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
-from gen_metrics import read_in_surr_config
 from matplotlib.ticker import MaxNLocator
 from pprint import pprint
+from utils import get_label, read_in_surr_config
 
 NUM_FEATURES = 2
 NUM_EVAL = 10000
@@ -26,23 +26,6 @@ def get_win_cnt_from_cell(cell_data):
     nonFeatureIdx = NUM_FEATURES
     win = int(splitedData[nonFeatureIdx + 2])
     return win
-
-
-def get_label(experiment_config):
-    legend = ""
-    if experiment_config["Search"]["Category"] == "Surrogated":
-        if experiment_config["Search"]["Type"] == "MAP-Elites":
-            if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
-                legend += "FCNN" + " DSA-ME"
-            elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
-                legend += "Deep-set" + " DSA-ME"
-            elif experiment_config["Surrogate"]["Type"] == "LinearModel":
-                legend += "Linear" + " DSA-ME"
-            else:
-                legend += experiment_config["Surrogate"]["Type"] + " DSA-ME"
-    elif experiment_config["Search"]["Category"] == "Distributed":
-        legend += experiment_config["Search"]["Type"]
-    return legend
 
 
 def ridge_plot(df, legend_col_name, data_col_name):

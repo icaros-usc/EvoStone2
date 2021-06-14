@@ -14,7 +14,7 @@ from tqdm import tqdm
 from pprint import pprint
 
 # read in card index
-with open('model_analysis/paladin_card_index.json') as f:
+with open('analysis/paladin_card_index.json') as f:
     card_index = json.load(f)
 
 card_name = {idx: name for name, idx in card_index.items()}

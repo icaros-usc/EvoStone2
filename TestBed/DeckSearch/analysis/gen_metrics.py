@@ -14,6 +14,7 @@ import matplotlib
 import matplotlib as mpl
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.ticker import MaxNLocator
+from utils import read_in_surr_config
 
 matplotlib.use("agg")
 matplotlib.rcParams.update({'font.size': 12})
@@ -39,13 +40,6 @@ COLORMAP = "viridis"  # Colormap for everything.
 # max and min value of fitness
 FITNESS_MIN = -30
 FITNESS_MAX = 30
-
-
-def read_in_surr_config(exp_config_file):
-    experiment_config = toml.load(exp_config_file)
-    elite_map_config = toml.load(experiment_config["Search"]["ConfigFilename"])
-    return experiment_config, elite_map_config
-
 
 # def read_in_lsi_config(exp_config_file):
 #     experiment_config = toml.load(exp_config_file)
