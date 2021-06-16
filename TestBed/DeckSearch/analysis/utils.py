@@ -1,4 +1,5 @@
 import toml
+import json
 
 def read_in_surr_config(exp_config_file):
     experiment_config = toml.load(exp_config_file)
@@ -22,3 +23,11 @@ def get_label(experiment_config):
     elif experiment_config["Search"]["Category"] == "Distributed":
         legend += experiment_config["Search"]["Type"]
     return legend
+
+def read_in_card_index():
+    # read in card index
+    with open('analysis/paladin_card_index.json') as f:
+        card_index = json.load(f)
+
+    card_name = {idx: name for name, idx in card_index.items()}
+    return card_index, card_name
