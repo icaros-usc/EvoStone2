@@ -19,22 +19,47 @@ def deck_str2encode(deck_str):
     return "".join([str(digit) for digit in deck_encode.tolist()])
 
 
-def get_elites(log_dirs):
-    elites = []
-    elite_ids = []
+def get_inds(log_dirs):
+    inds = []
+    ind_ids = []
     for log_dir in log_dirs:
         inds_csv = os.path.join(log_dir, "individual_log.csv")
         inds_pd = pd.read_csv(inds_csv)
-        inds = inds_pd["Deck"].tolist()
+        all_inds = inds_pd["Deck"].tolist()
         inds_id = inds_pd["Individual"].tolist()
-        for deck_str in inds:
+        for deck_str in all_inds:
             deck_encode = deck_str2encode(deck_str)
-            elites.append(deck_encode)
+            inds.append(deck_encode)
 
         for ind_id in inds_id:
-            elite_ids.append((log_dir, ind_id))
+            ind_ids.append((log_dir, ind_id))
 
-    return elites, elite_ids
+    return inds, ind_ids
+
+
+def get_elites(log_dirs):
+    elites = []
+    elite_ids = []
+    elite_fitnesses = []
+    for log_dir in log_dirs:
+        inds_csv = os.path.join(log_dir, "individual_log.csv")
+        inds_pd = pd.read_csv(inds_csv)
+        archive_path = os.path.join(log_dir, "elite_map_log.csv")
+        with open(archive_path) as f:
+            archive = f.readlines()
+        elites_cells = archive[-1].strip().split(",")[1:]
+        for cell_data in elites_cells:
+            elite_id = int(cell_data.split(":")[3])
+            ind = inds_pd[inds_pd["Individual"] == elite_id].iloc[0]
+            deck_str = ind["Deck"]
+            elite_fitness = float(ind["AverageHealthDifference"])
+
+            # add to result
+            elite_ids.append((log_dir, elite_id))
+            elites.append(deck_str2encode(deck_str))
+            elite_fitnesses.append(elite_fitness)
+
+    return elites, elite_ids, elite_fitnesses
 
 
 if __name__ == '__main__':
@@ -44,7 +69,7 @@ if __name__ == '__main__':
         "logs/to_plot/2021-05-18_23-50-35_Surrogated_MAP-Elites_FullyConnectedNN_analyze"
     ]
 
-    training_elites, _ = get_elites(log_dirs_training)
+    training_inds, _ = get_inds(log_dirs_training)
 
     # Find elites from specified experiments that are not a part of
     # training elites
@@ -53,13 +78,17 @@ if __name__ == '__main__':
         "logs/to_plot/2021-04-21_18-49-56_Surrogated_MAP-Elites_FullyConnectedNN_10000",
         "logs/to_plot/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000"
     ]
-    candidate_elites, candidate_elite_ids = get_elites(exps_to_find)
+
+    # get_elites(exps_to_find)
+    candidate_elites, candidate_elite_ids, candidate_fitnesses = \
+        get_elites(exps_to_find)
 
     testing_elites = []
-    for candidate_elite, candidate_elite_id in zip(candidate_elites,
-                                                   candidate_elite_ids):
-        if candidate_elite not in training_elites:
-            testing_elites.append((candidate_elite, *candidate_elite_id))
+    for candidate_elite, candidate_elite_id, candidate_fitness in zip(
+            candidate_elites, candidate_elite_ids, candidate_fitnesses):
+        if candidate_elite not in training_inds:
+            testing_elites.append(
+                (candidate_elite, *candidate_elite_id, candidate_fitness))
 
-    with open("testing_decks.json", "w") as f:
+    with open("analysis/testing_decks.json", "w") as f:
         json.dump(testing_elites, f)

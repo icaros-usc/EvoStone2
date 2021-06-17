@@ -1,11 +1,11 @@
 import toml
 import json
 
+
 def read_in_surr_config(exp_config_file):
     experiment_config = toml.load(exp_config_file)
     elite_map_config = toml.load(experiment_config["Search"]["ConfigFilename"])
     return experiment_config, elite_map_config
-
 
 
 def get_label(experiment_config):
@@ -23,6 +23,7 @@ def get_label(experiment_config):
     elif experiment_config["Search"]["Category"] == "Distributed":
         legend += experiment_config["Search"]["Type"]
     return legend
+
 
 def read_in_card_index():
     # read in card index

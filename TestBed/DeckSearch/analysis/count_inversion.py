@@ -6,10 +6,16 @@ import pandas as pd
 import argparse
 import tensorflow as tf
 import json
+import random
 from tqdm import tqdm
 from pprint import pprint
-from jacobian import get_latest_model_checkpoint, get_vec_encoding, build_model, calc_jacobian_matrix, card_index, card_name
+from jacobian import get_latest_model_checkpoint, get_vec_encoding, build_model, calc_jacobian_matrix, card_index, card_name, get_order_from_jacobian
 
+
+def encode_str2encode_vec(encode_str):
+    encode_list_char = list(encode_str)
+    encode_list_int = [int(c) for c in encode_list_char]
+    return np.array(encode_list_int).reshape((1, -1))
 
 
 def get_complete_deck(elite_id, log_dir):
@@ -188,6 +194,7 @@ def merge(arr, temp_arr, left, mid, right):
 
     return inv_count
 
+
 # This code is contributed by ankush_953
 ##############################################
 
@@ -205,92 +212,146 @@ if __name__ == "__main__":
                         '--log_dir',
                         help='path to the experiment log directory',
                         required=True)
+    parser.add_argument(
+        '-m',
+        '--mode',
+        help=
+        'mode of the inversion counting. Could be `in-dist` to count in distribution inversions or `out-dist` to count out of distribution inversions.',
+        required=True)
+    parser.add_argument(
+        '-s',
+        '--surrogate_log_path',
+        help='log dir of surrogate model.',
+        required=False,
+        default="surrogate_train_log",
+    )
     opt = parser.parse_args()
     log_dir = opt.log_dir
-
-    # get all orders from remove card analysis
-    print("Getting orders from remove card analysis...")
-    rca_orders = obtain_card_order(log_dir)
-
-    rm_card_analysis_dir = os.path.join(log_dir, "remove_card_analysis")
-    if not os.path.isdir(rm_card_analysis_dir):
-        raise ValueError("Remove card analysis not finished.")
-        exit(1)
-
-    # read in all individuals
-    individuals = pd.read_csv(os.path.join(log_dir, "individual_log.csv"))
-
-    # get all elites to do analysis
-    real_sim_dir = os.path.join(rm_card_analysis_dir, "real_sim")
-    all_elite_decks = []
-    for elite_dir in os.listdir(real_sim_dir):
-        elite_id = int(elite_dir.split("#")[1])
-        elite_deck_str = individuals[individuals["Individual"] ==
-                                     elite_id].iloc[0]["Deck"]
-        elite_fitness = float(
-            individuals[individuals["Individual"] ==
-                        elite_id].iloc[0]["AverageHealthDifference"])
-        elite_deck = elite_deck_str.split("*")
-        all_elite_decks.append((elite_id, elite_deck, elite_fitness))
+    mode = opt.mode
+    surr_log_dir = opt.surrogate_log_path
 
     # read in model
-    model = build_model(log_dir)
+    model = build_model(log_dir, surr_log_dir)
 
     # get latest model
-    model_checkpoint = get_latest_model_checkpoint(log_dir)
+    model_checkpoint = get_latest_model_checkpoint(log_dir, surr_log_dir)
 
-    num_inversions = {}
-    print("Getting orders from jacobian analysis and counting inversions...")
-    for elite_id, elite_deck, elite_fitness in tqdm(all_elite_decks):
-        with tf.compat.v1.Session() as sess:
-            # load model params
-            saver = tf.compat.v1.train.Saver()
-            saver.restore(sess, model_checkpoint)
+    if mode == "in-dist":
+        # get all orders from remove card analysis
+        print("Counting in distribution inversions")
+        print("Getting orders from remove card analysis...")
+        rca_orders = obtain_card_order(log_dir)
 
-            # encode deck
-            x = get_vec_encoding(elite_deck)
-            # print(x)
+        rm_card_analysis_dir = os.path.join(log_dir, "remove_card_analysis")
+        if not os.path.isdir(rm_card_analysis_dir):
+            raise ValueError("Remove card analysis not finished.")
+            exit(1)
 
-            jacobian_matrix = calc_jacobian_matrix(model, x, sess)
+        # read in all individuals
+        individuals = pd.read_csv(os.path.join(log_dir, "individual_log.csv"))
 
-            # print("Jacobian matrix of Fitness value:")
-            # print(jacobian_matrix[0, 0])
-            # print(jacobian_matrix.shape)
+        # get all elites to do analysis
+        real_sim_dir = os.path.join(rm_card_analysis_dir, "real_sim")
+        all_elite_decks = []
+        for elite_dir in os.listdir(real_sim_dir):
+            elite_id = int(elite_dir.split("#")[1])
+            elite_deck_str = individuals[individuals["Individual"] ==
+                                         elite_id].iloc[0]["Deck"]
+            elite_fitness = float(
+                individuals[individuals["Individual"] ==
+                            elite_id].iloc[0]["AverageHealthDifference"])
+            elite_deck = elite_deck_str.split("*")
+            all_elite_decks.append((elite_id, elite_deck, elite_fitness))
 
-            # get the order of cards
-            fitness_jacobian = copy.deepcopy(jacobian_matrix[0, 0])
-            top_card_index = fitness_jacobian.argsort()
+        num_inversions = {}
+        print(
+            "Getting orders from jacobian analysis and counting inversions...")
+        for elite_id, elite_deck, elite_fitness in tqdm(all_elite_decks):
+            with tf.compat.v1.Session() as sess:
+                # load model params
+                saver = tf.compat.v1.train.Saver()
+                saver.restore(sess, model_checkpoint)
 
-            card_names_by_pw = []
-            num_cards = []
-            card_values = []
-            for idx in np.flip(top_card_index):
-                if x[0, idx] != 0:
-                    card_names_by_pw.append(card_name[idx])
-                    num_cards.append(x[0, idx])
-                    card_values.append(fitness_jacobian[idx])
-            # print("'Value' of card (Large to small):")
-            # print(card_values)
-            # print("Cards:")
-            # print(card_names_by_pw)
-            # print("Number of cards:")
-            # print(num_cards)
+                # encode deck
+                x = get_vec_encoding(elite_deck)
+                # print(x)
 
-            # get the order from remove card analysis
-            real_order = [
-                card for card, _ in rca_orders[elite_id]["real_order"]
-            ]
+                jacobian_matrix = calc_jacobian_matrix(model, x, sess)
 
-            # calculate num inversions
-            num_inversions[elite_id] = {
-                "inversions": count_inversion(real_order, card_names_by_pw),
-                "fitness": elite_fitness,
-            }
+                # print("Jacobian matrix of Fitness value:")
+                # print(jacobian_matrix[0, 0])
+                # print(jacobian_matrix.shape)
 
-        # reset model
-        tf.compat.v1.reset_default_graph()
-        model = build_model(log_dir)
+                card_names_by_pw, _, _ = get_order_from_jacobian(
+                    jacobian_matrix, x)
 
-    with open(os.path.join(log_dir, "inversions.json"), "w") as f:
-        json.dump(num_inversions, f)
-    # pprint(num_inversions)
+                # get the order from remove card analysis
+                real_order = [
+                    card for card, _ in rca_orders[elite_id]["real_order"]
+                ]
+
+                # calculate num inversions
+                num_inversions[elite_id] = {
+                    "inversions": count_inversion(real_order,
+                                                  card_names_by_pw),
+                    "fitness": elite_fitness,
+                }
+
+            # reset model
+            tf.compat.v1.reset_default_graph()
+            model = build_model(log_dir, surr_log_dir)
+
+        with open(os.path.join(log_dir, "in-dist_inversions.json"), "w") as f:
+            json.dump(num_inversions, f)
+        # pprint(num_inversions)
+
+    elif mode == "out-dist":
+        # get all rca orders
+        exps_to_find = [
+            "logs/to_plot/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000",
+            "logs/to_plot/2021-04-21_18-49-56_Surrogated_MAP-Elites_FullyConnectedNN_10000",
+            "logs/to_plot/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000"
+        ]
+
+        print("Getting orders from remove card analysis...")
+        all_rca_orders = {}
+        for exp_log_dir in exps_to_find:
+            all_rca_orders[exp_log_dir] = obtain_card_order(exp_log_dir)
+
+        with open("analysis/testing_decks.json") as f:
+            testing_decks = json.load(f)
+
+        num_inversions = {}
+        print(
+            "Getting orders from jacobian analysis and counting inversions...")
+        for encode_str, curr_log_dir, elite_id, elite_fitness in tqdm(
+                testing_decks):
+            with tf.compat.v1.Session() as sess:
+                # load model params
+                saver = tf.compat.v1.train.Saver()
+                saver.restore(sess, model_checkpoint)
+
+                rca_orders = all_rca_orders[curr_log_dir]
+                x = encode_str2encode_vec(encode_str)
+                jacobian_matrix = calc_jacobian_matrix(model, x, sess)
+
+                card_names_by_pw, _, _ = get_order_from_jacobian(
+                    jacobian_matrix, x)
+
+                # get the order from remove card analysis
+                real_order = [
+                    card for card, _ in rca_orders[elite_id]["real_order"]
+                ]
+
+                # calculate num inversions
+                num_inversions[elite_id] = {
+                    "inversions": count_inversion(real_order,
+                                                  card_names_by_pw),
+                    "fitness": elite_fitness,
+                }
+            # reset model
+            tf.compat.v1.reset_default_graph()
+            model = build_model(log_dir, surr_log_dir)
+
+        with open(os.path.join(log_dir, "out-dist_inversions.json"), "w") as f:
+            json.dump(num_inversions, f)
