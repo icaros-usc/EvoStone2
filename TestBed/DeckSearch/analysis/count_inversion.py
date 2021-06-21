@@ -206,6 +206,16 @@ def count_inversion(real_order, order):
     return num_invert
 
 
+def sum_squared_pos_shift(real_order, order):
+    card2index = {card: i for i, card in enumerate(real_order)}
+    order_w_index = [card2index[card] for card in order]
+
+    sum_squared_pos_shift = 0
+    for real_index, card_index in enumerate(order_w_index):
+        sum_squared_pos_shift += np.square(card_index - real_index)
+    return sum_squared_pos_shift / len(order_w_index)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-l',
@@ -292,9 +302,12 @@ if __name__ == "__main__":
 
                 # calculate num inversions
                 num_inversions[elite_id] = {
-                    "inversions": count_inversion(real_order,
-                                                  card_names_by_pw),
-                    "fitness": elite_fitness,
+                    "inversions":
+                    count_inversion(real_order, card_names_by_pw),
+                    "fitness":
+                    elite_fitness,
+                    "sum_squared_pos_shift":
+                    float(sum_squared_pos_shift(real_order, card_names_by_pw)),
                 }
 
             # reset model
@@ -345,9 +358,12 @@ if __name__ == "__main__":
 
                 # calculate num inversions
                 num_inversions[elite_id] = {
-                    "inversions": count_inversion(real_order,
-                                                  card_names_by_pw),
-                    "fitness": elite_fitness,
+                    "inversions":
+                    count_inversion(real_order, card_names_by_pw),
+                    "fitness":
+                    elite_fitness,
+                    "sum_squared_pos_shift":
+                    float(sum_squared_pos_shift(real_order, card_names_by_pw)),
                 }
             # reset model
             tf.compat.v1.reset_default_graph()
