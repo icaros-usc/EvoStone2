@@ -40,5 +40,6 @@ TestBed/DeckSearch/*.pdf
 TestBed/DeckSearch/*.csv
 TestBed/DeckSearch/__pycache__
 TestBed/DeckSearch/analysis/__pycache__
+TestBed/DeckSearch/analysis/*.png
 
 TestBed/StrategySearch/bin/
