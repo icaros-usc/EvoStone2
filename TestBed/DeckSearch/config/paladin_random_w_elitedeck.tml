@@ -1,0 +1,16 @@
+[Evaluation]
+OpponentDeckSuite = "resources/decks/suites/eliteMeta.tml"
+DeckPools = ["resources/decks/pools/eliteDecks.tml"]
+
+[[Evaluation.PlayerStrategies]]
+NumGames = 200
+Strategy = "Control"
+
+[Deckspace]
+HeroClass = "paladin"
+CardSets = ["CORE", "EXPERT1"]
+
+[Search]
+Category = "Distributed"
+Type = "RandomSearch"
+ConfigFilename = "config/paladin_random_config.tml"
