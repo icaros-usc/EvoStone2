@@ -211,7 +211,7 @@ def plot_qd_score(rowData, savePath, archive_name):
             splitedData = cellData.split(":")
             nonFeatureIdx = NUM_FEATURES
             fitness = float(splitedData[nonFeatureIdx + 3])
-            map_fitness += fitness
+            map_fitness += fitness - FITNESS_MIN
         map_fitnesses.append(map_fitness)
 
     fig, ax = plt.subplots()

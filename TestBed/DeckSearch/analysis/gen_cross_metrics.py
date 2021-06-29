@@ -12,7 +12,8 @@ from utils import get_label, read_in_surr_config
 NUM_FEATURES = 2
 NUM_EVAL = 10000
 NUM_GAME = 200
-
+FITNESS_MIN = -30
+FITNESS_MAX = 30
 
 def get_fitness_from_cell(cell_data):
     splitedData = cell_data.split(":")
@@ -165,7 +166,7 @@ if __name__ == '__main__':
                     for cellData in mapData[1:]:
                         fitness = get_fitness_from_cell(cellData)
                         win = get_win_cnt_from_cell(cellData)
-                        qd_score += fitness
+                        qd_score += fitness - FITNESS_MIN
                         if fitness > max_fitness:
                             max_fitness = fitness
                         if win > max_win:
