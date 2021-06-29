@@ -40,6 +40,8 @@ if __name__ == '__main__':
 
         if label == "RandomSearch":
             label = "Offline FCNN (Random)"
+        elif label == "MAP-Elites":
+            label = "Offline FCNN (MAP-Elites)"
 
         invert_ax.errorbar(idx,
                            avg_invert,
