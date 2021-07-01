@@ -41,6 +41,8 @@ COLORMAP = "viridis"  # Colormap for everything.
 FITNESS_MIN = -30
 FITNESS_MAX = 30
 
+RESOLUTION = None
+
 # def read_in_lsi_config(exp_config_file):
 #     experiment_config = toml.load(exp_config_file)
 #     algorithm_config = toml.load(
@@ -162,10 +164,10 @@ def createImage(rowData, filename, archive_name):
     ax.set_xlabel(FEATURE1_LABEL)
     ax.set_ylabel(FEATURE2_LABEL)
 
-    ax.set_xticks([0, 10, 20, 30, 40])
+    ax.set_xticks([0, RESOLUTION/4, RESOLUTION/2, RESOLUTION * 3/4, RESOLUTION])
     ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
 
-    ax.set_yticks([0, 20, 40])
+    ax.set_yticks([0, RESOLUTION/2, RESOLUTION])
     ax.set_yticklabels([1, 4, 7][::-1])
 
     set_spines_visible(ax)
@@ -339,6 +341,7 @@ if __name__ == "__main__":
 
     # read in parameters
     NUM_FEATURES = len(features)
+    RESOLUTION = elite_map_config["Map"]["StartSize"]
 
     # Clear out the previous images
     tmpMetricsFolder = os.path.join(opt.log_dir, METRICS_DIR)
