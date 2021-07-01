@@ -43,3 +43,6 @@ TestBed/DeckSearch/analysis/__pycache__
 TestBed/DeckSearch/analysis/*.png
 
 TestBed/StrategySearch/bin/
+TestBed/StrategySearch/active/
+TestBed/StrategySearch/logs/
+TestBed/StrategySearch/boxes/
