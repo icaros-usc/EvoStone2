@@ -21,12 +21,12 @@ namespace DeckSearch
 
             if(config.Search.Category == "Distributed")
             {
-                var search = new DistributedSearch(config, args[0]);
+                var search = new DistributedSearch(args[0]);
                 search.Run();
             }
             else if(config.Search.Category == "Surrogated")
             {
-                var search = new SurrogatedSearch(config, args[0]);
+                var search = new SurrogatedSearch(args[0]);
                 search.Run();
             }
         }

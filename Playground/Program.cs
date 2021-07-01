@@ -109,6 +109,8 @@ namespace PlayGround
             // DemoSavedModel();
 
             // DataProcessor.WriteCardIndex();
+
+            DemoToml(args[0]);
         }
 
         static public void DemoClassicCards(string[] args)
@@ -132,7 +134,8 @@ namespace PlayGround
             foreach (var nerfParam in config.Nerfs)
             {
                 Card card = Cards.FromName(nerfParam.CardName);
-                if (!card.Implemented) {
+                if (!card.Implemented)
+                {
                     not_imp++;
                     Console.WriteLine("Name: {0}", card.Name);
                     Console.WriteLine("Cardset: {0}", card.Set);
@@ -145,7 +148,8 @@ namespace PlayGround
                     Console.WriteLine();
                     notImpCards.add(card.Name);
                 }
-                else{
+                else
+                {
                     ImpCards.add(card.Name);
                     // if(ImpCards.Count >= 30) {
                     //     break;
@@ -201,7 +205,7 @@ namespace PlayGround
             var model = new DeepSetModel();
             model.LoadModel("logs/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000/surrogate_train_log/surrogate_model/model18/model.ckpt");
 
-            print(model.Forward(np.ones(new int[]{2, 30, 178})));
+            print(model.Forward(np.ones(new int[] { 2, 30, 178 })));
             // model.OfflineFit();
         }
 
@@ -227,7 +231,7 @@ namespace PlayGround
 
         static void Demo2DSlicing()
         {
-            var a = np.random.rand(new int[] {2, 2});
+            var a = np.random.rand(new int[] { 2, 2 });
             print(a);
             print(a[Slice.All, Slice.Index(1)]);
         }
@@ -237,7 +241,7 @@ namespace PlayGround
             var model = new DeepSetModel();
             // var sess = tf.Session();
 
-            var x_input = np.random.rand(new int[] {2, 30, 178});
+            var x_input = np.random.rand(new int[] { 2, 30, 178 });
             // print(model.Forward(x_input));
 
             print(model.input);
@@ -259,6 +263,12 @@ namespace PlayGround
             //     print(result);
             //     // self.assertEquals(0.41997434127f, actual);
             // }
+        }
+
+        static void DemoToml(string configFileName)
+        {
+            var evalConfig = Toml.ReadFile<DeckEvaluator.Config.Configuration>(configFileName);
+            Console.WriteLine(evalConfig.Evaluation.PlayerStrategies[0].Weights == null);
         }
     }
 }

@@ -18,6 +18,7 @@ namespace DeckEvaluator.Config
    {
       public int NumGames { get; set; }
       public string Strategy { get; set; }
+      public double[] Weights { get; set; }
    }
 
    public class NetworkParams

@@ -73,7 +73,6 @@ namespace DeckSearch.Search
         /// </summary>
         /// <param name = "configFilename">name of the configuation file</param>
         public DeckSearchManager(
-            Configuration config,
             string configFilename
             ) : base(configFilename)
         {

@@ -66,9 +66,10 @@ namespace DeckSearch.Search
         /// Constructor
         /// </summary>
         /// <param name = "configFilename">name of the configuation file</param>
-        public SurrogatedSearch(Configuration config, string configFilename)
+        public SurrogatedSearch(string configFilename)
         {
-            _searchManager = new DeckSearchManager(config, configFilename);
+            _searchManager = new DeckSearchManager(configFilename);
+            var config = _searchManager.config;
             _numGeneration = config.Search.NumGeneration;
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
             _numSurrogateEvals = _searchManager.searchAlgo.InitialPopulation();

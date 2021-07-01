@@ -19,9 +19,9 @@ namespace DeckSearch.Search
         /// Constructor
         /// </summary>
         /// <param name = "configFilename">name of the configuation file</param>
-        public DistributedSearch(Configuration config, string configFilename)
+        public DistributedSearch(string configFilename)
         {
-            _searchManager = new DeckSearchManager(config, configFilename);
+            _searchManager = new DeckSearchManager(configFilename);
         }
 
         public void Run()

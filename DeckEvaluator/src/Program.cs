@@ -105,10 +105,27 @@ namespace DeckEvaluator
                // Setup the player with the current strategy
                PlayerStrategyParams curStrat =
                   config.Evaluation.PlayerStrategies[i];
+
+               // If neural net weights are passed in as strategy, use it.
+               // If you are doing Strategy Search, please leave it blank.
+               CustomStratWeights playerStrategy;
+               if (curStrat.Weights != null)
+               {
+                  playerStrategy =
+                     CustomStratWeights.CreateFromVector(curStrat.Weights);
+                  Utilities.WriteLineWithTimestamp(
+                     "Using fixed Neural Net strategy.");
+               }
+               else
+               {
+                  Utilities.WriteLineWithTimestamp(
+                     "Using strategy params passed by Search Process.");
+                  playerStrategy = playMessage.Strategy;
+               }
                var player = new PlayerSetup(playerDeck,
                   PlayerSetup.GetStrategy(curStrat.Strategy,
                                           config.Network,
-                                          playMessage.Strategy));
+                                          playerStrategy));
 
                List<PlayerSetup> opponents =
                   gameSuite.GetOpponents(curStrat.NumGames);

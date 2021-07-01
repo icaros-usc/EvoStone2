@@ -47,6 +47,12 @@ namespace DeckSearch.Search
         public string _configFilename { get; private set; }
 
 
+        /// <summary>
+        /// Config of the search.
+        /// </summary>
+        public Configuration config { get; private set; }
+
+
         // Directory names
         private const string ACTIVE_DIRECTORY = "active/";
         private const string BOXES_DIRECTORY = "boxes/";
@@ -88,6 +94,7 @@ namespace DeckSearch.Search
 
             // Grab the configuration info
             _configFilename = configFilename;
+            config = Toml.ReadFile<Configuration>(_configFilename);
         }
 
 
