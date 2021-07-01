@@ -15,6 +15,7 @@ NUM_GAME = 200
 FITNESS_MIN = -30
 FITNESS_MAX = 30
 
+
 def get_fitness_from_cell(cell_data):
     splitedData = cell_data.split(":")
     nonFeatureIdx = NUM_FEATURES
@@ -206,10 +207,14 @@ if __name__ == '__main__':
                         (curr_last_fitnesses > fitness).sum())
                 all_num_ccdf.append(num_elites_ccdf)
 
-        # get average
+        # get average and std
         avg_qd_scores = np.mean(np.array(all_qd_scores), axis=0)
         avg_num_elites = np.mean(np.array(all_num_elites), axis=0)
         avg_num_ccdf = np.mean(np.array(all_num_ccdf), axis=0)
+        std_qd_scores = np.std(np.array(all_qd_scores), axis=0)
+        std_num_elites = np.std(np.array(all_num_elites), axis=0)
+        std_num_ccdf = np.std(np.array(all_num_ccdf), axis=0)
+
         numerical_measures["algo"].append(legend)
         numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
         numerical_measures["max_fitness"].append(np.mean(all_max_fitness))
@@ -217,7 +222,14 @@ if __name__ == '__main__':
         numerical_measures["max_winrate"].append(np.mean(all_max_winrate))
 
         # plot qd score
-        qd_ax.plot(avg_qd_scores, label=legend)
+        qd_p = qd_ax.plot(avg_qd_scores, label=legend)
+        # qd_ax.fill_between(
+        #     np.arange(len(avg_qd_scores)),
+        #     avg_qd_scores + std_qd_scores,
+        #     avg_qd_scores - std_qd_scores,
+        #     alpha=0.5,
+        #     color=qd_p[0].get_color(),
+        # )
 
         # plot num elites
         num_elites_ax.plot(avg_num_elites, label=legend)
