@@ -55,7 +55,7 @@ namespace SurrogateModel
             else
             {
                 throw new System.ArgumentException(
-                    "Invalid model type: {0}.\nMust be one of [DeepSetmodel, FullyConnectedNN, LinearModel].", modelType);
+                    "Invalid model type: {0}.\nMust be one of [DeepSetModel, FullyConnectedNN, LinearModel].", modelType);
             }
 
             // run offline fit
