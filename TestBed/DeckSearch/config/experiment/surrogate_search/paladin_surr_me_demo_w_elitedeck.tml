@@ -3,7 +3,7 @@ OpponentDeckSuite = "resources/decks/suites/eliteMeta.tml"
 DeckPools = ["resources/decks/pools/eliteDecks.tml"]
 
 [[Evaluation.PlayerStrategies]]
-NumGames = 200
+NumGames = 20
 Strategy = "Control"
 
 [Deckspace]
@@ -11,6 +11,12 @@ HeroClass = "paladin"
 CardSets = ["CORE", "EXPERT1"]
 
 [Search]
-Category = "Distributed"
-Type = "RandomSearch"
-ConfigFilename = "config/paladin_random_config.tml"
+Category = "Surrogated"
+Type = "MAP-Elites"
+ConfigFilename = "config/elite_map/paladin_me_demo_config.tml"
+NumGeneration = 1000
+NumToEvaluatePerGeneration = 10
+LogLengthPerGen=10
+
+[Surrogate]
+Type="FullyConnectedNN"

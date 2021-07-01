@@ -11,6 +11,12 @@ HeroClass = "paladin"
 CardSets = ["CORE", "EXPERT1"]
 
 [Search]
-Category = "Distributed"
+Category = "Surrogated"
 Type = "MAP-Elites"
-ConfigFilename = "config/paladin_me_config.tml"
+ConfigFilename = "config/elite_map/paladin_me_config.tml"
+NumGeneration = 100000
+NumToEvaluatePerGeneration = 10
+LogLengthPerGen=10
+
+[Surrogate]
+Type="DeepSetModel"

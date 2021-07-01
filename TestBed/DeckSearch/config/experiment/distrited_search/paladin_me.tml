@@ -11,12 +11,6 @@ HeroClass = "paladin"
 CardSets = ["CORE", "EXPERT1"]
 
 [Search]
-Category = "Surrogated"
+Category = "Distributed"
 Type = "MAP-Elites"
-ConfigFilename = "config/paladin_me_config.tml"
-NumGeneration = 100000
-NumToEvaluatePerGeneration = 10
-LogLengthPerGen=10
-
-[Surrogate]
-Type="FullyConnectedNN"
+ConfigFilename = "config/elite_map/paladin_me_config.tml"

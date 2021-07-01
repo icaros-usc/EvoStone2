@@ -13,4 +13,4 @@ CardSets = ["CORE", "EXPERT1"]
 [Search]
 Category = "Distributed"
 Type = "RandomSearch"
-ConfigFilename = "config/paladin_random_config.tml"
+ConfigFilename = "config/elite_map/paladin_random_config.tml"

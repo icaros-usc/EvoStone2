@@ -13,7 +13,7 @@ CardSets = ["CORE", "EXPERT1"]
 [Search]
 Category = "Surrogated"
 Type = "MAP-Elites"
-ConfigFilename = "config/paladin_me_demo_config.tml"
+ConfigFilename = "config/elite_map/paladin_me_demo_config.tml"
 NumGeneration = 1000
 NumToEvaluatePerGeneration = 10
 LogLengthPerGen=10
