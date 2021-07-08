@@ -330,6 +330,9 @@ namespace DeckSearch.Search
                 _searchManager.numEvaledPerRun = 0;
             }
 
+            // Final back prop using individuals in the buffer
+            BackProp(_searchManager._individualsBuffer.ToList());
+
             // Let the workers know that we are done.
             _searchManager.AnnounceWorkersDone();
         }
