@@ -65,7 +65,17 @@ namespace SabberStoneUtil.Config
             Console.WriteLine("Card set size = " + cards.Count);
             foreach (Card c in cards)
             {
-                Console.WriteLine(c.Name);
+                // Console.WriteLine(c.Name);
+                Console.WriteLine("Name: {0}", c.Name);
+                Console.WriteLine("ID: {0}", c.Id);
+                Console.WriteLine("Cost: {0}", c.Cost);
+                Console.WriteLine("ATK: {0}", c.ATK);
+                Console.WriteLine("Health: {0}", c.Health);
+                Console.WriteLine("Card Set: {0}", c.Set);
+                Console.WriteLine("Card Class: {0}", c.Class);
+                Console.WriteLine("Text: {0}", c.Text);
+                Console.WriteLine("Implemented: {0}", c.Implemented);
+                Console.WriteLine("-----------------------------");
             }
         }
 

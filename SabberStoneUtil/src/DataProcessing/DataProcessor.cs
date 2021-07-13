@@ -84,7 +84,7 @@ namespace SabberStoneUtil.DataProcessing
         }
 
 
-        private static void PrintCardInfo(Card card)
+        public static void PrintCardInfo(Card card)
         {
             foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(card))
             {

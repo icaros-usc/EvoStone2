@@ -110,7 +110,43 @@ namespace PlayGround
 
             // DataProcessor.WriteCardIndex();
 
-            DemoToml(args[0]);
+            // DemoToml(args[0]);
+
+
+            // var deck = new List<string>() { "Backstab", "Backstab", "Preparation", "Preparation", "Shadowstep", "Shadowstep", "Cold Blood", "Cold Blood", "Conceal", "Conceal", "Deadly Poison", "Deadly Poison", "Blade Flurry", "Eviscerate", "Eviscerate", "Sap", "Shiv", "Shiv", "Edwin VanCleef", "Fan of Knives", "Fan of Knives", "SI:7 Agent", "SI:7 Agent", "Bloodmage Thalnos", "Earthen Ring Farseer", "Leeroy Jenkins", "Azure Drake", "Azure Drake", "Gadgetzan Auctioneer", "Gadgetzan Auctioneer" };
+            // PrintDeckInfo(deck);
+        }
+
+        static public void PrintCardInfo(Card c)
+        {
+            Console.WriteLine("Name: {0}", c.Name);
+            Console.WriteLine("ID: {0}", c.Id);
+            Console.WriteLine("Cost: {0}", c.Cost);
+            Console.WriteLine("ATK: {0}", c.ATK);
+            Console.WriteLine("Health: {0}", c.Health);
+            Console.WriteLine("Card Set: {0}", c.Set);
+            Console.WriteLine("Card Class: {0}", c.Class);
+            Console.WriteLine("Text: {0}", c.Text);
+            Console.WriteLine("Implemented: {0}", c.Implemented);
+            Console.WriteLine("-----------------------------");
+        }
+
+
+        static public void PrintDeckInfo(List<string> deck)
+        {
+            foreach (var cardName in deck)
+            {
+                Card card = Cards.FromName(cardName);
+                Console.WriteLine("Name: {0}", card.Name);
+                Console.WriteLine("Cost: {0}", card.Cost);
+                Console.WriteLine("ATK: {0}", card.ATK);
+                Console.WriteLine("Health: {0}", card.Health);
+                Console.WriteLine("Class: {0}", card.Set);
+                Console.WriteLine("Text: {0}", card.Text);
+                Console.WriteLine("Implemented: {0}", card.Implemented);
+                Console.WriteLine("-----------------------------");
+            }
+            Console.WriteLine("Total cards: {0}", deck.Count);
         }
 
         static public void DemoClassicCards(string[] args)
