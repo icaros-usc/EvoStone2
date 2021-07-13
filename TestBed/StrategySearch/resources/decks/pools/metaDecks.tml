@@ -5,3 +5,9 @@ PoolName = "Meta Decks"
 DeckName = "Tempo Rogue"
 ClassName = "Rogue"
 CardList = ["Backstab", "Backstab", "Preparation", "Preparation", "Shadowstep", "Shadowstep", "Eviscerate", "Eviscerate", "Sap", "Sap", "EVIL Miscreant", "EVIL Miscreant", "Edwin VanCleef", "SI:7 Agent", "SI:7 Agent", "Raiding Party", "Raiding Party", "Waggle Pick", "Waggle Pick", "Myra's Unstable Element", "Wisp", "Bloodsail Corsair", "Southsea Deckhand", "Southsea Deckhand", "Dread Corsair", "Dread Corsair", "Lifedrinker", "Lifedrinker", "Leeroy Jenkins", "Chef Nomi"]
+
+# Classic Miracle Rogue
+[[Decks]]
+DeckName = "Classic Miracle Rogue"
+ClassName = "Rogue"
+CardList = ["Backstab", "Backstab", "Preparation", "Preparation", "Shadowstep", "Shadowstep", "Cold Blood", "Cold Blood", "Conceal", "Conceal", "Deadly Poison", "Deadly Poison", "Blade Flurry", "Eviscerate", "Eviscerate", "Sap", "Shiv", "Shiv", "Edwin VanCleef", "Fan of Knives", "Fan of Knives", "SI:7 Agent", "SI:7 Agent", "Bloodmage Thalnos", "Earthen Ring Farseer", "Leeroy Jenkins", "Azure Drake", "Azure Drake", "Gadgetzan Auctioneer", "Gadgetzan Auctioneer"]
