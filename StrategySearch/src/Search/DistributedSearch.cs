@@ -229,8 +229,24 @@ namespace StrategySearch.Search
 					string label = activeFile.Substring(start, end-start);
 					int workerId = Int32.Parse(label);
 					_idleWorkers.Enqueue(workerId);
-					_individualStable.Add(workerId, null);
-					File.Delete(activeFile);
+
+               // avoid key error
+               if (!_individualStable.ContainsKey(workerId))
+               {
+                  _individualStable.Add(workerId, null);
+                  Console.WriteLine(
+                     String.Format("Found worker: {0} ", workerId));
+               }
+               try
+               {
+                  File.Delete(activeFile);
+               }
+               catch (Exception e)
+               {
+                  Console.WriteLine("Exception while deleting: {0}",
+                                    e.GetType().ToString());
+                  Console.WriteLine(e.StackTrace);
+               }
 					Console.WriteLine("Found worker: " + workerId);
 				}
          }
