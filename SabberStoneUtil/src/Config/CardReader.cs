@@ -29,6 +29,30 @@ namespace SabberStoneUtil.Config
             _heroClass = CardReader.GetClassFromName(config.Deckspace.HeroClass);
             CardSet[] sets = CardReader.GetSetsFromNames(config.Deckspace.CardSets);
             _cardSet = CardReader.GetCards(_heroClass, sets);
+
+            // add specified additional card to the card set
+            if (config.Deckspace.AdditionalCards != null)
+            {
+                foreach (string cardName in config.Deckspace.AdditionalCards)
+                {
+                    var matchCnt =
+                        _cardSet.Where(c => c.Name == cardName).ToList().Count;
+                    // add card if it does not exist in the current deck space
+                    if (matchCnt == 0)
+                    {
+                        Card card = Cards.FromName(cardName);
+                        _cardSet.Add(card);
+                        Utilities.WriteLineWithTimestamp(
+                            String.Format(
+                                "Adding {0} from set {1} to search space.",
+                                cardName, card.Set)
+                        );
+                    }
+                }
+            }
+            Utilities.WriteLineWithTimestamp(
+                String.Format("Number of cards in search space: {0}",
+                              _cardSet.Count));
         }
 
 

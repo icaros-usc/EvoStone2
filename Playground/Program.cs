@@ -115,6 +115,7 @@ namespace PlayGround
 
             // var deck = new List<string>() { "Backstab", "Backstab", "Preparation", "Preparation", "Shadowstep", "Shadowstep", "Cold Blood", "Cold Blood", "Conceal", "Conceal", "Deadly Poison", "Deadly Poison", "Blade Flurry", "Eviscerate", "Eviscerate", "Sap", "Shiv", "Shiv", "Edwin VanCleef", "Fan of Knives", "Fan of Knives", "SI:7 Agent", "SI:7 Agent", "Bloodmage Thalnos", "Earthen Ring Farseer", "Leeroy Jenkins", "Azure Drake", "Azure Drake", "Gadgetzan Auctioneer", "Gadgetzan Auctioneer" };
             // PrintDeckInfo(deck);
+            // CheckDeckInDeckSpace(deck);
         }
 
         static public void PrintCardInfo(Card c)
@@ -147,6 +148,20 @@ namespace PlayGround
                 Console.WriteLine("-----------------------------");
             }
             Console.WriteLine("Total cards: {0}", deck.Count);
+        }
+
+
+        static public void CheckDeckInDeckSpace(List<string> deck)
+        {
+            foreach (var cardName in deck)
+            {
+                var matchCnt = CardReader._cardSet.Where(c => c.Name == cardName).ToList().Count;
+                if (matchCnt == 0)
+                {
+                    Console.WriteLine(
+                        "Card {0} is not in deck space", cardName);
+                }
+            }
         }
 
         static public void DemoClassicCards(string[] args)

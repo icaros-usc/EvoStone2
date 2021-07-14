@@ -11,6 +11,7 @@ namespace SabberStoneUtil.Config
     {
         public string HeroClass { get; set; }
         public string[] CardSets { get; set; }
+        public string[] AdditionalCards { get; set; }
     }
 
     public class SearchParams

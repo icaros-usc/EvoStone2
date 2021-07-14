@@ -70,10 +70,6 @@ namespace SabberStoneUtil.DataProcessing
                 cardEmbeddings[rawEmbeddings[i].cardName] = rawEmbeddings[i].embedding;
             }
             cardEmbeddingSize = rawEmbeddings[0].embedding.Length;
-
-            Utilities.WriteLineWithTimestamp(
-                String.Format("Number of cards in search space: {0}",
-                              numCards));
         }
 
         // ****************** I/O Functions ******************
