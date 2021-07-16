@@ -216,7 +216,7 @@ def plot_qd_score(rowData, savePath, archive_name):
             map_fitness += fitness - FITNESS_MIN
         map_fitnesses.append(map_fitness)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 6))
     ax.plot(map_fitnesses)
 
     if archive_name == "surrogate_archive":
