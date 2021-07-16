@@ -34,8 +34,7 @@ if __name__ == '__main__':
         avg_pos_shift = np.mean(pos_shift)
         std_pos_shift = np.std(pos_shift)
 
-        experiment_config, _ = read_in_surr_config(
-            os.path.join(log_dir, "experiment_config.tml"))
+        experiment_config, _ = read_in_surr_config(log_dir)
         label = get_label(experiment_config)
 
         if label == "RandomSearch":

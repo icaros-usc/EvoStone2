@@ -1,10 +1,13 @@
+import os
 import toml
 import json
 
 
-def read_in_surr_config(exp_config_file):
+def read_in_surr_config(log_dir):
+    exp_config_file = os.path.join(log_dir, "experiment_config.tml")
+    elite_map_config_file = os.path.join(log_dir, "elite_map_config.tml")
     experiment_config = toml.load(exp_config_file)
-    elite_map_config = toml.load(experiment_config["Search"]["ConfigFilename"])
+    elite_map_config = toml.load(elite_map_config_file)
     return experiment_config, elite_map_config
 
 

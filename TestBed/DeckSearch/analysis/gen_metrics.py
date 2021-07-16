@@ -334,8 +334,7 @@ if __name__ == "__main__":
     opt = parser.parse_args()
 
     # read in the name of the algorithm and features to plot
-    experiment_config, elite_map_config = read_in_surr_config(
-        os.path.join(opt.log_dir, "experiment_config.tml"))
+    experiment_config, elite_map_config = read_in_surr_config(opt.log_dir)
     features = elite_map_config['Map']['Features']
     ELITE_MAP_NAME = elite_map_config["Map"]["Type"]
 

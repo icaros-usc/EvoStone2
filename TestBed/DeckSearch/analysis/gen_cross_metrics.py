@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from pprint import pprint
+from tqdm import tqdm
 from utils import get_label, read_in_surr_config
 
 NUM_FEATURES = 2
@@ -94,24 +95,25 @@ if __name__ == '__main__':
         required=True)
 
     opt = parser.parse_args()
+    log_dir_plot = opt.log_dir_plot
     qdplots = {}
-    for log_dir in os.listdir(opt.log_dir_plot):
+    for log_dir in os.listdir(log_dir_plot):
         # read in the name of the algorithm and features to plot
-        log_dir = os.path.join(opt.log_dir_plot, log_dir)
-        experiment_config, elite_map_config = read_in_surr_config(
-            os.path.join(log_dir, "experiment_config.tml"))
-        curr_exp_id = experiment_config["Search"]["Category"] + "_" + \
-                      experiment_config["Search"]["Type"]
-        if "Surrogate" in experiment_config:
-            curr_exp_id += "_" + experiment_config["Surrogate"]["Type"]
+        log_dir = os.path.join(log_dir_plot, log_dir)
+        if os.path.isdir(log_dir):
+            experiment_config, elite_map_config = read_in_surr_config(log_dir)
+            curr_exp_id = experiment_config["Search"]["Category"] + "_" + \
+                        experiment_config["Search"]["Type"]
+            if "Surrogate" in experiment_config:
+                curr_exp_id += "_" + experiment_config["Surrogate"]["Type"]
 
-        # add to dict
-        if curr_exp_id in qdplots:
-            qdplots[curr_exp_id].append(
-                (log_dir, experiment_config, elite_map_config))
-        else:
-            qdplots[curr_exp_id] = [(log_dir, experiment_config,
-                                     elite_map_config)]
+            # add to dict
+            if curr_exp_id in qdplots:
+                qdplots[curr_exp_id].append(
+                    (log_dir, experiment_config, elite_map_config))
+            else:
+                qdplots[curr_exp_id] = [(log_dir, experiment_config,
+                                         elite_map_config)]
 
     # plot QD score of surrogate searchs alltogether
     image_title = "DSA-ME & MAP-Elites"
@@ -132,7 +134,7 @@ if __name__ == '__main__':
     num_elites_fig, num_elites_ax = plt.subplots(figsize=(8, 6))
     ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
 
-    for curr_plots in qdplots.values():
+    for curr_plots in tqdm(qdplots.values()):
         # take average of current type of algo
         all_num_elites = []
         all_qd_scores = []
@@ -143,7 +145,8 @@ if __name__ == '__main__':
         all_last_fitness = []
         all_max_winrate = []
 
-        for log_dir, experiment_config, elite_map_config in curr_plots:
+        for log_dir, experiment_config, elite_map_config in tqdm(curr_plots,
+                                                                 leave=False):
             log_file = os.path.join(log_dir, "elite_map_log.csv")
             legend = get_label(experiment_config)
 
@@ -251,7 +254,8 @@ if __name__ == '__main__':
     qd_ax.set(xlim=(0, NUM_EVAL), ylim=(0, None))
     qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     qd_ax.grid()
-    qd_fig.savefig(image_title + " QD-score.pdf", bbox_inches="tight")
+    qd_fig.savefig(os.path.join(log_dir_plot, image_title + " QD-score.pdf"),
+                   bbox_inches="tight")
 
     # finalize num elites plot
     num_elites_ax.legend(loc='lower left',
@@ -265,7 +269,8 @@ if __name__ == '__main__':
     num_elites_ax.set(xlim=(0, NUM_EVAL), ylim=(0, None))
     num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     num_elites_ax.grid()
-    num_elites_fig.savefig(image_title + " Num elites.pdf",
+    num_elites_fig.savefig(os.path.join(log_dir_plot,
+                                        image_title + " Num elites.pdf"),
                            bbox_inches="tight")
 
     # finalize ccdf plot
@@ -281,7 +286,8 @@ if __name__ == '__main__':
     ccdf_ax.set(xlim=(min_fit, max_fit), ylim=(0, None))
     ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ccdf_ax.grid()
-    ccdf_fig.savefig(image_title + " CCDF.pdf", bbox_inches="tight")
+    ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
+                     bbox_inches="tight")
 
     # # ridge plot
     # fitness_ridge_df = pd.DataFrame(elites_dists)
@@ -289,4 +295,5 @@ if __name__ == '__main__':
 
     # write numerical results
     numerical_measures_df = pd.DataFrame(numerical_measures)
-    numerical_measures_df.to_csv("numerical_measures.csv")
+    numerical_measures_df.to_csv(
+        os.path.join(log_dir_plot, "numerical_measures.csv"))

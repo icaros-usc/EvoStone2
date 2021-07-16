@@ -25,8 +25,7 @@ if __name__ == '__main__':
         inversions = [item["inversions"] for item in inversions_dict.values()]
         fitness = [item["fitness"] for item in inversions_dict.values()]
 
-        experiment_config, _ = read_in_surr_config(
-            os.path.join(log_dir, "experiment_config.tml"))
+        experiment_config, _ = read_in_surr_config(log_dir)
         label = get_label(experiment_config)
 
         ax.scatter(fitness, inversions, label=label)
