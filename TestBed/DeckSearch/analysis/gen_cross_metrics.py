@@ -201,8 +201,8 @@ if __name__ == '__main__':
                 performance_x = []
                 # max_fit = int(np.ceil(np.max(curr_last_fitnesses))) + 1
                 # min_fit = int(np.min(curr_last_fitnesses))
-                max_fit = 30
-                min_fit = -20
+                max_fit = FITNESS_MAX
+                min_fit = FITNESS_MIN
                 num_elites_ccdf = []
                 curr_last_fitnesses = np.asarray(curr_last_fitnesses)
                 for fitness in range(min_fit, max_fit + 1):
@@ -226,13 +226,13 @@ if __name__ == '__main__':
 
         # plot qd score
         qd_p = qd_ax.plot(avg_qd_scores, label=legend)
-        # qd_ax.fill_between(
-        #     np.arange(len(avg_qd_scores)),
-        #     avg_qd_scores + std_qd_scores,
-        #     avg_qd_scores - std_qd_scores,
-        #     alpha=0.5,
-        #     color=qd_p[0].get_color(),
-        # )
+        qd_ax.fill_between(
+            np.arange(len(avg_qd_scores)),
+            avg_qd_scores + std_qd_scores,
+            avg_qd_scores - std_qd_scores,
+            alpha=0.5,
+            color=qd_p[0].get_color(),
+        )
 
         # plot num elites
         num_elites_ax.plot(avg_num_elites, label=legend)
