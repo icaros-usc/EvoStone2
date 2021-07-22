@@ -11,9 +11,10 @@ import numpy as np
 from surrogate_model import FCNN, DeepSet, LinearModel
 from tqdm import tqdm
 from pprint import pprint
-from utils import read_in_card_index
+from utils import read_in_paladin_card_index, read_in_rogue_card_index
 
-card_index, card_name = read_in_card_index()
+# card_index, card_name = read_in_paladin_card_index()
+card_index, card_name = read_in_rogue_card_index()
 
 
 def get_latest_model_checkpoint(log_dir, surrogate_path="surrogate_train_log"):

@@ -28,9 +28,17 @@ def get_label(experiment_config):
     return legend
 
 
-def read_in_card_index():
+def read_in_paladin_card_index():
     # read in card index
     with open('analysis/paladin_card_index.json') as f:
+        card_index = json.load(f)
+
+    card_name = {idx: name for name, idx in card_index.items()}
+    return card_index, card_name
+
+def read_in_rogue_card_index():
+    # read in card index
+    with open('analysis/rogue_card_index.json') as f:
         card_index = json.load(f)
 
     card_name = {idx: name for name, idx in card_index.items()}

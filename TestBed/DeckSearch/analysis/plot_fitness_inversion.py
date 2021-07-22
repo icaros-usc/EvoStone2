@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
 
     opt = parser.parse_args()
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(15, 10))
 
     for idx, log_dir in enumerate(opt.log_dir_plot):
         inversion_file = os.path.join(log_dir, "out-dist_inversions.json")
@@ -30,7 +30,11 @@ if __name__ == '__main__':
 
         ax.scatter(fitness, inversions, label=label)
 
+    ax.set_xlabel("Fitness", fontsize=15)
+    ax.set_ylabel("Number of inversions", fontsize=15)
+    ax.set(xlim=(-30, 30))
+
 
     ax.legend()
-    plt.show()
+    fig.savefig("analysis/fitness_invert_dist.png")
 
