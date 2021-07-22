@@ -10,7 +10,7 @@ class LinearModel:
         with tf.compat.v1.variable_scope("placeholder"):
             self.n_samples = tf.compat.v1.placeholder(tf.float32)
             self.input = tf.compat.v1.placeholder(tf.float32,
-                                                  shape=(None, 178))
+                                                  shape=(None, 180))
             self.y_true = tf.compat.v1.placeholder(tf.float32, shape=(None, 3))
 
         self.output = fc_layer(self.input, name="fc1", num_output=3)
@@ -24,7 +24,7 @@ class FCNN:
         with tf.compat.v1.variable_scope("placeholder"):
             self.n_samples = tf.compat.v1.placeholder(tf.float32)
             self.input = tf.compat.v1.placeholder(tf.float32,
-                                                  shape=(None, 178))
+                                                  shape=(None, 180))
             self.y_true = tf.compat.v1.placeholder(tf.float32, shape=(None, 3))
 
         o_fc1 = fc_layer(self.input, name="fc1", num_output=128)
@@ -47,7 +47,7 @@ class DeepSet:
         with tf.compat.v1.variable_scope("placeholder"):
             self.n_samples = tf.compat.v1.placeholder(tf.float32)
             self.input = tf.compat.v1.placeholder(tf.float32,
-                                                  shape=(None, 30, 178))
+                                                  shape=(None, 30, 180))
             self.y_true = tf.compat.v1.placeholder(tf.float32, shape=(None, 3))
 
         # push through phi approximator
