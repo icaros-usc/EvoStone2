@@ -6,9 +6,10 @@ import json
 import numpy as np
 import pandas as pd
 from pprint import pprint
-from utils import read_in_card_index
+from utils import read_in_paladin_card_index, read_in_rogue_card_index
 
-card_index, card_name = read_in_card_index()
+# card_index, card_name = read_in_paladin_card_index()
+card_index, card_name = read_in_rogue_card_index()
 
 
 def deck_str2encode(deck_str):
@@ -65,8 +66,10 @@ def get_elites(log_dirs):
 if __name__ == '__main__':
     # read in training decks
     log_dirs_training = [
-        "logs/to_plot/2021-05-18_23-50-33_Surrogated_MAP-Elites_LinearModel_analyze",
-        "logs/to_plot/2021-05-18_23-50-35_Surrogated_MAP-Elites_FullyConnectedNN_analyze"
+        # "logs/to_plot/2021-05-18_23-50-33_Surrogated_MAP-Elites_LinearModel_analyze",
+        # "logs/to_plot/2021-05-18_23-50-35_Surrogated_MAP-Elites_FullyConnectedNN_analyze",
+        "logs/classic_miracle_rogue_strat_deck/to_plot/2021-07-19_04-32-24_Surrogated_MAP-Elites_FullyConnectedNN_Classic_Miracle_Rogue_Analysis",
+        "logs/classic_miracle_rogue_strat_deck/to_plot/2021-07-19_21-48-08_Surrogated_MAP-Elites_LinearModel_Classic_Miracle_Rogue_Analysis",
     ]
 
     training_inds, _ = get_inds(log_dirs_training)
@@ -74,9 +77,11 @@ if __name__ == '__main__':
     # Find elites from specified experiments that are not a part of
     # training elites
     exps_to_find = [
-        "logs/to_plot/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000",
-        "logs/to_plot/2021-04-21_18-49-56_Surrogated_MAP-Elites_FullyConnectedNN_10000",
-        "logs/to_plot/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000"
+        # "logs/to_plot/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000",
+        # "logs/to_plot/2021-04-21_18-49-56_Surrogated_MAP-Elites_FullyConnectedNN_10000",
+        # "logs/to_plot/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000",
+        "logs/classic_miracle_rogue_strat_deck/to_plot/2021-07-19_21-24-50_Surrogated_MAP-Elites_FullyConnectedNN_Classic_Miracle_Rogue_RCA",
+        "logs/classic_miracle_rogue_strat_deck/to_plot/2021-07-14_21-15-30_Surrogated_MAP-Elites_LinearModel_Classic_Miracle_Rogue_RCA",
     ]
 
     # get_elites(exps_to_find)
@@ -90,5 +95,5 @@ if __name__ == '__main__':
             testing_elites.append(
                 (candidate_elite, *candidate_elite_id, candidate_fitness))
 
-    with open("analysis/testing_decks.json", "w") as f:
+    with open("analysis/testing_decks_rogue.json", "w") as f:
         json.dump(testing_elites, f)
