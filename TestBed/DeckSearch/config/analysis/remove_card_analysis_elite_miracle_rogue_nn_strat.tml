@@ -116,3 +116,31 @@ Weights = [
   0.212851399990421,
   0.0438668277306421,
 ]
+
+[Deckspace]
+AdditionalCards = ["Azure Drake", "Conceal"]
+CardSets = ["CORE", "EXPERT1"]
+HeroClass = "rogue"
+
+[Network]
+LayerSizes = [15, 5, 4, 1]
+
+[[Nerfs]]
+CardName = "Cold Blood"
+NewManaCost = 1
+
+[[Nerfs]]
+CardName = "Blade Flurry"
+NewManaCost = 2
+
+[[Nerfs]]
+CardName = "Leeroy Jenkins"
+NewAttack = 6
+NewHealth = 2
+NewManaCost = 4
+
+[[Nerfs]]
+CardName = "Gadgetzan Auctioneer"
+NewAttack = 4
+NewHealth = 4
+NewManaCost = 5
