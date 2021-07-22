@@ -177,15 +177,15 @@ namespace Analysis
             model = null;
             if (config.Surrogate.Type == "DeepSetModel")
             {
-                model = new DeepSetModel();
+                model = new DeepSetModel(log_dir_exp: expLogDir);
             }
             else if (config.Surrogate.Type == "FullyConnectedNN")
             {
-                model = new FullyConnectedNN();
+                model = new FullyConnectedNN(log_dir_exp: expLogDir);
             }
             else if (config.Surrogate.Type == "LinearModel")
             {
-                model = new LinearModel();
+                model = new LinearModel(log_dir_exp: expLogDir);
             }
             else
             {
