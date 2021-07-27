@@ -135,6 +135,20 @@ Type = "MAP-Elites"
 
 [Surrogate]
 Type = "FullyConnectedNN"
+ModelTargets=[
+  "WinCount",
+  "AverageHealthDifference",
+  "DamageDone",
+  "NumTurns",
+  "CardsDrawn",
+  "HandSize",
+  "ManaSpent",
+  "ManaWasted",
+  "DeckManaSum",
+  "DeckManaVariance",
+  "NumMinionCards",
+  "NumSpellCards",
+]
 
 [[Nerfs]]
 CardName = "Cold Blood"
