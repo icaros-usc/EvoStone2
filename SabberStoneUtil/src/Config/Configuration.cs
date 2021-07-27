@@ -27,5 +27,6 @@ namespace SabberStoneUtil.Config
     public class SurrogateParams
     {
         public string Type { get; set; }
+        public string[] ModelTargets { get; set; }
     }
 }

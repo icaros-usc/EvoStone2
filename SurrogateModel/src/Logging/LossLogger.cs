@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using NumSharp;
 
 // using MapSabber.Messaging;
 using SabberStoneUtil.Decks;
@@ -14,11 +15,13 @@ namespace SurrogateModel.Logging
     {
         private string _logPath;
         private bool _isInitiated;
+        private string[] _model_targets;
 
-        public LossLogger(string logPath)
+        public LossLogger(string logPath, string[] model_targets)
         {
             _logPath = logPath;
             _isInitiated = false;
+            _model_targets = model_targets;
         }
 
         private static void writeText(Stream fs, string s)
@@ -39,10 +42,15 @@ namespace SurrogateModel.Logging
             using (FileStream ow = File.Open(_logPath,
                       FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                string[] dataLabels = {
-                    "train_loss",
-                    "test_loss",
+                List<string> dataLabels = new List<string>(){
+                    "Sum train loss",
+                    "Sum test loss",
                 };
+                foreach (string target in _model_targets)
+                {
+                    dataLabels.Add(target + " train loss");
+                    dataLabels.Add(target + " test loss");
+                }
                 writeText(ow, string.Join(",", dataLabels));
                 ow.Close();
             }
@@ -52,7 +60,11 @@ namespace SurrogateModel.Logging
         /// <summary>
         // Function to write a single individual
         /// </summary>
-        public void LogLoss(double train_loss, double test_loss)
+        public void LogLoss(
+            double train_loss,
+            double test_loss,
+            NDArray train_per_ele_loss,
+            NDArray test_per_ele_loss)
         {
             // Put the header on the log file if this is the first
             // individual in the experiment.
@@ -61,10 +73,18 @@ namespace SurrogateModel.Logging
 
             using (StreamWriter sw = File.AppendText(_logPath))
             {
-                string[] losses = {
+                List<string> losses = new List<string>(){
                     train_loss.ToString(),
                     test_loss.ToString(),
                 };
+                for (int i = 0; i < train_per_ele_loss.shape[0]; i++)
+                {
+                    var train_ele_loss = train_per_ele_loss[i];
+                    var test_ele_loss = test_per_ele_loss[i];
+                    losses.Add(train_ele_loss.ToString());
+                    losses.Add(test_ele_loss.ToString());
+                }
+
                 sw.WriteLine(string.Join(",", losses));
                 sw.Close();
             }

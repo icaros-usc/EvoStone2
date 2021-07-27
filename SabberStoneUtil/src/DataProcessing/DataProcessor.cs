@@ -172,18 +172,22 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Print onehot encoded deck data
         /// </summary>
-        public static void PrintDeckOnehotEncoding(String inPath)
+        public static void PrintDeckOnehotEncoding(
+            String inPath, string[] modelTargets)
         {
-            (int [,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
+            (int [,] cardsEncoding, _) =
+                PreprocessDeckOnehotFromFile(inPath, modelTargets);
             PrintDeckEncoding(cardsEncoding);
         }
 
         /// <summary>
         /// Write onehot encoded deck data to disk
         /// </summary>
-        public static void WriteDeckOnehotEncoding(String inPath, String outPath)
+        public static void WriteDeckOnehotEncoding(
+            String inPath, String outPath, string[] modelTargets)
         {
-            (int[,] cardsEncoding, _) = PreprocessDeckOnehotFromFile(inPath);
+            (int[,] cardsEncoding, _) =
+                PreprocessDeckOnehotFromFile(inPath, modelTargets);
             WriteDeckEncoding(cardsEncoding, outPath);
         }
 
@@ -327,7 +331,7 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Generate (modified) one hot encoding feature from data read from data
         /// </summary>
-        public static (int[,], double[,]) PreprocessDeckOnehotFromData(List<LogIndividual> logIndividualsList)
+        public static (int[,], double[,]) PreprocessDeckOnehotFromData(List<LogIndividual> logIndividualsList, string[] modelTargets)
         {
             // store encoding in a 2D array
             int [,] cardsEncoding = new int[logIndividualsList.Count, numCards]; // feature of surrogate model
@@ -343,12 +347,12 @@ namespace SabberStoneUtil.DataProcessing
                     cardsEncoding[i,j]++;
                 }
             }
-            double [,] deckStats = GetDeckStats(logIndividualsList); // target of surrogate model
+            double [,] deckStats = GetDeckStats(logIndividualsList, modelTargets); // target of surrogate model
 
             return (cardsEncoding, deckStats);
         }
 
-        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromData(List<LogIndividual> logIndividualsList)
+        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromData(List<LogIndividual> logIndividualsList, string[] modelTargets)
         {
             // store embedding in a 3D array
             // each deck consists of 30 embedding vectors
@@ -364,7 +368,7 @@ namespace SabberStoneUtil.DataProcessing
                 deckEmbeddings[i] = deckEmbedding;
             }
 
-            double[,] deckStats = GetDeckStats(logIndividualsList);
+            double[,] deckStats = GetDeckStats(logIndividualsList, modelTargets);
 
             return (deckEmbeddings, deckStats);
         }
@@ -372,7 +376,7 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Generate encoding of a deck as a set of 30 one hot encoded cards from data
         /// </summary>
-        public static (double [][][], double[,]) PreprocessCardsSetOnehotFromData(List<LogIndividual> logIndividualsList)
+        public static (double [][][], double[,]) PreprocessCardsSetOnehotFromData(List<LogIndividual> logIndividualsList, string[] modelTargets)
         {
             /// store embedding in a 3D array
             // each deck contains 30 embedding vectors
@@ -401,7 +405,8 @@ namespace SabberStoneUtil.DataProcessing
                 deckEmbeddings[i] = deckEmbedding;
             }
 
-            double[,] deckStats = GetDeckStats(logIndividualsList);
+            double[,] deckStats = GetDeckStats(
+                logIndividualsList, modelTargets);
             return (deckEmbeddings, deckStats);
         }
 
@@ -413,28 +418,30 @@ namespace SabberStoneUtil.DataProcessing
         /// Generate (modified) one hot encoding feature from data read from file
         /// </summary>
         /// <param name = "path">path of the file containing raw data</param>
-        public static (int[,], double[,]) PreprocessDeckOnehotFromFile(String path)
+        public static (int[,], double[,]) PreprocessDeckOnehotFromFile(String path, string[] modelTargets)
         {
             var logIndividualsList = readLogIndividuals(path).ToList();
-            return PreprocessDeckOnehotFromData(logIndividualsList);
+            return PreprocessDeckOnehotFromData(logIndividualsList, modelTargets);
         }
 
         /// <summary>
         /// Generate deck2vec embedding from data read from
         /// </summary>
-        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromFile(string path)
+        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromFile(string path, string[] modelTargets)
         {
             var logIndividualsList = readLogIndividuals(path).ToList();
-            return PreprocessDeckToVecEmbeddingFromData(logIndividualsList);
+            return PreprocessDeckToVecEmbeddingFromData(
+                logIndividualsList, modelTargets);
         }
 
         /// <summary>
         /// Generate encoding of a deck as a set of 30 one hot encoded cards from file
         /// </summary>
-        public static (double [][][], double[,]) PreprocessCardsSetOnehotFromFile(string path)
+        public static (double [][][], double[,]) PreprocessCardsSetOnehotFromFile(string path, string[] modelTargets)
         {
             var logIndividualsList = readLogIndividuals(path).ToList();
-            return PreprocessCardsSetOnehotFromData(logIndividualsList);
+            return PreprocessCardsSetOnehotFromData(
+                logIndividualsList, modelTargets);
         }
 
         // ******** End Preprocess Card/Deck Encoding from File ************
@@ -444,15 +451,32 @@ namespace SabberStoneUtil.DataProcessing
         /// <summary>
         /// Get Deck stats from list of LogIndividuals as the learning target
         /// </summary>
-        public static double[,] GetDeckStats(List<LogIndividual> logIndividualsList)
+        public static double[,] GetDeckStats(
+            List<LogIndividual> logIndsList,
+            string[] modelTargets)
         {
-            double [,] deckStats = new double[logIndividualsList.Count, 3]; // target of surrogate model
-            for(int i=0; i<logIndividualsList.Count; i++)
+            int numInds = logIndsList.Count;
+            int numTargets = modelTargets.Length;
+            // target of surrogate model
+            double [,] deckStats = new double[numInds, numTargets];
+            for(int i=0; i<numInds; i++)
             {
-                // could add more stats here if model is improved
-                deckStats[i,0] = logIndividualsList[i].AverageHealthDifference;
-                deckStats[i,1] = logIndividualsList[i].NumTurns;
-                deckStats[i,2] = logIndividualsList[i].HandSize;
+                for(int j=0; j<numTargets; j++)
+                {
+                    string target = modelTargets[j];
+                    deckStats[i,j] = Convert.ToDouble(
+                        logIndsList[i]
+                        .GetType()
+                        .GetProperty(target)
+                        .GetValue(logIndsList[i]));
+                    // convert win count to win rate
+                    // NOTE:
+                    // May need to change total number of game based on config.
+                    if (target == "WinCount")
+                    {
+                        deckStats[i,j] /= 200.0;
+                    }
+                }
             }
             return deckStats;
         }
@@ -481,25 +505,6 @@ namespace SabberStoneUtil.DataProcessing
             }
         }
 
-        /// <summary>
-        /// Function to read in and preprocess new batches of training data provided by DeckSearch
-        /// </summary>
-        /// <param name = "path">path of the file containing training data</param>
-        public static (int[,] cardsEncoding, double[,] deckStats) ReadNewTrainingData(string path)
-        {
-            Console.WriteLine("Waiting for training data from DeckSearch");
-            while(FileIsLocked(path, FileAccess.Read))
-            {
-                Thread.Sleep(1000); // check for training data for every 2 seconds
-            }
-
-            Console.WriteLine("Found data, start reading");
-
-            // data is ready, read them in, delete file, and return
-            (int[,] cardsEncoding, double[,] deckStats) = PreprocessDeckOnehotFromFile(path);
-            File.Delete(path);
-            return (cardsEncoding, deckStats);
-        }
 
         public static void GenerateCardDescription()
         {
