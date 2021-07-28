@@ -61,6 +61,8 @@ namespace DeckSearch.Search
         private string _surrogateElitesLogDir;
 
 
+        private string[] _modelTargets;
+
 
         /// <summary>
         /// Constructor
@@ -74,6 +76,8 @@ namespace DeckSearch.Search
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
             _numSurrogateEvals = _searchManager.searchAlgo.InitialPopulation();
             _logLengthPerGen = config.Search.LogLengthPerGen;
+
+            // create surrogate elites log dir
             _surrogateElitesLogDir = System.IO.Path.Combine(
                 _searchManager.log_dir_exp, "surrogate_elites");
             System.IO.Directory.CreateDirectory(_surrogateElitesLogDir);
@@ -83,17 +87,20 @@ namespace DeckSearch.Search
             if (config.Surrogate.Type == "DeepSetModel")
             {
                 _surrogateModel = new DeepSetModel(
-                    log_dir_exp: _searchManager.log_dir_exp);
+                    log_dir_exp: _searchManager.log_dir_exp,
+                    model_targets: config.Surrogate.ModelTargets);
             }
             else if (config.Surrogate.Type == "FullyConnectedNN")
             {
                 _surrogateModel = new FullyConnectedNN(
-                    log_dir_exp: _searchManager.log_dir_exp);
+                    log_dir_exp: _searchManager.log_dir_exp,
+                    model_targets: config.Surrogate.ModelTargets);
             }
             else if (config.Surrogate.Type == "LinearModel")
             {
                 _surrogateModel = new LinearModel(
-                    log_dir_exp: _searchManager.log_dir_exp);
+                    log_dir_exp: _searchManager.log_dir_exp,
+                    model_targets: config.Surrogate.ModelTargets);
             }
             else
             {
@@ -103,6 +110,9 @@ namespace DeckSearch.Search
             Utilities.WriteLineWithTimestamp(
                 String.Format("{0} Surrogate model created.",
                               config.Surrogate.Type));
+
+            // get model targets
+            _modelTargets = _surrogateModel.model_targets;
 
         }
 
@@ -164,11 +174,16 @@ namespace DeckSearch.Search
                 individual.ID = this._numSurrogateEvals;
                 this._numSurrogateEvals += 1;
 
-                // same evaluated stats
+                // put result into individual
                 individual.OverallData = new OverallStatistics();
-                individual.OverallData.AverageHealthDifference = result[i,0];
-                individual.OverallData.NumTurns = result[i,1];
-                individual.OverallData.HandSize = result[i,2];
+                for(int j = 0; j < _modelTargets.Length; j++)
+                {
+                    string target = _modelTargets[j];
+                    individual.OverallData
+                        .GetType()
+                        .GetProperty(target)
+                        .SetValue(individual.OverallData, result[i, j]);
+                }
 
                 // save fitness
                 individual.Fitness = individual.OverallData.AverageHealthDifference;
@@ -254,7 +269,9 @@ namespace DeckSearch.Search
                     List<Individual> currGeneration = new List<Individual>();
                     for(int j=0; j<_numToEvaluatePerGen; j++)
                     {
-                        Individual choiceIndividual = _searchManager.searchAlgo.GenerateIndividualFromSurrogateMap(CardReader._cardSet);
+                        Individual choiceIndividual =
+                            _searchManager.searchAlgo.GenerateIndividualFromSurrogateMap(
+                                    CardReader._cardSet);
                         currGeneration.Add(choiceIndividual);
                     }
                     EvaluateOnSurrogate(currGeneration);

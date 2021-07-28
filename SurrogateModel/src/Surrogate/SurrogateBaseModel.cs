@@ -42,7 +42,7 @@ namespace SurrogateModel.Surrogate
         protected DataLoader dataLoaderTrain = null;
         protected DataLoader dataLoaderTest = null;
         protected Tensorflow.Saver saver;
-        protected string[] model_targets;
+        public string[] model_targets { protected set; get; }
 
         // writers to record training/testing loss and model save point.
         protected LossLogger loss_logger;
@@ -301,9 +301,10 @@ namespace SurrogateModel.Surrogate
         protected double[,] PredictHelper(NDArray x_input)
         {
             // get the model output
-            var output = sess.run((model_output), // operations
-                                (n_samples, (int)x_input.shape[0]), // batch size
-                                (input, x_input)); // features
+            var output = sess.run(
+                (model_output), // operations
+                (n_samples, (int)x_input.shape[0]), // batch size
+                (input, x_input)); // features
 
             // convert result to double array
             double[,] result;
@@ -312,7 +313,8 @@ namespace SurrogateModel.Surrogate
             {
                 for (int j = 0; j < output.shape[1]; j++)
                 {
-                    result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
+                    // need to cast twice because the model use float
+                    result[i, j] = (double)(float)output[i, j];
                 }
             }
             return result;
