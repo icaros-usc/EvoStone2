@@ -29,9 +29,16 @@ namespace PlayGround
             var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(args[0]);
             CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
-            // var model = new FullyConnectedNN();
-            // var model = new DeepSetModel();
-            // model.OfflineFit();
+            var model = new FullyConnectedNN(
+                offline_data_file: "resources/individual_log_rogue.csv",
+                model_targets: config.Surrogate.ModelTargets);
+            // var model = new DeepSetModel(
+            //     offline_data_file: "resources/individual_log_rogue.csv",
+            //     model_targets: config.Surrogate.ModelTargets);
+            // var model = new LinearModel(
+            //     offline_data_file: "resources/individual_log_rogue.csv",
+            //     model_targets: config.Surrogate.ModelTargets);
+            model.OfflineFit();
             // Console.WriteLine(DataProcessor.numCards);
 
             // // shape (3, 2, 2)

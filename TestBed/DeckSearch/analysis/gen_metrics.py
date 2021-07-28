@@ -15,6 +15,7 @@ import matplotlib as mpl
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.ticker import MaxNLocator
 from utils import read_in_surr_config
+from plot_loss import plot_loss
 
 matplotlib.use("agg")
 matplotlib.rcParams.update({'font.size': 12})
@@ -238,18 +239,19 @@ def plot_qd_score(rowData, savePath, archive_name):
     fig.savefig(savePath)
 
 
-def plot_loss(loss_log_file, savePath):
-    losses_pd = pd.read_csv(loss_log_file)
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.plot(losses_pd["train_loss"], label="Training")
-    ax.plot(losses_pd["test_loss"], label="Testing")
-    ax.legend(loc='upper left', fontsize="xx-large")
-    ax.set_xlabel("Number of Epochs", fontsize=20)
-    ax.set_ylabel("MSE Loss", fontsize=20)
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.set(xlim=(0, None), ylim=(0, 20))
-    ax.grid()
-    fig.savefig(savePath)
+# def plot_loss(loss_log_file, savePath):
+#     losses_pd = pd.read_csv(loss_log_file)
+#     fig, ax = plt.subplots(figsize=(8, 6))
+#     for label in losses_pd:
+#         ax.plot(losses_pd[label], label=label)
+#         ax.plot(losses_pd[label], label=label)
+#     ax.legend(loc='upper left', fontsize="xx-large")
+#     ax.set_xlabel("Number of Epochs", fontsize=20)
+#     ax.set_ylabel("MSE Loss", fontsize=20)
+#     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+#     ax.set(xlim=(0, None), ylim=(0, 20))
+#     ax.grid()
+#     fig.savefig(savePath)
 
 
 def generateAll(elite_map_logs, loss_log_file):

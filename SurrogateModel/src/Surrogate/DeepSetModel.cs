@@ -20,16 +20,18 @@ namespace SurrogateModel.Surrogate
         /// <param name = "step_size">The step size of adam optimizer.</param>
         /// <param name = "log_dir_exp">Path to the log directory.</param>
         public DeepSetModel(
-            int num_epoch = 10,
+            int num_epoch = 20,
             int batch_size = 32,
             float step_size = 0.002f,
             string log_dir_exp = "train_log",
-            string offline_data_file = "resources/individual_log.csv")
+            string offline_data_file = "resources/individual_log.csv",
+            string[] model_targets = null)
             : base(num_epoch,
                    batch_size,
                    step_size,
                    log_dir_exp,
-                   offline_data_file)
+                   offline_data_file,
+                   model_targets)
         {
             graph = build_graph();
             sess = tf.Session(config);
@@ -46,7 +48,9 @@ namespace SurrogateModel.Surrogate
         {
             if(!online)
             {
-                (deckEmbedding, deckStats) = DataProcessor.PreprocessCardsSetOnehotFromFile(offline_data_file);
+                (deckEmbedding, deckStats) =
+                    DataProcessor.PreprocessCardsSetOnehotFromFile(
+                        offline_data_file, this.model_targets);
             }
 
             var X = np.array(deckEmbedding);
@@ -69,8 +73,10 @@ namespace SurrogateModel.Surrogate
             tf_with(tf.variable_scope("placeholder"), delegate
             {
                 n_samples = tf.placeholder(tf.float32);
-                input = tf.placeholder(tf.float32, shape: (-1, 30, DataProcessor.numCards));
-                y_true = tf.placeholder(tf.float32, shape: (-1, 3));
+                input = tf.placeholder(tf.float32,
+                                       shape: (-1, 30, DataProcessor.numCards));
+                y_true = tf.placeholder(tf.float32,
+                                        shape: (-1, this.model_targets.Length));
             });
 
             // push through phi approximator
@@ -84,7 +90,7 @@ namespace SurrogateModel.Surrogate
             model_output = ro_output;
 
             // loss
-            loss_op = mse_loss(model_output, y_true);
+            (loss_op, per_ele_loss_op) = mse_loss(model_output, y_true);
 
             // optimizer
             var adam = tf.train.AdamOptimizer(step_size);
@@ -171,7 +177,8 @@ namespace SurrogateModel.Surrogate
                 Tensor o_fc2 = fc_layer(input, name: "fc2", num_output: 8);
                 Tensor o_acti2 = elu_layer(o_fc2, name: "elu2");
 
-                Tensor o_fc3 = fc_layer(o_acti2, name: "fc3", num_output: 3);
+                Tensor o_fc3 = fc_layer(o_acti2, name: "fc3",
+                                        num_output: this.model_targets.Length);
                 Tensor o_acti3 = elu_layer(o_fc3, name: "elu3");
                 ro_output = o_acti3;
             });
@@ -192,7 +199,9 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         public override void OnlineFit(List<LogIndividual> logIndividuals)
         {
-            var (deckEncoding, deckStats) = DataProcessor.PreprocessCardsSetOnehotFromData(logIndividuals);
+            var (deckEncoding, deckStats) =
+                DataProcessor.PreprocessCardsSetOnehotFromData(
+                    logIndividuals, this.model_targets);
             prepare_data(online: true, deckEncoding, deckStats);
             train();
         }
@@ -203,7 +212,9 @@ namespace SurrogateModel.Surrogate
         public override double[,] Predict(List<LogIndividual> logIndividuals)
         {
             // obtain deck embedding
-            var (deckEmbedding, _) = DataProcessor.PreprocessCardsSetOnehotFromData(logIndividuals);
+            var (deckEmbedding, _) =
+                DataProcessor.PreprocessCardsSetOnehotFromData(
+                    logIndividuals, this.model_targets);
             var x_input = np.array(deckEmbedding);
             return PredictHelper(x_input);
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Tensorflow;
 using NumSharp;
 using static Tensorflow.Binding;
+using SabberStoneUtil;
 using SabberStoneUtil.DataProcessing;
 using SurrogateModel.Logging;
 
@@ -21,12 +22,13 @@ namespace SurrogateModel.Surrogate
 
         // Tensors and Operations to be evaluated in the graph
         protected Session sess;
-        public Tensor input {protected set; get;} = null;
+        public Tensor input { protected set; get; } = null;
         protected Tensor y_true = null;
-        public Tensor model_output {protected set; get;} = null;
+        public Tensor model_output { protected set; get; } = null;
         protected Operation train_op = null;
         protected Operation init = null;
         protected Tensor loss_op = null;
+        protected Tensor per_ele_loss_op = null;
         protected Tensor n_samples; // number of samples for each batch to calculate mse error
 
         // hyperparams
@@ -40,6 +42,7 @@ namespace SurrogateModel.Surrogate
         protected DataLoader dataLoaderTrain = null;
         protected DataLoader dataLoaderTest = null;
         protected Tensorflow.Saver saver;
+        public string[] model_targets { protected set; get; }
 
         // writers to record training/testing loss and model save point.
         protected LossLogger loss_logger;
@@ -58,12 +61,39 @@ namespace SurrogateModel.Surrogate
             int batch_size = 64,
             float step_size = 0.005f,
             string log_dir_exp = "train_log",
-            string offline_data_file = "resources/individual_log.csv")
+            string offline_data_file = "resources/individual_log.csv",
+            string[] model_targets = null)
         {
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
             this.step_size = step_size;
             this.offline_data_file = offline_data_file;
+
+            // get targets of the model
+            if (model_targets == null)
+            {
+                this.model_targets = new string[]
+                {
+                    "AverageHealthDifference",
+                    "NumTurns",
+                    "HandSize",
+                };
+            }
+            else
+            {
+                this.model_targets = model_targets;
+            }
+
+            string model_targets_str = "[ ";
+            foreach (string target in this.model_targets)
+            {
+                model_targets_str += target + ", ";
+            }
+            model_targets_str += " ]";
+
+            Utilities.WriteLineWithTimestamp(
+                String.Format("Model is predicting metrics: {0}",
+                              model_targets_str));
 
             // set up session, attempt to use all cores
             config = new ConfigProto
@@ -79,7 +109,8 @@ namespace SurrogateModel.Surrogate
             // create loss logger
             string loss_logger_path = System.IO.Path.Combine(
                 train_log_dir, "model_losses.csv");
-            this.loss_logger = new LossLogger(loss_logger_path);
+            this.loss_logger = new LossLogger(loss_logger_path,
+                                              this.model_targets);
         }
 
         /// <summary>
@@ -181,14 +212,18 @@ namespace SurrogateModel.Surrogate
         /// </summary>
         /// <param name = "output">output tensor to be computed loss against. Assumed to be size [-1, num_output]</param>
         /// <param name = "target">true value, should have the same size of output</param>
-        protected Tensor mse_loss(Tensor output, Tensor target)
+        protected (Tensor, Tensor) mse_loss(Tensor output, Tensor target)
         {
             Tensor _loss_op = null;
+            Tensor _per_ele_loss_op = null;
             tf_with(tf.variable_scope("mse_loss"), delegate
             {
-                _loss_op = tf.reduce_sum(tf.pow(output - target, 2)) / n_samples;
+                var _row_loss = tf.pow(output - target, 2);
+                _per_ele_loss_op =
+                    tf.reduce_sum(_row_loss, axis: 0) / n_samples;
+                _loss_op = tf.reduce_sum(_row_loss) / n_samples;
             });
-            return _loss_op;
+            return (_loss_op, _per_ele_loss_op);
         }
 
         /// <summary>
@@ -197,6 +232,8 @@ namespace SurrogateModel.Surrogate
         protected void train()
         {
             double running_loss = 0;
+            NDArray running_per_ele_loss = np.zeros(
+                shapes: new int[]{this.model_targets.Length});
 
             saver = tf.train.Saver();
 
@@ -206,30 +243,43 @@ namespace SurrogateModel.Surrogate
                 for (int j = 0; j < dataLoaderTrain.num_batch; j++)
                 {
                     var (x_input, y_input) = dataLoaderTrain.Sample();
-                    var (_, training_loss) = sess.run((train_op, loss_op), // operations
-                                                (n_samples, (int)x_input.shape[0]), // per-iteration batch size
-                                                (input, x_input), // features
-                                                (y_true, y_input)); // targets
+                    var (_, training_loss, per_ele_train_loss) =
+                        sess.run(
+                            (train_op, loss_op, per_ele_loss_op), // operations
+                            (n_samples, (int)x_input.shape[0]), // batch size
+                            (input, x_input), // features
+                            (y_true, y_input)); // targets
                     running_loss += training_loss;
+                    running_per_ele_loss += per_ele_train_loss;
                 }
 
                 // do validation at the end of every epoch
                 double train_loss = running_loss / dataLoaderTrain.num_batch;
+                NDArray train_per_ele_loss =
+                    running_per_ele_loss / dataLoaderTrain.num_batch;
                 print($"epoch{epoch_idx}:");
                 print($"training_loss = {train_loss}");
                 running_loss = 0;
+                running_per_ele_loss = np.zeros(
+                    shapes: new int[]{this.model_targets.Length});
 
                 // Test the model
                 var (test_x, test_y) = dataLoaderTest.Sample();
-                var testing_loss = sess.run((loss_op),
-                                    (n_samples, (int)test_x.shape[0]), // per-iteration batch size
-                                    (input, test_x), // features
-                                    (y_true, test_y)); // targets
-                print($"testing_loss = {testing_loss}\n");
+                var (testing_loss, test_per_ele_loss) =
+                    sess.run(
+                        (loss_op, per_ele_loss_op), // operation
+                        (n_samples, (int)test_x.shape[0]), // batch size
+                        (input, test_x), // features
+                        (y_true, test_y)); // targets
+                print($"testing_loss = {testing_loss}");
 
                 // write the losses
                 // divide by 1 to convert
-                loss_logger.LogLoss(train_loss, testing_loss / 1.0);
+                loss_logger.LogLoss(
+                    train_loss,
+                    testing_loss / 1.0,
+                    train_per_ele_loss,
+                    test_per_ele_loss);
                 epoch_idx++;
             }
 
@@ -251,9 +301,10 @@ namespace SurrogateModel.Surrogate
         protected double[,] PredictHelper(NDArray x_input)
         {
             // get the model output
-            var output = sess.run((model_output), // operations
-                                (n_samples, (int)x_input.shape[0]), // batch size
-                                (input, x_input)); // features
+            var output = sess.run(
+                (model_output), // operations
+                (n_samples, (int)x_input.shape[0]), // batch size
+                (input, x_input)); // features
 
             // convert result to double array
             double[,] result;
@@ -262,7 +313,8 @@ namespace SurrogateModel.Surrogate
             {
                 for (int j = 0; j < output.shape[1]; j++)
                 {
-                    result[i, j] = (double)(float)output[i, j]; // need to cast twice because the model use float
+                    // need to cast twice because the model use float
+                    result[i, j] = (double)(float)output[i, j];
                 }
             }
             return result;
