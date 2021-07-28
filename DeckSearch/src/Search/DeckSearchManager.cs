@@ -153,14 +153,33 @@ namespace DeckSearch.Search
 
 
         /// <summary>
-        /// Function to dispatch multiple simulation jobs to DeckEvaluator through File IO
+        /// Function to dispatch multiple simulation jobs to DeckEvaluator
+        /// through File IO.
         /// </summary>
         public void DispatchSearchJobsToWorkers()
         {
             // Dispatch jobs to the available workers.
             while (_idleWorkers.Count > 0 && !searchAlgo.IsBlocking())
             {
-                Individual choiceIndividual = searchAlgo.GenerateIndividual(CardReader._cardSet);
+                Individual choiceIndividual =
+                    searchAlgo.GenerateIndividual(CardReader._cardSet);
+                DispatchOneJobToWorker(choiceIndividual);
+            }
+        }
+
+        /// <summary>
+        /// Function to dispatch initial simulation jobs to DeckEvaluator
+        /// through File IO.
+        /// </summary>
+        public void DispatchInitJobsToWorkers()
+        {
+            // Dispatch jobs to the available workers.
+            while (_idleWorkers.Count > 0 &&
+                   !searchAlgo.IsBlocking() &&
+                   !searchAlgo.InitialPopulationDispatched())
+            {
+                Individual choiceIndividual =
+                    searchAlgo.GenerateIndividual(CardReader._cardSet);
                 DispatchOneJobToWorker(choiceIndividual);
             }
         }

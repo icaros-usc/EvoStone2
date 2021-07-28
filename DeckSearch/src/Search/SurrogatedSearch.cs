@@ -220,10 +220,8 @@ namespace DeckSearch.Search
                 // initial population size
                 _searchManager.FindNewWorkers();
 
-                if(!_searchManager.searchAlgo.InitialPopulationDispatched())
-                {
-                    _searchManager.DispatchSearchJobsToWorkers();
-                }
+                // dispatch initial population
+                _searchManager.DispatchInitJobsToWorkers();
 
                 // wait for workers to finish evaluating initial population
                 _searchManager.FindDoneWorkers(
