@@ -77,7 +77,7 @@ def createRecordList(mapData, mapDims):
         nonFeatureIdx = NUM_FEATURES
         cellSize = int(splitedData[nonFeatureIdx])
         indID = int(splitedData[nonFeatureIdx + 1])
-        winCount = int(splitedData[nonFeatureIdx + 2])
+        winCount = float(splitedData[nonFeatureIdx + 2])
         fitness = float(splitedData[nonFeatureIdx + 3])
         f1 = float(splitedData[nonFeatureIdx + 4 + ROW_INDEX])
         f2 = float(splitedData[nonFeatureIdx + 4 + COL_INDEX])

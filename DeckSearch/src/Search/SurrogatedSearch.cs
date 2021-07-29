@@ -64,6 +64,9 @@ namespace DeckSearch.Search
         private string[] _modelTargets;
 
 
+        private bool _useFixedModel = false;
+
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -101,6 +104,17 @@ namespace DeckSearch.Search
                 _surrogateModel = new LinearModel(
                     log_dir_exp: _searchManager.log_dir_exp,
                     model_targets: config.Surrogate.ModelTargets);
+            }
+            else if (config.Surrogate.Type == "FixedFCNN")
+            {
+                _useFixedModel = true;
+                _surrogateModel = new FullyConnectedNN(
+                    log_dir_exp: _searchManager.log_dir_exp,
+                    model_targets: config.Surrogate.ModelTargets);
+                _surrogateModel.LoadModel(config.Surrogate.FixedModelSavePath);
+                Utilities.WriteLineWithTimestamp(
+                    String.Format("Loaded model from {0}",
+                                  config.Surrogate.ModelTargets));
             }
             else
             {
@@ -247,10 +261,18 @@ namespace DeckSearch.Search
 
             _searchManager.numEvaledPerRun = 0;
 
+
+            List<Individual> indsToTrain;
+
             while(_searchManager.searchAlgo.IsRunning())
             {
                 // back prop using individuals in the buffer
-                BackProp(_searchManager._individualsBuffer.ToList());
+                if (!_useFixedModel)
+                {
+                    indsToTrain = _searchManager._individualsBuffer.ToList();
+                    indsToTrain.Shuffle();
+                    BackProp(_searchManager._individualsBuffer.ToList());
+                }
 
                 // clear the surrogate map
                 _searchManager.searchAlgo.ClearSurrogateMap();
@@ -345,8 +367,13 @@ namespace DeckSearch.Search
                 _searchManager.numEvaledPerRun = 0;
             }
 
-            // Final back prop using individuals in the buffer
-            BackProp(_searchManager._individualsBuffer.ToList());
+            if (!_useFixedModel)
+            {
+                // Final back prop using individuals in the buffer
+                indsToTrain = _searchManager._individualsBuffer.ToList();
+                indsToTrain.Shuffle();
+                BackProp(indsToTrain);
+            }
 
             // Let the workers know that we are done.
             _searchManager.AnnounceWorkersDone();
