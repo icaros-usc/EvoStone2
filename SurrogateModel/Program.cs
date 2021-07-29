@@ -29,6 +29,20 @@ namespace SurrogateModel
 
             string indsLogPath = System.IO.Path.Combine(
                 expLogDir, "individual_log.csv");
+            string[] modelTargets = new string[] {
+                "WinCount",
+                "AverageHealthDifference",
+                "DamageDone",
+                "NumTurns",
+                "CardsDrawn",
+                "HandSize",
+                "ManaSpent",
+                "ManaWasted",
+                "DeckManaSum",
+                "DeckManaVariance",
+                "NumMinionCards",
+                "NumSpellCards",
+            };
 
             // create model
             string modelType = args[1];
@@ -38,19 +52,22 @@ namespace SurrogateModel
             {
                 model = new DeepSetModel(
                     log_dir_exp: expLogDir,
-                    offline_data_file: indsLogPath);
+                    offline_data_file: indsLogPath,
+                    model_targets: modelTargets);
             }
             else if (modelType == "FullyConnectedNN")
             {
                 model = new FullyConnectedNN(
                     log_dir_exp: expLogDir,
-                    offline_data_file: indsLogPath);
+                    offline_data_file: indsLogPath,
+                    model_targets: modelTargets);
             }
             else if (modelType == "LinearModel")
             {
                 model = new LinearModel(
                     log_dir_exp: expLogDir,
-                    offline_data_file: indsLogPath);
+                    offline_data_file: indsLogPath,
+                    model_targets: modelTargets);
             }
             else
             {
