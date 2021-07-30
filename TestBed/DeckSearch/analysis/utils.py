@@ -21,6 +21,8 @@ def get_label(experiment_config):
                 legend += "Deep-set" + " DSA-ME"
             elif experiment_config["Surrogate"]["Type"] == "LinearModel":
                 legend += "Linear" + " DSA-ME"
+            elif experiment_config["Surrogate"]["Type"] == "FixedFCNN":
+                legend += "Fixed FCNN DSA-ME"
             else:
                 legend += experiment_config["Surrogate"]["Type"] + " DSA-ME"
     elif experiment_config["Search"]["Category"] == "Distributed":

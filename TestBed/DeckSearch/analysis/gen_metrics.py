@@ -359,11 +359,14 @@ if __name__ == "__main__":
             IMAGE_TITLE = experiment_config["Surrogate"]["Type"] +\
                            " Surrogate " +\
                            experiment_config["Search"]["Type"]
-            loss_log_file = os.path.join(
-                opt.log_dir,
-                "surrogate_train_log",
-                "model_losses.csv",
-            )
+            if experiment_config["Surrogate"]["Type"] == "FixedFCNN":
+                loss_log_file = None
+            else:
+                loss_log_file = os.path.join(
+                    opt.log_dir,
+                    "surrogate_train_log",
+                    "model_losses.csv",
+                )
             ELITE_MAP_LOG_FILE_NAMES = [
                 ("surrogate_archive",
                  os.path.join(opt.log_dir, "surrogate_elite_map_log.csv")),
