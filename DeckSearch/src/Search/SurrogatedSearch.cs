@@ -114,7 +114,7 @@ namespace DeckSearch.Search
                 _surrogateModel.LoadModel(config.Surrogate.FixedModelSavePath);
                 Utilities.WriteLineWithTimestamp(
                     String.Format("Loaded model from {0}",
-                                  config.Surrogate.ModelTargets));
+                                  config.Surrogate.FixedModelSavePath));
             }
             else
             {
@@ -123,7 +123,7 @@ namespace DeckSearch.Search
             }
             Utilities.WriteLineWithTimestamp(
                 String.Format("{0} Surrogate model created.",
-                              config.Surrogate.FixedModelSavePath));
+                              config.Surrogate.Type));
 
             // get model targets
             _modelTargets = _surrogateModel.model_targets;
