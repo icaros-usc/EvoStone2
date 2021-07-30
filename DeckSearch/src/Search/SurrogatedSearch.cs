@@ -123,7 +123,7 @@ namespace DeckSearch.Search
             }
             Utilities.WriteLineWithTimestamp(
                 String.Format("{0} Surrogate model created.",
-                              config.Surrogate.Type));
+                              config.Surrogate.FixedModelSavePath));
 
             // get model targets
             _modelTargets = _surrogateModel.model_targets;
