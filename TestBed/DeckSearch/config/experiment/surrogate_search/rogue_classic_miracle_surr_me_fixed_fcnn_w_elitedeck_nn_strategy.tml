@@ -134,7 +134,7 @@ NumToEvaluatePerGeneration = 10
 LogLengthPerGen=10
 
 [Surrogate]
-Type="FullyConnectedNN"
+Type="FixedFCNN"
 ModelTargets=[
   "WinCount",
   "AverageHealthDifference",
