@@ -170,7 +170,10 @@ if __name__ == '__main__':
                     for cellData in mapData[1:]:
                         fitness = get_fitness_from_cell(cellData)
                         win = get_win_cnt_from_cell(cellData)
-                        qd_score += fitness - FITNESS_MIN
+                        # normalize fitness to [0, 1]
+                        fitness_nor = (fitness - FITNESS_MIN) \
+                                    / (FITNESS_MAX - FITNESS_MIN)
+                        qd_score += fitness_nor
                         if fitness > max_fitness:
                             max_fitness = fitness
                         if win > max_win:
@@ -250,7 +253,7 @@ if __name__ == '__main__':
                  ncol=2,
                  mode="expand")
     qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
-    qd_ax.set_ylabel('QD-score', fontsize=20)
+    qd_ax.set_ylabel('QD-score (Normalized Fitness)', fontsize=20)
     qd_ax.set(xlim=(0, NUM_EVAL), ylim=(0, None))
     qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     qd_ax.grid()
