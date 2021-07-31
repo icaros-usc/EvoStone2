@@ -30,18 +30,18 @@ namespace SurrogateModel
             string indsLogPath = System.IO.Path.Combine(
                 expLogDir, "individual_log.csv");
             string[] modelTargets = new string[] {
-                "WinCount",
+                // "WinCount",
                 "AverageHealthDifference",
-                "DamageDone",
+                // "DamageDone",
                 "NumTurns",
-                "CardsDrawn",
+                // "CardsDrawn",
                 "HandSize",
-                "ManaSpent",
-                "ManaWasted",
-                "DeckManaSum",
-                "DeckManaVariance",
-                "NumMinionCards",
-                "NumSpellCards",
+                // "ManaSpent",
+                // "ManaWasted",
+                // "DeckManaSum",
+                // "DeckManaVariance",
+                // "NumMinionCards",
+                // "NumSpellCards",
             };
 
             // create model
