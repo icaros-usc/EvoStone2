@@ -285,7 +285,7 @@ if __name__ == '__main__':
     ccdf_ax.set_xlabel('Average Health Difference', fontsize=label_fontsize)
     ccdf_ax.set_ylabel('Number of Elites', fontsize=label_fontsize)
     ccdf_ax.set(xlim=(FITNESS_MIN, FITNESS_MAX), ylim=(0, 600))
-    # ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
+    ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
     ccdf_ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
     ccdf_ax.tick_params(labelsize=tick_fontsize)
     ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
