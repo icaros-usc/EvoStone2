@@ -3,7 +3,7 @@ import os
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import get_label, read_in_surr_config
+from utils import get_label_color, read_in_surr_config
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         std_pos_shift = np.std(pos_shift)
 
         experiment_config, _ = read_in_surr_config(log_dir)
-        label = get_label(experiment_config)
+        label, _ = get_label_color(experiment_config)
 
         if label == "RandomSearch":
             label = "Offline FCNN (Random)"

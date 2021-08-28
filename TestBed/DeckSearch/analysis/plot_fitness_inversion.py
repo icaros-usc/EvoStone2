@@ -3,7 +3,7 @@ import json
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
-from utils import get_label, read_in_surr_config
+from utils import get_label_color, read_in_surr_config
 
 
 if __name__ == '__main__':
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         fitness = [item["fitness"] for item in inversions_dict.values()]
 
         experiment_config, _ = read_in_surr_config(log_dir)
-        label = get_label(experiment_config)
+        label, _ = get_label_color(experiment_config)
 
         ax.scatter(fitness, inversions, label=label)
 

@@ -11,23 +11,31 @@ def read_in_surr_config(log_dir):
     return experiment_config, elite_map_config
 
 
-def get_label(experiment_config):
+def get_label_color(experiment_config):
     legend = ""
+    color = None
     if experiment_config["Search"]["Category"] == "Surrogated":
         if experiment_config["Search"]["Type"] == "MAP-Elites":
             if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
-                legend += "FCNN" + " DSA-ME"
+                legend += "FCNN" + " Emulation-ME"
+                color = "green"
             elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
-                legend += "Deep-set" + " DSA-ME"
+                legend += "Deep-set" + " Emulation-ME"
+                color = "purple"
             elif experiment_config["Surrogate"]["Type"] == "LinearModel":
-                legend += "Linear" + " DSA-ME"
+                legend += "Linear" + " Emulation-ME"
+                color = "orange"
             elif experiment_config["Surrogate"]["Type"] == "FixedFCNN":
-                legend += "Fixed FCNN DSA-ME"
+                legend += "Fixed FCNN Emulation-ME"
+                color = "red"
             else:
-                legend += experiment_config["Surrogate"]["Type"] + " DSA-ME"
+                legend += experiment_config["Surrogate"]["Type"] \
+                          + " Emulation-ME"
+                color = None
     elif experiment_config["Search"]["Category"] == "Distributed":
         legend += experiment_config["Search"]["Type"]
-    return legend
+        color = "blue"
+    return legend, color
 
 
 def read_in_paladin_card_index():
