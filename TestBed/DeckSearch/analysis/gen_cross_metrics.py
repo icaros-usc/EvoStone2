@@ -7,7 +7,7 @@ import pandas as pd
 import scipy.stats as st
 import matplotlib.pyplot as plt
 import warnings
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, MultipleLocator
 from matplotlib import rc
 from pprint import pprint
 from tqdm import tqdm
@@ -237,6 +237,10 @@ if __name__ == '__main__':
             color=color,
         )
 
+
+    label_fontsize = 35
+    tick_fontsize = 20
+
     # finalize qd score plot
     qd_ax.legend(loc='lower left',
                  fontsize='x-large',
@@ -244,11 +248,12 @@ if __name__ == '__main__':
                  borderaxespad=0,
                  ncol=2,
                  mode="expand")
-    qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
-    qd_ax.set_ylabel('QD-score (Normalized Fitness)', fontsize=20)
-    qd_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 360))
-    qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    qd_ax.grid()
+    qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=label_fontsize)
+    qd_ax.set_ylabel('QD-score (Normalized)', fontsize=label_fontsize)
+    qd_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 400))
+    qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
+    qd_ax.yaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
+    qd_ax.tick_params(labelsize=tick_fontsize)
     qd_fig.savefig(os.path.join(log_dir_plot, image_title + " QD-score.pdf"),
                    bbox_inches="tight")
 
@@ -259,11 +264,12 @@ if __name__ == '__main__':
                          borderaxespad=0,
                          ncol=2,
                          mode="expand")
-    num_elites_ax.set_xlabel('Number of Evaluation(s)', fontsize=20)
-    num_elites_ax.set_ylabel('Number of Elites', fontsize=20)
+    num_elites_ax.set_xlabel('Number of Evaluation(s)', fontsize=label_fontsize)
+    num_elites_ax.set_ylabel('Number of Elites', fontsize=label_fontsize)
     num_elites_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 600))
-    num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    num_elites_ax.grid()
+    num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
+    num_elites_ax.yaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
+    num_elites_ax.tick_params(labelsize=tick_fontsize)
     num_elites_fig.savefig(os.path.join(log_dir_plot,
                                         image_title + " Num elites.pdf"),
                            bbox_inches="tight")
@@ -276,11 +282,12 @@ if __name__ == '__main__':
                    borderaxespad=0,
                    ncol=2,
                    mode="expand")
-    ccdf_ax.set_xlabel('Performance', fontsize=20)
-    ccdf_ax.set_ylabel('Number of Elites', fontsize=20)
+    ccdf_ax.set_xlabel('Average Health Difference', fontsize=label_fontsize)
+    ccdf_ax.set_ylabel('Number of Elites', fontsize=label_fontsize)
     ccdf_ax.set(xlim=(FITNESS_MIN, FITNESS_MAX), ylim=(0, 600))
-    ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ccdf_ax.grid()
+    # ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
+    ccdf_ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
+    ccdf_ax.tick_params(labelsize=tick_fontsize)
     ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
                      bbox_inches="tight")
 

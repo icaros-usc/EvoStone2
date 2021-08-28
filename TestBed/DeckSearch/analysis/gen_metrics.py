@@ -18,7 +18,15 @@ from utils import read_in_surr_config
 from plot_loss import plot_loss
 
 matplotlib.use("agg")
-matplotlib.rcParams.update({'font.size': 12})
+# matplotlib.rcParams.update({'font.size': 12})
+
+# set matplotlib params
+plt.rcParams.update({
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
+    "font.family": "serif",
+    "font.serif": ["Palatino"],
+})
 
 # from overcooked_ai_pcg import LSI_IMAGE_DIR, LSI_LOG_DIR, LSI_CONFIG_ALGO_DIR, LSI_CONFIG_MAP_DIR, LSI_CONFIG_AGENT_DIR
 
@@ -139,6 +147,7 @@ def createImage(rowData, filename, archive_name):
     ax_divider = make_axes_locatable(ax)
     cbar_ax = ax_divider.append_axes("right", size="7%", pad="10%")
     sns.set(font_scale=1.8, style="ticks")
+    sns.set_style("white",{'font.family':'serif','font.serif':'Palatino'})
     sns.heatmap(
         fitnessMap,
         annot=False,
@@ -162,8 +171,9 @@ def createImage(rowData, filename, archive_name):
         raise ValueError("Invalid archive name")
 
     # ax.set(title=title, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
-    ax.set_xlabel(FEATURE1_LABEL)
-    ax.set_ylabel(FEATURE2_LABEL)
+    # ax.tick_params(labelsize=20)
+    ax.set_xlabel(FEATURE1_LABEL, fontsize=30)
+    ax.set_ylabel(FEATURE2_LABEL, fontsize=30)
 
     ax.set_xticks([0, RESOLUTION/4, RESOLUTION/2, RESOLUTION * 3/4, RESOLUTION])
     ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
