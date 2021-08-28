@@ -6,6 +6,7 @@ import seaborn as sns
 import pandas as pd
 import scipy.stats as st
 import matplotlib.pyplot as plt
+import warnings
 from matplotlib.ticker import MaxNLocator
 from matplotlib import rc
 from pprint import pprint
@@ -13,16 +14,16 @@ from tqdm import tqdm
 from utils import get_label_color, read_in_surr_config
 from joblib import Parallel, delayed
 
-plt.rcParams["pdf.fonttype"] = 42
-plt.rcParams["ps.fonttype"] = 42
+# turn off runtime warning
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+# set matplotlib params
 plt.rcParams.update({
     "pdf.fonttype": 42,
     "ps.fonttype": 42,
     "font.family": "serif",
-    "font.serif": ["Palatino Linotype"],
+    "font.serif": ["Palatino"],
 })
-
 
 NUM_FEATURES = 2
 NUM_EVAL = 10000
@@ -43,60 +44,6 @@ def get_win_cnt_from_cell(cell_data):
     nonFeatureIdx = NUM_FEATURES
     win = int(splitedData[nonFeatureIdx + 2])
     return win
-
-
-def ridge_plot(df, legend_col_name, data_col_name):
-    sns.set_theme(style="white",
-                  rc={"axes.facecolor": (0, 0, 0, 0)},
-                  font_scale=1.8)
-
-    # Initialize the FacetGrid object
-    pal = sns.cubehelix_palette(10, rot=-.25, light=.7)
-    g = sns.FacetGrid(df,
-                      row=legend_col_name,
-                      hue=legend_col_name,
-                      aspect=5,
-                      height=2,
-                      palette=pal)
-
-    # Draw the densities in a few steps
-    g.map(sns.kdeplot,
-          data_col_name,
-          bw_adjust=.5,
-          clip_on=False,
-          fill=True,
-          alpha=1,
-          linewidth=1.5)
-    g.map(sns.kdeplot,
-          data_col_name,
-          clip_on=False,
-          color="w",
-          lw=2,
-          bw_adjust=.5)
-    g.map(plt.axhline, y=0, lw=2, clip_on=False)
-
-    # Define and use a simple function to label the plot in axes coordinates
-    def label(x, color, label):
-        ax = plt.gca()
-        ax.text(0,
-                .2,
-                label,
-                fontweight="bold",
-                color=color,
-                ha="left",
-                va="center",
-                transform=ax.transAxes)
-
-    g.map(label, data_col_name)
-
-    # Set the subplots to overlap
-    g.fig.subplots_adjust(hspace=-.25)
-
-    # Remove axes details that don't play well with overlap
-    g.set_titles("")
-    g.set(yticks=[])
-    g.despine(bottom=True, left=True)
-    g.savefig(image_title + " elites_dist.pdf")
 
 
 def calculate_stats(log_dir, experiment_config, elite_map_config):
@@ -135,37 +82,18 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
         cell_filled = len(rowData[-1]) / total_num_cell * 100
         last_qd_score = qd_score
 
-        # add to list for average calculation
-        # all_num_elites.append(num_elites)
-        # all_qd_scores.append(qd_scores)
-        # all_last_qd_score.append(qd_score)
-        # all_max_fitness.append(max_fitness)
-        # all_max_winrate.append(max_winrate)
-        # all_cell_filled.append(cell_filled)
-
-        # legends.append(legend)
-
-        # get the fitness values from the last archive for ridge plot
+        # get ccdf count from the last map
         curr_last_fitnesses = []
         for cellData in rowData[-1][1:]:
             fitness = get_fitness_from_cell(cellData)
             curr_last_fitnesses.append(fitness)
-        # num_elites = len(curr_last_fitnesses)
-        # all_last_fitness.append(curr_last_fitnesses)
-        # elites_dists["legends"] += [legend] * num_elites
-        # elites_dists["fitnesses"] += curr_last_fitnesses
 
-        # get number of elites for CCDF plot
-        # performance_x = []
-        # max_fit = int(np.ceil(np.max(curr_last_fitnesses))) + 1
-        # min_fit = int(np.min(curr_last_fitnesses))
         max_fit = FITNESS_MAX
         min_fit = FITNESS_MIN
         num_elites_ccdf = []
         curr_last_fitnesses = np.asarray(curr_last_fitnesses)
         for fitness in range(min_fit, max_fit + 1):
             num_elites_ccdf.append((curr_last_fitnesses > fitness).sum())
-        # all_num_ccdf.append(num_elites_ccdf)
 
         return (num_elites, qd_scores, last_qd_score, max_fitness, max_winrate,
                 cell_filled, curr_last_fitnesses, num_elites_ccdf)
@@ -231,74 +159,6 @@ if __name__ == '__main__':
         all_last_fitness = []
         all_max_winrate = []
 
-        # for log_dir, experiment_config, elite_map_config in tqdm(curr_plots,
-        #                                                          leave=False):
-        # log_file = os.path.join(log_dir, "elite_map_log.csv")
-        # legend, color = get_label_color(experiment_config)
-
-        # # read in resolutions of elite map
-        # total_num_cell = np.power(elite_map_config["Map"]["StartSize"], 2)
-
-        # with open(log_file, "r") as csvfile:
-        #     rowData = list(csv.reader(csvfile,
-        #                               delimiter=','))[1:NUM_EVAL + 1]
-        #     assert len(rowData) == NUM_EVAL
-        #     qd_scores = []
-        #     num_elites = []
-        #     for mapData in rowData:
-        #         # get number of elites
-        #         num_elites.append(len(mapData[1:]))
-
-        #         # get qd score
-        #         qd_score = 0
-        #         max_fitness = -np.inf
-        #         max_win = -np.inf
-        #         for cellData in mapData[1:]:
-        #             fitness = get_fitness_from_cell(cellData)
-        #             win = get_win_cnt_from_cell(cellData)
-        #             # normalize fitness to [0, 1]
-        #             fitness_nor = (fitness - FITNESS_MIN) \
-        #                         / (FITNESS_MAX - FITNESS_MIN)
-        #             qd_score += fitness_nor
-        #             if fitness > max_fitness:
-        #                 max_fitness = fitness
-        #             if win > max_win:
-        #                 max_win = win
-        #         qd_scores.append(qd_score)
-
-        #     # add to list for average calculation
-        #     all_num_elites.append(num_elites)
-        #     all_qd_scores.append(qd_scores)
-        #     all_last_qd_score.append(qd_score)
-        #     all_max_fitness.append(max_fitness)
-        #     all_max_winrate.append(max_win / NUM_GAME * 100)
-        #     all_cell_filled.append(len(rowData[-1]) / total_num_cell * 100)
-
-        #     legends.append(legend)
-
-        #     # get the fitness values from the last archive for ridge plot
-        #     curr_last_fitnesses = []
-        #     for cellData in rowData[-1][1:]:
-        #         fitness = get_fitness_from_cell(cellData)
-        #         curr_last_fitnesses.append(fitness)
-        #     num_elites = len(curr_last_fitnesses)
-        #     all_last_fitness.append(curr_last_fitnesses)
-        #     # elites_dists["legends"] += [legend] * num_elites
-        #     # elites_dists["fitnesses"] += curr_last_fitnesses
-
-        #     # get number of elites for CCDF plot
-        #     performance_x = []
-        #     # max_fit = int(np.ceil(np.max(curr_last_fitnesses))) + 1
-        #     # min_fit = int(np.min(curr_last_fitnesses))
-        #     max_fit = FITNESS_MAX
-        #     min_fit = FITNESS_MIN
-        #     num_elites_ccdf = []
-        #     curr_last_fitnesses = np.asarray(curr_last_fitnesses)
-        #     for fitness in range(min_fit, max_fit + 1):
-        #         num_elites_ccdf.append(
-        #             (curr_last_fitnesses > fitness).sum())
-        #     all_num_ccdf.append(num_elites_ccdf)
-
         results = Parallel(n_jobs=8)(
             delayed(calculate_stats)(log_dir, experiment_config,
                                      elite_map_config)
@@ -317,14 +177,6 @@ if __name__ == '__main__':
             all_cell_filled.append(cell_filled)
             all_last_fitness.append(curr_last_fitnesses)
             all_num_ccdf.append(num_elites_ccdf)
-
-
-        # all_num_elites.append(num_elites)
-        # all_qd_scores.append(qd_scores)
-        # all_last_qd_score.append(qd_score)
-        # all_max_fitness.append(max_fitness)
-        # all_max_winrate.append(max_winrate)
-        # all_cell_filled.append(cell_filled)
 
         # get average and std
         avg_qd_scores = np.mean(np.array(all_qd_scores), axis=0)
@@ -431,10 +283,6 @@ if __name__ == '__main__':
     ccdf_ax.grid()
     ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
                      bbox_inches="tight")
-
-    # # ridge plot
-    # fitness_ridge_df = pd.DataFrame(elites_dists)
-    # ridge_plot(fitness_ridge_df, "legends", "fitnesses")
 
     # write numerical results
     numerical_measures_df = pd.DataFrame(numerical_measures)
