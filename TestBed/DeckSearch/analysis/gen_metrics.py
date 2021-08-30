@@ -14,7 +14,7 @@ import matplotlib
 import matplotlib as mpl
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.ticker import MaxNLocator
-from utils import read_in_surr_config
+from utils import read_in_surr_config, get_label_color
 from plot_loss import plot_loss
 
 matplotlib.use("agg")
@@ -147,7 +147,7 @@ def createImage(rowData, filename, archive_name):
     ax_divider = make_axes_locatable(ax)
     cbar_ax = ax_divider.append_axes("right", size="7%", pad="10%")
     sns.set(font_scale=1.8, style="ticks")
-    sns.set_style("white",{'font.family':'serif','font.serif':'Palatino'})
+    sns.set_style("white", {'font.family': 'serif', 'font.serif': 'Palatino'})
     sns.heatmap(
         fitnessMap,
         annot=False,
@@ -160,25 +160,21 @@ def createImage(rowData, filename, archive_name):
         cbar_ax=cbar_ax,
         linewidths=0.003,
         rasterized=False,
-        annot_kws={"size": 20},
+        annot_kws={"size": 30},
     )
 
-    if archive_name == "surrogate_archive":
-        title = IMAGE_TITLE + " Surrogate Archive"
-    elif archive_name == "elites_archive":
-        title = IMAGE_TITLE + " Archive"
-    else:
-        raise ValueError("Invalid archive name")
-
-    # ax.set(title=title, xlabel=FEATURE1_LABEL, ylabel=FEATURE2_LABEL)
+    # ax.set(title=IMAGE_TITLE)
+    ax.set_title(IMAGE_TITLE, fontdict={'fontsize': 28}, y=1.04)
+    # fig.suptitle(IMAGE_TITLE, fontsize=30)
     # ax.tick_params(labelsize=20)
-    ax.set_xlabel(FEATURE1_LABEL, fontsize=30)
-    ax.set_ylabel(FEATURE2_LABEL, fontsize=30)
+    ax.set_xlabel(FEATURE1_LABEL, fontsize=40)
+    ax.set_ylabel(FEATURE2_LABEL, fontsize=40)
 
-    ax.set_xticks([0, RESOLUTION/4, RESOLUTION/2, RESOLUTION * 3/4, RESOLUTION])
+    ax.set_xticks(
+        [0, RESOLUTION / 4, RESOLUTION / 2, RESOLUTION * 3 / 4, RESOLUTION])
     ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
 
-    ax.set_yticks([0, RESOLUTION/2, RESOLUTION])
+    ax.set_yticks([0, RESOLUTION / 2, RESOLUTION])
     ax.set_yticklabels([1, 4, 7][::-1])
 
     set_spines_visible(ax)
@@ -365,10 +361,10 @@ if __name__ == "__main__":
     for ROW_INDEX, COL_INDEX in combinations(range(NUM_FEATURES), 2):
         STEP_SIZE = int(opt.step_size)
         # get image title
+        IMAGE_TITLE, _ = get_label_color(experiment_config)
+
+        # get log file name and loss log file
         if "Surrogate" in experiment_config:
-            IMAGE_TITLE = experiment_config["Surrogate"]["Type"] +\
-                           " Surrogate " +\
-                           experiment_config["Search"]["Type"]
             if experiment_config["Surrogate"]["Type"] == "FixedFCNN":
                 loss_log_file = None
             else:
@@ -383,8 +379,13 @@ if __name__ == "__main__":
                 ("elites_archive",
                  os.path.join(opt.log_dir, "elite_map_log.csv"))
             ]
+
+            # modify title if there is more target
+            if "ModelTargets" in experiment_config["Surrogate"] and \
+               len(experiment_config["Surrogate"]["ModelTargets"]) > 3:
+                IMAGE_TITLE += " (More Targets)"
+
         else:
-            IMAGE_TITLE = "MAP-Elites"
             loss_log_file = None
             ELITE_MAP_LOG_FILE_NAMES = [("elites_archive",
                                          os.path.join(opt.log_dir,
