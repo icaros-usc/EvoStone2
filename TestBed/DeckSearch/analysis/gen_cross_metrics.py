@@ -239,7 +239,7 @@ if __name__ == '__main__':
 
 
     label_fontsize = 35
-    tick_fontsize = 20
+    tick_fontsize = 30
 
     # finalize qd score plot
     qd_ax.legend(loc='lower left',
