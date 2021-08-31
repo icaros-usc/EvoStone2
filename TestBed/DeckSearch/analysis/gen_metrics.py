@@ -26,9 +26,15 @@ plt.rcParams.update({
     "ps.fonttype": 42,
     "font.family": "serif",
     "font.serif": ["Palatino"],
+    "axes.unicode_minus": False,
 })
 
-# from overcooked_ai_pcg import LSI_IMAGE_DIR, LSI_LOG_DIR, LSI_CONFIG_ALGO_DIR, LSI_CONFIG_MAP_DIR, LSI_CONFIG_AGENT_DIR
+
+# feature names
+feature_name2label = {
+    "NumTurns": "Num Turns",
+    "HandSize": "Hand Size",
+}
 
 # handled by command line argument parser
 FEATURE1_LABEL = None  # label of the first feature to plot
@@ -290,13 +296,11 @@ def generateAll(elite_map_logs, loss_log_file):
             # generate the movie
             template = os.path.join(curr_heatmap_dir, 'grid_{:05d}.png')
             createImages(step_size, allRows[1:], template, archive_name)
-            movieFilename = 'fitness_' + str(ROW_INDEX) + '_' + str(
-                COL_INDEX) + '.avi'
+            movieFilename = f"heatmap_{IMAGE_TITLE}.avi"
             createMovie(curr_heatmap_dir, movieFilename)
 
             # Create the final image we need
-            imageFilename = 'fitnessMap_' + str(ROW_INDEX) + '_' + str(
-                COL_INDEX) + '.pdf'
+            imageFilename = f"heatmap_{IMAGE_TITLE}.pdf"
             createImage(allRows[-1],
                         os.path.join(curr_heatmap_dir, imageFilename),
                         archive_name)
@@ -391,6 +395,6 @@ if __name__ == "__main__":
                                          os.path.join(opt.log_dir,
                                                       "elite_map_log.csv"))]
 
-        FEATURE1_LABEL = features[ROW_INDEX]['Name']
-        FEATURE2_LABEL = features[COL_INDEX]['Name']
+        FEATURE1_LABEL = feature_name2label[features[ROW_INDEX]['Name']]
+        FEATURE2_LABEL = feature_name2label[features[COL_INDEX]['Name']]
         generateAll(ELITE_MAP_LOG_FILE_NAMES, loss_log_file)

@@ -23,6 +23,7 @@ plt.rcParams.update({
     "ps.fonttype": 42,
     "font.family": "serif",
     "font.serif": ["Palatino"],
+    "axes.unicode_minus": False,
 })
 
 NUM_FEATURES = 2
@@ -249,7 +250,7 @@ if __name__ == '__main__':
                  ncol=2,
                  mode="expand")
     qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=label_fontsize)
-    qd_ax.set_ylabel('QD-score (Normalized)', fontsize=label_fontsize)
+    qd_ax.set_ylabel('QD-score', fontsize=label_fontsize)
     qd_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 400))
     qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
     qd_ax.yaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
