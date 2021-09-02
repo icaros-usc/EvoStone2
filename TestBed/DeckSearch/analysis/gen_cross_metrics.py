@@ -134,7 +134,8 @@ if __name__ == '__main__':
     image_title = "Emulation-ME & MAP-Elites"
     legends = []
 
-    numerical_measures = {
+    numerical_measures = {}
+    avg_numerical_measures = {
         "algo": [],
         "max_fitness": [],
         "max_winrate": [],
@@ -165,7 +166,8 @@ if __name__ == '__main__':
                                      elite_map_config)
             for log_dir, experiment_config, elite_map_config in curr_plots)
 
-        legend, color = get_label_color(curr_plots[0][1])
+        algo_label, color = get_label_color(curr_plots[0][1])
+        numerical_measures[algo_label] = {}
 
         for result in results:
             (num_elites, qd_scores, qd_score, max_fitness, max_winrate,
@@ -199,14 +201,18 @@ if __name__ == '__main__':
                                     loc=avg_num_ccdf,
                                     scale=st.sem(all_num_ccdf))
 
-        numerical_measures["algo"].append(legend)
-        numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
-        numerical_measures["max_fitness"].append(np.mean(all_max_fitness))
-        numerical_measures["cell_filled"].append(np.mean(all_cell_filled))
-        numerical_measures["max_winrate"].append(np.mean(all_max_winrate))
+        avg_numerical_measures["algo"].append(algo_label)
+        avg_numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
+        avg_numerical_measures["max_fitness"].append(np.mean(all_max_fitness))
+        avg_numerical_measures["cell_filled"].append(np.mean(all_cell_filled))
+        avg_numerical_measures["max_winrate"].append(np.mean(all_max_winrate))
+        numerical_measures[algo_label]["qd_score"] = all_last_qd_score
+        numerical_measures[algo_label]["max_fitness"] = all_max_fitness
+        numerical_measures[algo_label]["cell_filled"] = all_cell_filled
+        numerical_measures[algo_label]["max_winrate"] = all_max_winrate
 
         # plot qd score
-        qd_p = qd_ax.plot(avg_qd_scores, label=legend, color=color)
+        qd_p = qd_ax.plot(avg_qd_scores, label=algo_label, color=color)
         qd_ax.fill_between(
             np.arange(len(avg_qd_scores)),
             cf_qd_scores[1],
@@ -216,7 +222,7 @@ if __name__ == '__main__':
         )
 
         # plot num elites
-        num_elites_ax.plot(avg_num_elites, label=legend, color=color)
+        num_elites_ax.plot(avg_num_elites, label=algo_label, color=color)
         num_elites_ax.fill_between(
             np.arange(len(avg_num_elites)),
             cf_num_elites[1],
@@ -228,7 +234,7 @@ if __name__ == '__main__':
         # plot CCDF
         ccdf_ax.plot(np.arange(FITNESS_MIN, FITNESS_MAX + 1),
                      avg_num_ccdf,
-                     label=legend,
+                     label=algo_label,
                      color=color)
         ccdf_ax.fill_between(
             np.arange(FITNESS_MIN, FITNESS_MAX + 1),
@@ -296,3 +302,7 @@ if __name__ == '__main__':
     numerical_measures_df = pd.DataFrame(numerical_measures)
     numerical_measures_df.to_csv(
         os.path.join(log_dir_plot, "numerical_measures.csv"))
+
+    avg_numerical_measures_df = pd.DataFrame(avg_numerical_measures)
+    avg_numerical_measures_df.to_csv(
+        os.path.join(log_dir_plot, "avg_numerical_measures.csv"))
