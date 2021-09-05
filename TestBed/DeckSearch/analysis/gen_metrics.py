@@ -387,7 +387,7 @@ if __name__ == "__main__":
             # modify title if there is more target
             if "ModelTargets" in experiment_config["Surrogate"] and \
                len(experiment_config["Surrogate"]["ModelTargets"]) > 3:
-                IMAGE_TITLE += " (More Targets)"
+                IMAGE_TITLE += " (mt)"
 
         else:
             loss_log_file = None

@@ -89,15 +89,14 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
             fitness = get_fitness_from_cell(cellData)
             curr_last_fitnesses.append(fitness)
 
-        max_fit = FITNESS_MAX
-        min_fit = FITNESS_MIN
-        num_elites_ccdf = []
+        percent_elites_ccdf = []
         curr_last_fitnesses = np.asarray(curr_last_fitnesses)
-        for fitness in range(min_fit, max_fit + 1):
-            num_elites_ccdf.append((curr_last_fitnesses > fitness).sum())
+        for fitness in range(FITNESS_MIN, FITNESS_MAX + 1):
+            percent_elites_ccdf.append(
+                (curr_last_fitnesses > fitness).sum() / total_num_cell * 100)
 
         return (num_elites, qd_scores, last_qd_score, max_fitness, max_winrate,
-                cell_filled, curr_last_fitnesses, num_elites_ccdf)
+                cell_filled, curr_last_fitnesses, percent_elites_ccdf)
 
 
 if __name__ == '__main__':
@@ -107,10 +106,19 @@ if __name__ == '__main__':
         '--log_dir_plot',
         help='Dir that contains log dirs to plot.',
         # nargs='+',
-        required=True)
+        required=True,
+    )
+    parser.add_argument(
+        '-a',
+        '--add_legend',
+        required=False,
+        help="whether add legend to the plot",
+        action='store_true',
+    )
 
     opt = parser.parse_args()
     log_dir_plot = opt.log_dir_plot
+    add_legend = opt.add_legend
     qdplots = {}
     for log_dir in os.listdir(log_dir_plot):
         # read in the name of the algorithm and features to plot
@@ -146,9 +154,11 @@ if __name__ == '__main__':
         "legends": [],
         "fitnesses": [],
     }
-    qd_fig, qd_ax = plt.subplots(figsize=(8, 6))
-    num_elites_fig, num_elites_ax = plt.subplots(figsize=(8, 6))
-    ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
+    # qd_fig, qd_ax = plt.subplots(figsize=(8, 6))
+    # num_elites_fig, num_elites_ax = plt.subplots(figsize=(8, 6))
+    # ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
+
+    fig, (qd_ax, num_elites_ax, ccdf_ax) = plt.subplots(1, 3, figsize=(33, 6))
 
     for curr_plots in tqdm(qdplots.values()):
         # take average of current type of algo
@@ -157,7 +167,7 @@ if __name__ == '__main__':
         all_last_qd_score = []
         all_max_fitness = []
         all_cell_filled = []
-        all_num_ccdf = []
+        all_percent_ccdf = []
         all_last_fitness = []
         all_max_winrate = []
 
@@ -167,11 +177,13 @@ if __name__ == '__main__':
             for log_dir, experiment_config, elite_map_config in curr_plots)
 
         algo_label, color = get_label_color(curr_plots[0][1])
+        if algo_label != "MAP-Elites":
+            algo_label += "(Base/More Targets)"
         numerical_measures[algo_label] = {}
 
         for result in results:
             (num_elites, qd_scores, qd_score, max_fitness, max_winrate,
-             cell_filled, curr_last_fitnesses, num_elites_ccdf) = result
+             cell_filled, curr_last_fitnesses, percent_elites_ccdf) = result
             all_num_elites.append(num_elites)
             all_qd_scores.append(qd_scores)
             all_last_qd_score.append(qd_score)
@@ -179,15 +191,15 @@ if __name__ == '__main__':
             all_max_winrate.append(max_winrate)
             all_cell_filled.append(cell_filled)
             all_last_fitness.append(curr_last_fitnesses)
-            all_num_ccdf.append(num_elites_ccdf)
+            all_percent_ccdf.append(percent_elites_ccdf)
 
         # get average and std
         avg_qd_scores = np.mean(np.array(all_qd_scores), axis=0)
         avg_num_elites = np.mean(np.array(all_num_elites), axis=0)
-        avg_num_ccdf = np.mean(np.array(all_num_ccdf), axis=0)
+        avg_percent_ccdf = np.mean(np.array(all_percent_ccdf), axis=0)
         std_qd_scores = np.std(np.array(all_qd_scores), axis=0)
         std_num_elites = np.std(np.array(all_num_elites), axis=0)
-        std_num_ccdf = np.std(np.array(all_num_ccdf), axis=0)
+        std_num_ccdf = np.std(np.array(all_percent_ccdf), axis=0)
         cf_qd_scores = st.t.interval(alpha=0.95,
                                      df=len(all_qd_scores) - 1,
                                      loc=avg_qd_scores,
@@ -196,10 +208,10 @@ if __name__ == '__main__':
                                       df=len(all_num_elites) - 1,
                                       loc=avg_num_elites,
                                       scale=st.sem(all_num_elites))
-        cf_num_ccdf = st.t.interval(alpha=0.95,
-                                    df=len(all_num_ccdf) - 1,
-                                    loc=avg_num_ccdf,
-                                    scale=st.sem(all_num_ccdf))
+        cf_percent_ccdf = st.t.interval(alpha=0.95,
+                                        df=len(all_percent_ccdf) - 1,
+                                        loc=avg_percent_ccdf,
+                                        scale=st.sem(all_percent_ccdf))
 
         avg_numerical_measures["algo"].append(algo_label)
         avg_numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
@@ -233,70 +245,93 @@ if __name__ == '__main__':
 
         # plot CCDF
         ccdf_ax.plot(np.arange(FITNESS_MIN, FITNESS_MAX + 1),
-                     avg_num_ccdf,
+                     avg_percent_ccdf,
                      label=algo_label,
                      color=color)
         ccdf_ax.fill_between(
             np.arange(FITNESS_MIN, FITNESS_MAX + 1),
-            cf_num_ccdf[1],
-            cf_num_ccdf[0],
+            cf_percent_ccdf[1],
+            cf_percent_ccdf[0],
             alpha=0.5,
             color=color,
         )
-
 
     label_fontsize = 35
     tick_fontsize = 30
 
     # finalize qd score plot
-    qd_ax.legend(loc='lower left',
-                 fontsize='x-large',
-                 bbox_to_anchor=(0, 1.02, 1, 0.2),
-                 borderaxespad=0,
-                 ncol=2,
-                 mode="expand")
-    qd_ax.set_xlabel('Number of Evaluation(s)', fontsize=label_fontsize)
+    # qd_ax.legend(loc='lower left',
+    #              fontsize='x-large',
+    #              bbox_to_anchor=(0, 1.02, 1, 0.2),
+    #              borderaxespad=0,
+    #              ncol=2,
+    #              mode="expand")
+    qd_ax.set_xlabel('Evaluations', fontsize=label_fontsize)
     qd_ax.set_ylabel('QD-score', fontsize=label_fontsize)
     qd_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 400))
     qd_ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
     qd_ax.yaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
     qd_ax.tick_params(labelsize=tick_fontsize)
-    qd_fig.savefig(os.path.join(log_dir_plot, image_title + " QD-score.pdf"),
-                   bbox_inches="tight")
+    # qd_fig.savefig(os.path.join(log_dir_plot, image_title + " QD-score.pdf"),
+    #                bbox_inches="tight")
 
     # finalize num elites plot
-    num_elites_ax.legend(loc='lower left',
-                         fontsize='x-large',
-                         bbox_to_anchor=(0, 1.02, 1, 0.2),
-                         borderaxespad=0,
-                         ncol=2,
-                         mode="expand")
-    num_elites_ax.set_xlabel('Number of Evaluation(s)', fontsize=label_fontsize)
+    # num_elites_ax.legend(loc='lower left',
+    #                      fontsize='x-large',
+    #                      bbox_to_anchor=(0, 1.02, 1, 0.2),
+    #                      borderaxespad=0,
+    #                      ncol=2,
+    #                      mode="expand")
+    num_elites_ax.set_xlabel('Evaluations',
+                             fontsize=label_fontsize)
     num_elites_ax.set_ylabel('Number of Elites', fontsize=label_fontsize)
     num_elites_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 600))
     num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
     num_elites_ax.yaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
     num_elites_ax.tick_params(labelsize=tick_fontsize)
-    num_elites_fig.savefig(os.path.join(log_dir_plot,
-                                        image_title + " Num elites.pdf"),
-                           bbox_inches="tight")
+    # num_elites_fig.savefig(os.path.join(log_dir_plot,
+    #                                     image_title + " Num elites.pdf"),
+    #                        bbox_inches="tight")
 
     # finalize ccdf plot
-    ccdf_ax.legend(facecolor='white',
-                   loc='lower left',
-                   fontsize='x-large',
-                   bbox_to_anchor=(0, 1.02, 1, 0.2),
-                   borderaxespad=0,
-                   ncol=2,
-                   mode="expand")
+    # ccdf_ax.legend(facecolor='white',
+    #                loc='lower left',
+    #                fontsize='x-large',
+    #                bbox_to_anchor=(0, 1.02, 1, 0.2),
+    #                borderaxespad=0,
+    #                ncol=2,
+    #                mode="expand")
     ccdf_ax.set_xlabel('Average Health Difference', fontsize=label_fontsize)
-    ccdf_ax.set_ylabel('Number of Elites', fontsize=label_fontsize)
-    ccdf_ax.set(xlim=(FITNESS_MIN, FITNESS_MAX), ylim=(0, 600))
+    ccdf_ax.set_ylabel('Threshold Percentage', fontsize=label_fontsize)
+    ccdf_ax.set(xlim=(FITNESS_MIN, FITNESS_MAX), ylim=(0, 40))
     ccdf_ax.xaxis.set_major_locator(MaxNLocator(integer=False, nbins=2))
     ccdf_ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
     ccdf_ax.tick_params(labelsize=tick_fontsize)
-    ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
-                     bbox_inches="tight")
+    # ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
+    #                  bbox_inches="tight")
+
+    if add_legend:
+        handles, labels = ccdf_ax.get_legend_handles_labels()
+        fig.legend(
+            handles,
+            labels,
+            loc="lower center",
+            ncol=4,
+            fontsize=28,
+            #    mode="expand",
+            bbox_to_anchor=(0.5, -0.3),
+            # borderaxespad=0,
+        )
+
+    # add row label
+    if "more_target" in log_dir_plot:
+        row_label = "More Targets"
+    else:
+        row_label = "Base Targets"
+
+    fig.suptitle(row_label, y=1.1, fontsize=40)
+    fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),
+                bbox_inches="tight")
 
     # write numerical results
     numerical_measures_df = pd.DataFrame(numerical_measures)
