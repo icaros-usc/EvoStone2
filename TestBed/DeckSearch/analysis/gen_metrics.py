@@ -170,7 +170,7 @@ def createImage(rowData, filename, archive_name):
     )
 
     # ax.set(title=IMAGE_TITLE)
-    ax.set_title(IMAGE_TITLE, fontdict={'fontsize': 28}, y=1.04)
+    ax.set_title(IMAGE_TITLE, fontdict={'fontsize': 40}, y=1.04)
     # fig.suptitle(IMAGE_TITLE, fontsize=30)
     # ax.tick_params(labelsize=20)
     ax.set_xlabel(FEATURE1_LABEL, fontsize=40)
