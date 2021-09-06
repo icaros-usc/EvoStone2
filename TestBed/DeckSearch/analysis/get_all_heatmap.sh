@@ -14,12 +14,12 @@ declare -a all_more_exp=(
 )
 
 
-# for log_dir in "${all_base_exp[@]}"
-# do
-#     echo "Log Dir: ${log_dir}"
-#     python analysis/gen_metrics.py -l "${log_dir}" -s $step_length
-#     cp $log_dir/metrics/elites_archive/heatmap/*.pdf ~/default_targets/
-# done
+for log_dir in "${all_base_exp[@]}"
+do
+    echo "Log Dir: ${log_dir}"
+    python analysis/gen_metrics.py -l "${log_dir}" -s $step_length
+    cp $log_dir/metrics/elites_archive/heatmap/*.pdf ~/default_targets/
+done
 
 
 for log_dir in "${all_more_exp[@]}"
