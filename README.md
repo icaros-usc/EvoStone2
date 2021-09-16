@@ -27,7 +27,7 @@ That's it! Your project is now setup to run experiments from the paper.
 
 The setup script created three empty folders in the `TestBed/DeckSearch` directory: `bin`, `active`, `boxes`, and `logs`. The `active` folder is used for initial communication between distributed nodes and for letting the workers know when the search is complete. The `boxes` folder is for sending neural networks to the `DeckEvaluator` and receiving results. The `logs` folder holds CSV files for logging information about the neural net policies and elite maps from the search.
 
-First we need to start the control node responsible for running our search (CMA-ES, MAP-Elites, CMA-ME, etc). To do this, run the following command.
+First we need to start the control node responsible for running our search (MAP-Elites, EM-ME, etc). To do this, run the following command.
 
 ```
 dotnet bin/DeckSearch.dll config/experiment/distrited_search/paladin_me_demo.tml
@@ -39,7 +39,7 @@ The first parameter passed is the config file for the experiment. Here we are ru
 dotnet bin/DeckEvaluator.dll 1
 ```
 
-This command starts a new DeckEvaluator node. The first parameter is the node ID. You can start multiple nodes locally, but you must specify a different node for each worker. The node will take a strategy generated from the search algorithm and play specified number of games using that strategy. Once the games are complete, the node will send results back to the control node and await a new strategy.
+This command starts a new DeckEvaluator node. The first parameter is the node ID. You can start multiple nodes locally, but you must specify a different node for each worker. The node will take a deck generated from the search algorithm and play specified number of games using that deck. Once the games are complete, the node will send results back to the control node and await a new deck.
 
 
 ## Running DeckSearch Experiment (Distributed using Slurm)
