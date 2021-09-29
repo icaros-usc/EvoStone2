@@ -32,6 +32,7 @@ TestBed/DeckSearch/boxes/
 TestBed/DeckSearch/resources/
 TestBed/DeckSearch/card2vec/*.ipynb
 TestBed/DeckSearch/card2vec/.ipynb_checkpoints/
+TestBed/DeckSearch/card2vec/__pycache__
 TestBed/DeckSearch/singularity/ubuntu_dotnet
 TestBed/DeckSearch/slurm/logs/
 TestBed/DeckSearch/slurm/logs/
