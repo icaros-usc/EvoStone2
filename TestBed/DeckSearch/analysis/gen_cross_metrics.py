@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
         algo_label, color = get_label_color(curr_plots[0][1])
         if algo_label != "MAP-Elites":
-            algo_label += "(Base/More Targets)"
+            algo_label += " (with/without Ancillary Data)"
         numerical_measures[algo_label] = {}
 
         for result in results:
@@ -316,18 +316,18 @@ if __name__ == '__main__':
             handles,
             labels,
             loc="lower center",
-            ncol=4,
-            fontsize=28,
+            ncol=2,
+            fontsize=32,
             #    mode="expand",
-            bbox_to_anchor=(0.5, -0.3),
+            bbox_to_anchor=(0.5, -0.35),
             # borderaxespad=0,
         )
 
     # add row label
     if "more_target" in log_dir_plot:
-        row_label = "More Targets"
+        row_label = "With Ancillary Data"
     else:
-        row_label = "Base Targets"
+        row_label = "Without Ancillary Data"
 
     fig.suptitle(row_label, y=1.02, fontsize=40)
     fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),

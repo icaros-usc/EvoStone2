@@ -17,20 +17,21 @@ def get_label_color(experiment_config):
     if experiment_config["Search"]["Category"] == "Surrogated":
         if experiment_config["Search"]["Type"] == "MAP-Elites":
             if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
-                legend += "MLP" + " EM-ME"
+                # legend += "MLP" + " DSM-ME"
+                legend += "DSA-ME"
                 color = "green"
             elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
-                legend += "Deep-set" + " EM-ME"
+                legend += "Deep-set" + " DSA-ME"
                 color = "purple"
             elif experiment_config["Surrogate"]["Type"] == "LinearModel":
-                legend += "Linear" + " EM-ME"
+                legend += "LSA-ME"
                 color = "orange"
             elif experiment_config["Surrogate"]["Type"] == "FixedFCNN":
-                legend += "Offline MLP EM-ME"
+                legend += "Offline DSA-ME"
                 color = "red"
             else:
                 legend += experiment_config["Surrogate"]["Type"] \
-                          + " EM-ME"
+                          + " DSA-ME"
                 color = None
     elif experiment_config["Search"]["Category"] == "Distributed":
         legend += experiment_config["Search"]["Type"]
