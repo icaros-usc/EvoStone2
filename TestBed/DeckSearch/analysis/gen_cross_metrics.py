@@ -177,8 +177,8 @@ if __name__ == '__main__':
             for log_dir, experiment_config, elite_map_config in curr_plots)
 
         algo_label, color = get_label_color(curr_plots[0][1])
-        if algo_label != "MAP-Elites":
-            algo_label += " (with/without Ancillary Data)"
+        # if algo_label != "MAP-Elites":
+        #     algo_label += " (with/without Ancillary Data)"
         numerical_measures[algo_label] = {}
 
         for result in results:
@@ -316,10 +316,10 @@ if __name__ == '__main__':
             handles,
             labels,
             loc="lower center",
-            ncol=2,
+            ncol=4,
             fontsize=32,
             #    mode="expand",
-            bbox_to_anchor=(0.5, -0.35),
+            bbox_to_anchor=(0.5, -0.3),
             # borderaxespad=0,
         )
 

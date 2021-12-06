@@ -122,7 +122,7 @@ def createRecordMap(dataLabels, recordList):
     return dataDict
 
 
-def createImage(rowData, filename, archive_name):
+def createImage(rowData, filename, archive_name, dpi=300):
     mapDims = tuple(map(int, rowData[0].split('x')))
     mapData = rowData[1:]
 
@@ -164,7 +164,7 @@ def createImage(rowData, filename, archive_name):
         vmin=FITNESS_MIN,
         vmax=FITNESS_MAX,
         cbar_ax=cbar_ax,
-        linewidths=0.003,
+        # linewidths=0.003,
         rasterized=False,
         annot_kws={"size": 30},
     )
@@ -176,9 +176,13 @@ def createImage(rowData, filename, archive_name):
     ax.set_xlabel(FEATURE1_LABEL, fontsize=40)
     ax.set_ylabel(FEATURE2_LABEL, fontsize=40)
 
+    # ax.set_xticks(
+    #     [0, RESOLUTION / 4, RESOLUTION / 2, RESOLUTION * 3 / 4, RESOLUTION])
+    # ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
+
     ax.set_xticks(
-        [0, RESOLUTION / 4, RESOLUTION / 2, RESOLUTION * 3 / 4, RESOLUTION])
-    ax.set_xticklabels([5, 7.5, 10, 12.5, 15], rotation=0)
+        [0, RESOLUTION / 2, RESOLUTION])
+    ax.set_xticklabels([5, 10, 15], rotation=0)
 
     ax.set_yticks([0, RESOLUTION / 2, RESOLUTION])
     ax.set_yticklabels([1, 4, 7][::-1])
@@ -186,7 +190,7 @@ def createImage(rowData, filename, archive_name):
     set_spines_visible(ax)
     ax.figure.tight_layout()
 
-    fig.savefig(filename)
+    fig.savefig(filename, dpi=dpi)
     plt.close('all')
 
 
@@ -301,10 +305,10 @@ def generateAll(elite_map_logs, loss_log_file):
             createMovie(curr_heatmap_dir, movieFilename)
 
             # Create the final image we need
-            imageFilename = f"heatmap_{IMAGE_TITLE}.pdf"
+            imageFilename = f"heatmap_{IMAGE_TITLE}.png"
             createImage(allRows[-1],
                         os.path.join(curr_heatmap_dir, imageFilename),
-                        archive_name)
+                        archive_name, dpi=1200)
 
             # plot QD score
             plot_qd_score(allRows, os.path.join(curr_qd_dir, "qd-score.pdf"),
