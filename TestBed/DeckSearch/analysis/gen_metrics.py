@@ -122,7 +122,7 @@ def createRecordMap(dataLabels, recordList):
     return dataDict
 
 
-def createImage(rowData, filename, archive_name, dpi=300):
+def createImage(rowData, filename, archive_name, dpi=100):
     mapDims = tuple(map(int, rowData[0].split('x')))
     mapData = rowData[1:]
 
@@ -182,10 +182,10 @@ def createImage(rowData, filename, archive_name, dpi=300):
 
     ax.set_xticks(
         [0, RESOLUTION / 2, RESOLUTION])
-    ax.set_xticklabels([5, 10, 15], rotation=0)
+    ax.set_xticklabels([5, 10, 15], rotation=0, fontsize="x-large")
 
     ax.set_yticks([0, RESOLUTION / 2, RESOLUTION])
-    ax.set_yticklabels([1, 4, 7][::-1])
+    ax.set_yticklabels([1, 4, 7][::-1], fontsize="x-large")
 
     set_spines_visible(ax)
     ax.figure.tight_layout()

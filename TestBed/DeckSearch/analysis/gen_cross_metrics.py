@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import warnings
 from matplotlib.ticker import MaxNLocator, MultipleLocator
 from matplotlib import rc
+from matplotlib.lines import Line2D
 from pprint import pprint
 from tqdm import tqdm
 from utils import get_label_color, read_in_surr_config
@@ -312,6 +313,13 @@ if __name__ == '__main__':
 
     if add_legend:
         handles, labels = ccdf_ax.get_legend_handles_labels()
+
+        if "more_target" in log_dir_plot:
+            # add legend for LSA-ME
+            lsa_me_line = Line2D([0], [0], color='orange',lw=1, label='LSA-ME')
+            handles.append(lsa_me_line)
+            labels.append("LSA-ME")
+
         fig.legend(
             handles,
             labels,
