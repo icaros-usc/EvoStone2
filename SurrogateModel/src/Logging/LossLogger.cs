@@ -34,7 +34,7 @@ namespace SurrogateModel.Logging
         /// <summary>
         /// Write header info to file
         /// </summary>
-        private void initLog()
+        private void initLog(bool testOutOfDist)
         {
             _isInitiated = true;
 
@@ -46,10 +46,22 @@ namespace SurrogateModel.Logging
                     "Sum train loss",
                     "Sum test loss",
                 };
+
+                if (testOutOfDist)
+                {
+                    dataLabels.Add("Sum test out-of-dist loss");
+                }
+
                 foreach (string target in _model_targets)
                 {
                     dataLabels.Add(target + " train loss");
                     dataLabels.Add(target + " test loss");
+
+                    if (testOutOfDist)
+                    {
+                        dataLabels.Add(target + " test out-of-dist loss");
+                    }
+
                 }
                 writeText(ow, string.Join(",", dataLabels));
                 ow.Close();
@@ -63,13 +75,21 @@ namespace SurrogateModel.Logging
         public void LogLoss(
             double train_loss,
             double test_loss,
+            double test_loss_out_dist,
             NDArray train_per_ele_loss,
-            NDArray test_per_ele_loss)
+            NDArray test_per_ele_loss,
+            NDArray test_per_ele_loss_out_dist)
         {
+            bool testOutOfDist = false;
+            if (!Double.IsNaN(test_loss_out_dist) &&
+                !test_per_ele_loss_out_dist.Equals(null))
+            {
+                testOutOfDist = true;
+            }
             // Put the header on the log file if this is the first
             // individual in the experiment.
             if (!_isInitiated)
-                initLog();
+                initLog(testOutOfDist);
 
             using (StreamWriter sw = File.AppendText(_logPath))
             {
@@ -77,12 +97,26 @@ namespace SurrogateModel.Logging
                     train_loss.ToString(),
                     test_loss.ToString(),
                 };
+
+                // Add out-of-dist loss.
+                if (testOutOfDist)
+                {
+                    losses.Add(test_loss_out_dist.ToString());
+                }
                 for (int i = 0; i < train_per_ele_loss.shape[0]; i++)
                 {
                     var train_ele_loss = train_per_ele_loss[i];
                     var test_ele_loss = test_per_ele_loss[i];
                     losses.Add(train_ele_loss.ToString());
                     losses.Add(test_ele_loss.ToString());
+
+                    // Add out-of-dist loss.
+                    if (testOutOfDist)
+                    {
+                        var test_ele_loss_out_dist =
+                            test_per_ele_loss_out_dist[i];
+                        losses.Add(test_ele_loss_out_dist.ToString());
+                    }
                 }
 
                 sw.WriteLine(string.Join(",", losses));

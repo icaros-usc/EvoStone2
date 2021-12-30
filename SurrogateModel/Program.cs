@@ -52,21 +52,21 @@ namespace SurrogateModel
             {
                 model = new DeepSetModel(
                     log_dir_exp: expLogDir,
-                    offline_data_file: indsLogPath,
+                    offline_train_data_file: indsLogPath,
                     model_targets: modelTargets);
             }
             else if (modelType == "FullyConnectedNN")
             {
                 model = new FullyConnectedNN(
                     log_dir_exp: expLogDir,
-                    offline_data_file: indsLogPath,
+                    offline_train_data_file: indsLogPath,
                     model_targets: modelTargets);
             }
             else if (modelType == "LinearModel")
             {
                 model = new LinearModel(
                     log_dir_exp: expLogDir,
-                    offline_data_file: indsLogPath,
+                    offline_train_data_file: indsLogPath,
                     model_targets: modelTargets);
             }
             else

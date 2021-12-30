@@ -29,5 +29,7 @@ namespace SabberStoneUtil.Config
         public string Type { get; set; }
         public string[] ModelTargets { get; set; }
         public string FixedModelSavePath { get; set; }
+        public bool TestOutOfDist { get; set; }
+        public string TestOutOfDistDataFile { get; set; }
     }
 }

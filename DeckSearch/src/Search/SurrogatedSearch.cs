@@ -67,6 +67,9 @@ namespace DeckSearch.Search
         private bool _useFixedModel = false;
 
 
+        private bool _testOutOfDist = false;
+
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -79,6 +82,13 @@ namespace DeckSearch.Search
             _numToEvaluatePerGen = config.Search.NumToEvaluatePerGeneration;
             _numSurrogateEvals = _searchManager.searchAlgo.InitialPopulation();
             _logLengthPerGen = config.Search.LogLengthPerGen;
+            _testOutOfDist = config.Surrogate.TestOutOfDist;
+
+            if (_testOutOfDist)
+            {
+                Utilities.WriteLineWithTimestamp(
+                    "Running with out-of-dist testing data.");
+            }
 
             // create surrogate elites log dir
             _surrogateElitesLogDir = System.IO.Path.Combine(
@@ -91,26 +101,30 @@ namespace DeckSearch.Search
             {
                 _surrogateModel = new DeepSetModel(
                     log_dir_exp: _searchManager.log_dir_exp,
-                    model_targets: config.Surrogate.ModelTargets);
+                    model_targets: config.Surrogate.ModelTargets,
+                    offline_test_data_file: config.Surrogate.TestOutOfDistDataFile);
             }
             else if (config.Surrogate.Type == "FullyConnectedNN")
             {
                 _surrogateModel = new FullyConnectedNN(
                     log_dir_exp: _searchManager.log_dir_exp,
-                    model_targets: config.Surrogate.ModelTargets);
+                    model_targets: config.Surrogate.ModelTargets,
+                    offline_test_data_file: config.Surrogate.TestOutOfDistDataFile);
             }
             else if (config.Surrogate.Type == "LinearModel")
             {
                 _surrogateModel = new LinearModel(
                     log_dir_exp: _searchManager.log_dir_exp,
-                    model_targets: config.Surrogate.ModelTargets);
+                    model_targets: config.Surrogate.ModelTargets,
+                    offline_test_data_file: config.Surrogate.TestOutOfDistDataFile);
             }
             else if (config.Surrogate.Type == "FixedFCNN")
             {
                 _useFixedModel = true;
                 _surrogateModel = new FullyConnectedNN(
                     log_dir_exp: _searchManager.log_dir_exp,
-                    model_targets: config.Surrogate.ModelTargets);
+                    model_targets: config.Surrogate.ModelTargets,
+                    offline_test_data_file: config.Surrogate.TestOutOfDistDataFile);
                 _surrogateModel.LoadModel(config.Surrogate.FixedModelSavePath);
                 Utilities.WriteLineWithTimestamp(
                     String.Format("Loaded model from {0}",
@@ -218,7 +232,7 @@ namespace DeckSearch.Search
                 return;
             }
             var logIndividuals = ConvertIndividuals(individuals);
-            _surrogateModel.OnlineFit(logIndividuals);
+            _surrogateModel.OnlineFit(logIndividuals, _testOutOfDist);
         }
 
         private void GetElapsedTime()

@@ -41,13 +41,15 @@ namespace SurrogateModel.Surrogate
         protected int num_train_idx = 0;
         protected DataLoader dataLoaderTrain = null;
         protected DataLoader dataLoaderTest = null;
+        protected DataLoader dataLoaderTestOutOfDist = null;
         protected Tensorflow.Saver saver;
         public string[] model_targets { protected set; get; }
 
         // writers to record training/testing loss and model save point.
         protected LossLogger loss_logger;
         // protected string MODEL_SAVE_POINT = "train_log/model.ckpt";
-        protected string offline_data_file = "resources/individual_log.csv";
+        protected string offline_train_data_file = "resources/individual_log.csv";
+        protected string offline_test_data_file = "resources/individual_log.csv";
         protected string train_log_dir;
 
         /// <summary>
@@ -61,13 +63,15 @@ namespace SurrogateModel.Surrogate
             int batch_size = 64,
             float step_size = 0.005f,
             string log_dir_exp = "train_log",
-            string offline_data_file = "resources/individual_log.csv",
+            string offline_train_data_file = "resources/individual_log.csv",
+            string offline_test_data_file = "resources/individual_log.csv",
             string[] model_targets = null)
         {
             this.num_epoch = num_epoch;
             this.batch_size = batch_size;
             this.step_size = step_size;
-            this.offline_data_file = offline_data_file;
+            this.offline_train_data_file = offline_train_data_file;
+            this.offline_test_data_file = offline_test_data_file;
 
             // get targets of the model
             if (model_targets == null)
@@ -116,7 +120,12 @@ namespace SurrogateModel.Surrogate
         /// <summary>
         /// Helper function to initialize dataLoader used for training and testing.
         /// </summary>
-        protected void init_data_loaders(NDArray X, NDArray y)
+        protected void init_data_loaders(
+            NDArray X,
+            NDArray y,
+            NDArray X_out_dist,
+            NDArray y_out_dist,
+            bool testOutOfDist)
         {
             // if there is only one data point, use it both
             // for training and testing
@@ -124,6 +133,13 @@ namespace SurrogateModel.Surrogate
             {
                 dataLoaderTrain = new DataLoader(X, y, 1, shuffle: false);
                 dataLoaderTest = new DataLoader(X, y, 1, shuffle: false);
+
+                // Create data loader for out-of-dist data, if applicable.
+            if (testOutOfDist)
+                {
+                    dataLoaderTestOutOfDist = new DataLoader(
+                        X_out_dist, y_out_dist, 1, shuffle: false);
+                }
             }
 
             else
@@ -140,6 +156,16 @@ namespace SurrogateModel.Surrogate
                     X[new Slice(train_test_split, X.shape[0])],
                     y[new Slice(train_test_split, y.Shape[0])],
                     X.shape[0] - train_test_split, shuffle: false);
+
+                // Create data loader for out-of-dist data, if applicable.
+                if (testOutOfDist)
+                {
+                    dataLoaderTestOutOfDist = new DataLoader(
+                        X_out_dist,
+                        y_out_dist,
+                        X_out_dist.shape[0],
+                        shuffle: false);
+                }
             }
         }
 
@@ -273,13 +299,36 @@ namespace SurrogateModel.Surrogate
                         (y_true, test_y)); // targets
                 print($"testing_loss = {testing_loss}");
 
+                // do validation on out-of-distribution test set if necessary
+                // double testing_loss_out_dist = Double.NaN;
+                // print(testing_loss_out_dist);
+                // NDArray test_per_ele_loss_out_dist = null;
+                NDArray testing_loss_out_dist = null, test_per_ele_loss_out_dist = null;
+                if (!dataLoaderTestOutOfDist.Equals(null))
+                {
+                    var (test_x_out_dist, test_y_out_dist) =
+                        dataLoaderTestOutOfDist.Sample();
+                    (testing_loss_out_dist, test_per_ele_loss_out_dist) =
+                        sess.run(
+                            (loss_op, per_ele_loss_op), // operation
+                            (n_samples, (int)test_x_out_dist.shape[0]), // batch size
+                            (input, test_x_out_dist), // features
+                            (y_true, test_y_out_dist)); // targets
+                    print($"testing_loss_out_dist = {testing_loss_out_dist}");
+                }
+
                 // write the losses
                 // divide by 1 to convert
                 loss_logger.LogLoss(
                     train_loss,
                     testing_loss / 1.0,
+                    testing_loss_out_dist.Equals(null) ?
+                        null : testing_loss_out_dist / 1.0,
+                    // testing_loss_out_dist / 1.0,
                     train_per_ele_loss,
-                    test_per_ele_loss);
+                    test_per_ele_loss,
+                    test_per_ele_loss_out_dist is null ?
+                        null : test_per_ele_loss_out_dist);
                 epoch_idx++;
             }
 
@@ -351,7 +400,9 @@ namespace SurrogateModel.Surrogate
         /// <summary>
         /// online fit the model using specified data
         /// </summary>
-        public abstract void OnlineFit(List<LogIndividual> logIndividuals);
+        public abstract void OnlineFit(
+            List<LogIndividual> logIndividuals,
+            bool testOutOfDist = false);
 
         /// <summary>
         /// Evaluate input, return output. Do not run before initialization

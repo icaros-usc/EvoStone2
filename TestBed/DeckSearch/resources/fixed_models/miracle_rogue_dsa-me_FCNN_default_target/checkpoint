@@ -1,0 +1,2 @@
+model_checkpoint_path: "model.ckpt"
+all_model_checkpoint_paths: "logs/2021-07-14_21-15-29_Surrogated_MAP-Elites_FullyConnectedNN/surrogate_train_log/surrogate_model/model18/model.ckpt"

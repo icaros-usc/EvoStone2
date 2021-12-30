@@ -30,7 +30,7 @@ namespace PlayGround
             CardReader.Init(config);
             // DataProcessor.GenerateCardDescription();
             var model = new FullyConnectedNN(
-                offline_data_file: "resources/individual_log_rogue.csv",
+                offline_train_data_file: "resources/individual_log_rogue.csv",
                 model_targets: config.Surrogate.ModelTargets);
             // var model = new DeepSetModel(
             //     offline_data_file: "resources/individual_log_rogue.csv",
