@@ -29,7 +29,7 @@ TestBed/DeckSearch/active/
 TestBed/DeckSearch/logs/
 TestBed/DeckSearch/train_log/
 TestBed/DeckSearch/boxes/
-TestBed/DeckSearch/resources/
+TestBed/DeckSearch/resources/scripts/
 TestBed/DeckSearch/card2vec/*.ipynb
 TestBed/DeckSearch/card2vec/.ipynb_checkpoints/
 TestBed/DeckSearch/card2vec/__pycache__

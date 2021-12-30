@@ -1,0 +1,2 @@
+model_checkpoint_path: "model.ckpt"
+all_model_checkpoint_paths: "resources/fixed_models/miracle_rogue_random_FCNN/model.ckpt"
