@@ -28,7 +28,13 @@ def get_label_color(experiment_config):
                 color = "orange"
             elif experiment_config["Surrogate"]["Type"] == "FixedFCNN":
                 legend += "Offline DSA-ME"
-                color = "red"
+                fixed_model_path = experiment_config["Surrogate"]["FixedModelSavePath"]
+                if fixed_model_path == "resources/fixed_models/miracle_rogue_dsa-me_FCNN_default_target/model.ckpt":
+                    legend += " (DSA-ME Data Model)"
+                    color = "salmon"
+                elif fixed_model_path == "resources/fixed_models/miracle_rogue_random_FCNN_default_target/model.ckpt":
+                    legend += " (Random Data Model)"
+                    color = "red"
             else:
                 legend += experiment_config["Surrogate"]["Type"] \
                           + " DSA-ME"

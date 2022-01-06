@@ -32,6 +32,7 @@ NUM_EVAL = 10000
 NUM_GAME = 200
 FITNESS_MIN = -30
 FITNESS_MAX = 30
+PLOT_OUT_OF_DIST_LOSS = False
 
 
 def get_fitness_from_cell(cell_data):
@@ -96,8 +97,34 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
             percent_elites_ccdf.append(
                 (curr_last_fitnesses > fitness).sum() / total_num_cell * 100)
 
-        return (num_elites, qd_scores, last_qd_score, max_fitness, max_winrate,
-                cell_filled, curr_last_fitnesses, percent_elites_ccdf)
+    loss_log_file = os.path.join(
+        log_dir,
+        "surrogate_train_log",
+        "model_losses.csv")
+
+    out_of_dist_losses = None
+
+    if os.path.exists(loss_log_file):
+        losses_pd = pd.read_csv(loss_log_file)
+        if "Sum test out-of-dist loss" in losses_pd.columns:
+            out_of_dist_losses = losses_pd["Sum test out-of-dist loss"]
+
+    return (num_elites, qd_scores, last_qd_score, max_fitness, max_winrate,
+            cell_filled, curr_last_fitnesses, percent_elites_ccdf,
+            out_of_dist_losses)
+
+
+def process_out_of_dist_losses(all_out_of_dist_losses):
+    min_epoch_num = np.inf
+    for out_of_dist_loss in all_out_of_dist_losses:
+        if len(out_of_dist_loss) < min_epoch_num:
+            min_epoch_num = len(out_of_dist_loss)
+
+    for i in range(len(all_out_of_dist_losses)):
+        all_out_of_dist_losses[i] = all_out_of_dist_losses[i][:min_epoch_num]
+
+    return all_out_of_dist_losses
+
 
 
 if __name__ == '__main__':
@@ -129,7 +156,10 @@ if __name__ == '__main__':
             curr_exp_id = experiment_config["Search"]["Category"] + "_" + \
                         experiment_config["Search"]["Type"]
             if "Surrogate" in experiment_config:
-                curr_exp_id += "_" + experiment_config["Surrogate"]["Type"]
+                surrogate_type = experiment_config["Surrogate"]["Type"]
+                curr_exp_id += "_" + surrogate_type
+                if surrogate_type == "FixedFCNN":
+                    curr_exp_id += "_" + experiment_config["Surrogate"]["FixedModelSavePath"]
 
             # add to dict
             if curr_exp_id in qdplots:
@@ -160,6 +190,7 @@ if __name__ == '__main__':
     # ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
 
     fig, (qd_ax, num_elites_ax, ccdf_ax) = plt.subplots(1, 3, figsize=(33, 6))
+    out_of_dist_fig, out_of_dist_ax = plt.subplots(figsize=(8, 5))
 
     for curr_plots in tqdm(qdplots.values()):
         # take average of current type of algo
@@ -171,6 +202,7 @@ if __name__ == '__main__':
         all_percent_ccdf = []
         all_last_fitness = []
         all_max_winrate = []
+        all_out_of_dist_losses = []
 
         results = Parallel(n_jobs=8)(
             delayed(calculate_stats)(log_dir, experiment_config,
@@ -184,7 +216,8 @@ if __name__ == '__main__':
 
         for result in results:
             (num_elites, qd_scores, qd_score, max_fitness, max_winrate,
-             cell_filled, curr_last_fitnesses, percent_elites_ccdf) = result
+             cell_filled, curr_last_fitnesses, percent_elites_ccdf,
+             out_of_dist_losses) = result
             all_num_elites.append(num_elites)
             all_qd_scores.append(qd_scores)
             all_last_qd_score.append(qd_score)
@@ -193,6 +226,8 @@ if __name__ == '__main__':
             all_cell_filled.append(cell_filled)
             all_last_fitness.append(curr_last_fitnesses)
             all_percent_ccdf.append(percent_elites_ccdf)
+            if out_of_dist_losses is not None:
+                all_out_of_dist_losses.append(out_of_dist_losses)
 
         # get average and std
         avg_qd_scores = np.mean(np.array(all_qd_scores), axis=0)
@@ -213,6 +248,29 @@ if __name__ == '__main__':
                                         df=len(all_percent_ccdf) - 1,
                                         loc=avg_percent_ccdf,
                                         scale=st.sem(all_percent_ccdf))
+
+        # plot out-of-dist losses, if any
+        if len(all_out_of_dist_losses) > 0:
+            all_out_of_dist_losses = process_out_of_dist_losses(all_out_of_dist_losses)
+            PLOT_OUT_OF_DIST_LOSS = True
+            avg_out_of_dist_losses = np.mean(
+                np.array(all_out_of_dist_losses),
+                axis=0)
+            cf_out_of_dist_losses = st.t.interval(
+                alpha=0.95,
+                df=len(all_out_of_dist_losses) - 1,
+                loc=avg_out_of_dist_losses,
+                scale=st.sem(all_out_of_dist_losses))
+            out_of_dist_ax.plot(
+                avg_out_of_dist_losses,
+                label=algo_label,
+                color=color)
+            out_of_dist_ax.fill_between(
+                np.arange(len(avg_out_of_dist_losses)),
+                cf_out_of_dist_losses[1],
+                cf_out_of_dist_losses[0],
+                alpha=0.5,
+                color=color)
 
         avg_numerical_measures["algo"].append(algo_label)
         avg_numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
@@ -311,6 +369,23 @@ if __name__ == '__main__':
     # ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
     #                  bbox_inches="tight")
 
+    if PLOT_OUT_OF_DIST_LOSS:
+        out_of_dist_ax.set_xlabel(
+            'Training Epoches',
+            fontsize=label_fontsize)
+        out_of_dist_ax.set_ylabel(
+            'Out-of-dist MSE Loss',
+            fontsize=label_fontsize)
+        out_of_dist_ax.set(xlim=(0, None), ylim=(0, 50))
+        out_of_dist_ax.xaxis.set_major_locator(
+            MaxNLocator(integer=False, nbins=5))
+        out_of_dist_ax.yaxis.set_major_locator(
+            MaxNLocator(integer=True, nbins=2))
+        out_of_dist_ax.tick_params(labelsize=tick_fontsize)
+        out_of_dist_fig.savefig(
+            os.path.join(log_dir_plot, f"Out-of-dist Loss.pdf"),
+            bbox_inches="tight")
+
     if add_legend:
         handles, labels = ccdf_ax.get_legend_handles_labels()
 
@@ -324,10 +399,11 @@ if __name__ == '__main__':
             handles,
             labels,
             loc="lower center",
-            ncol=4,
+            ncol=2,
             fontsize=32,
             #    mode="expand",
-            bbox_to_anchor=(0.5, -0.3),
+            # bbox_to_anchor=(0.5, -0.3), # for ncols=4
+            bbox_to_anchor=(0.5, -0.5), # for ncols=2
             # borderaxespad=0,
         )
 
