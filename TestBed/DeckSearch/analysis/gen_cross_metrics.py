@@ -33,6 +33,12 @@ NUM_GAME = 200
 FITNESS_MIN = -30
 FITNESS_MAX = 30
 PLOT_OUT_OF_DIST_LOSS = False
+OUT_OF_DIST_LABELS = {
+    "Sum test out-of-dist loss": "Total Loss",
+    "AverageHealthDifference test out-of-dist loss": "Loss on Objective",
+    "NumTurns test out-of-dist loss": "Loss on measure 1 (Num Turns)",
+    "HandSize test out-of-dist loss": "Loss on measure 2 (Hand Size)"
+}
 
 
 def get_fitness_from_cell(cell_data):
@@ -106,8 +112,9 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
 
     if os.path.exists(loss_log_file):
         losses_pd = pd.read_csv(loss_log_file)
-        if "Sum test out-of-dist loss" in losses_pd.columns:
-            out_of_dist_losses = losses_pd["Sum test out-of-dist loss"]
+        out_of_dist_losses = losses_pd[OUT_OF_DIST_LABELS.keys()]
+        # if "Sum test out-of-dist loss" in losses_pd.columns:
+        #     out_of_dist_losses = losses_pd["Sum test out-of-dist loss"]
 
     return (num_elites, qd_scores, last_qd_score, max_fitness, max_winrate,
             cell_filled, curr_last_fitnesses, percent_elites_ccdf,
@@ -115,13 +122,14 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
 
 
 def process_out_of_dist_losses(all_out_of_dist_losses):
-    min_epoch_num = np.inf
-    for out_of_dist_loss in all_out_of_dist_losses:
-        if len(out_of_dist_loss) < min_epoch_num:
-            min_epoch_num = len(out_of_dist_loss)
+    for label, curr_losses in all_out_of_dist_losses.items():
+        min_epoch_num = np.inf
+        for out_of_dist_loss in curr_losses:
+            if len(out_of_dist_loss) < min_epoch_num:
+                min_epoch_num = len(out_of_dist_loss)
 
-    for i in range(len(all_out_of_dist_losses)):
-        all_out_of_dist_losses[i] = all_out_of_dist_losses[i][:min_epoch_num]
+        for i in range(len(curr_losses)):
+            all_out_of_dist_losses[label][i] = all_out_of_dist_losses[label][i][:min_epoch_num]
 
     return all_out_of_dist_losses
 
@@ -202,7 +210,7 @@ if __name__ == '__main__':
         all_percent_ccdf = []
         all_last_fitness = []
         all_max_winrate = []
-        all_out_of_dist_losses = []
+        all_out_of_dist_losses = {} # out-of-dist losses have many dimensions
 
         results = Parallel(n_jobs=8)(
             delayed(calculate_stats)(log_dir, experiment_config,
@@ -227,7 +235,15 @@ if __name__ == '__main__':
             all_last_fitness.append(curr_last_fitnesses)
             all_percent_ccdf.append(percent_elites_ccdf)
             if out_of_dist_losses is not None:
-                all_out_of_dist_losses.append(out_of_dist_losses)
+                PLOT_OUT_OF_DIST_LOSS = True
+                for label in out_of_dist_losses:
+                    if label in all_out_of_dist_losses:
+                        all_out_of_dist_losses[label].append(
+                            out_of_dist_losses[label])
+                    else:
+                        all_out_of_dist_losses[label] = [
+                            out_of_dist_losses[label]]
+                    # all_out_of_dist_losses.append(out_of_dist_losses)
 
         # get average and std
         avg_qd_scores = np.mean(np.array(all_qd_scores), axis=0)
@@ -250,27 +266,27 @@ if __name__ == '__main__':
                                         scale=st.sem(all_percent_ccdf))
 
         # plot out-of-dist losses, if any
-        if len(all_out_of_dist_losses) > 0:
+        if PLOT_OUT_OF_DIST_LOSS:
             all_out_of_dist_losses = process_out_of_dist_losses(all_out_of_dist_losses)
-            PLOT_OUT_OF_DIST_LOSS = True
-            avg_out_of_dist_losses = np.mean(
-                np.array(all_out_of_dist_losses),
-                axis=0)
-            cf_out_of_dist_losses = st.t.interval(
-                alpha=0.95,
-                df=len(all_out_of_dist_losses) - 1,
-                loc=avg_out_of_dist_losses,
-                scale=st.sem(all_out_of_dist_losses))
-            out_of_dist_ax.plot(
-                avg_out_of_dist_losses,
-                label=algo_label,
-                color=color)
-            out_of_dist_ax.fill_between(
-                np.arange(len(avg_out_of_dist_losses)),
-                cf_out_of_dist_losses[1],
-                cf_out_of_dist_losses[0],
-                alpha=0.5,
-                color=color)
+            for label, out_of_dist_losses in all_out_of_dist_losses.items():
+                avg_out_of_dist_losses = np.mean(
+                    np.array(out_of_dist_losses),
+                    axis=0)
+                cf_out_of_dist_losses = st.t.interval(
+                    alpha=0.95,
+                    df=len(out_of_dist_losses) - 1,
+                    loc=avg_out_of_dist_losses,
+                    scale=st.sem(out_of_dist_losses))
+                p = out_of_dist_ax.plot(
+                    avg_out_of_dist_losses,
+                    label=OUT_OF_DIST_LABELS[label],
+                    color=None)
+                out_of_dist_ax.fill_between(
+                    np.arange(len(avg_out_of_dist_losses)),
+                    cf_out_of_dist_losses[1],
+                    cf_out_of_dist_losses[0],
+                    alpha=0.5,
+                    color=p[0].get_color())
 
         avg_numerical_measures["algo"].append(algo_label)
         avg_numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
@@ -369,23 +385,6 @@ if __name__ == '__main__':
     # ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
     #                  bbox_inches="tight")
 
-    if PLOT_OUT_OF_DIST_LOSS:
-        out_of_dist_ax.set_xlabel(
-            'Training Epoches',
-            fontsize=label_fontsize)
-        out_of_dist_ax.set_ylabel(
-            'Out-of-dist MSE Loss',
-            fontsize=label_fontsize)
-        out_of_dist_ax.set(xlim=(0, None), ylim=(0, 50))
-        out_of_dist_ax.xaxis.set_major_locator(
-            MaxNLocator(integer=False, nbins=5))
-        out_of_dist_ax.yaxis.set_major_locator(
-            MaxNLocator(integer=True, nbins=2))
-        out_of_dist_ax.tick_params(labelsize=tick_fontsize)
-        out_of_dist_fig.savefig(
-            os.path.join(log_dir_plot, f"Out-of-dist Loss.pdf"),
-            bbox_inches="tight")
-
     if add_legend:
         handles, labels = ccdf_ax.get_legend_handles_labels()
 
@@ -406,6 +405,37 @@ if __name__ == '__main__':
             bbox_to_anchor=(0.5, -0.5), # for ncols=2
             # borderaxespad=0,
         )
+
+        if PLOT_OUT_OF_DIST_LOSS:
+            handles, labels = out_of_dist_ax.get_legend_handles_labels()
+
+            out_of_dist_fig.legend(
+                handles,
+                labels,
+                loc="lower center",
+                ncol=2,
+                fontsize=25,
+                #    mode="expand",
+                bbox_to_anchor=(0.5, -0.5), # for ncols=2
+                # borderaxespad=0,
+            )
+
+    if PLOT_OUT_OF_DIST_LOSS:
+        out_of_dist_ax.set_xlabel(
+            'Training Epoches',
+            fontsize=label_fontsize)
+        out_of_dist_ax.set_ylabel(
+            'Out-of-dist MSE Loss',
+            fontsize=label_fontsize)
+        out_of_dist_ax.set(xlim=(0, None), ylim=(0, 50))
+        out_of_dist_ax.xaxis.set_major_locator(
+            MaxNLocator(integer=False, nbins=5))
+        out_of_dist_ax.yaxis.set_major_locator(
+            MaxNLocator(integer=True, nbins=2))
+        out_of_dist_ax.tick_params(labelsize=tick_fontsize)
+        out_of_dist_fig.savefig(
+            os.path.join(log_dir_plot, f"Out-of-dist Loss.pdf"),
+            bbox_inches="tight")
 
     # add row label
     if "more_target" in log_dir_plot:
