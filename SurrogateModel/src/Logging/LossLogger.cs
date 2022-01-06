@@ -78,14 +78,15 @@ namespace SurrogateModel.Logging
             double test_loss_out_dist,
             NDArray train_per_ele_loss,
             NDArray test_per_ele_loss,
-            NDArray test_per_ele_loss_out_dist)
+            NDArray test_per_ele_loss_out_dist,
+            bool testOutOfDist)
         {
-            bool testOutOfDist = false;
-            if (!Double.IsNaN(test_loss_out_dist) &&
-                !test_per_ele_loss_out_dist.Equals(null))
-            {
-                testOutOfDist = true;
-            }
+            // bool testOutOfDist = false;
+            // if (!Double.IsNaN(test_loss_out_dist) &&
+            //     !test_per_ele_loss_out_dist.Equals(null))
+            // {
+            //     testOutOfDist = true;
+            // }
             // Put the header on the log file if this is the first
             // individual in the experiment.
             if (!_isInitiated)

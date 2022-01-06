@@ -42,6 +42,7 @@ namespace SurrogateModel.Surrogate
         protected DataLoader dataLoaderTrain = null;
         protected DataLoader dataLoaderTest = null;
         protected DataLoader dataLoaderTestOutOfDist = null;
+        protected bool testOutOfDist = false;
         protected Tensorflow.Saver saver;
         public string[] model_targets { protected set; get; }
 
@@ -127,6 +128,7 @@ namespace SurrogateModel.Surrogate
             NDArray y_out_dist,
             bool testOutOfDist)
         {
+            this.testOutOfDist = testOutOfDist;
             // if there is only one data point, use it both
             // for training and testing
             if (X.shape[0] <= 1)
@@ -304,7 +306,7 @@ namespace SurrogateModel.Surrogate
                 // print(testing_loss_out_dist);
                 // NDArray test_per_ele_loss_out_dist = null;
                 NDArray testing_loss_out_dist = null, test_per_ele_loss_out_dist = null;
-                if (!dataLoaderTestOutOfDist.Equals(null))
+                if (testOutOfDist)
                 {
                     var (test_x_out_dist, test_y_out_dist) =
                         dataLoaderTestOutOfDist.Sample();
@@ -319,16 +321,21 @@ namespace SurrogateModel.Surrogate
 
                 // write the losses
                 // divide by 1 to convert
+                double testing_loss_d = testing_loss / 1.0;
+                double testing_loss_out_dist_d = Double.NaN;
+                if (testOutOfDist)
+                {
+                    testing_loss_out_dist_d = testing_loss_out_dist / 1.0;
+                }
+
                 loss_logger.LogLoss(
                     train_loss,
                     testing_loss / 1.0,
-                    testing_loss_out_dist.Equals(null) ?
-                        null : testing_loss_out_dist / 1.0,
-                    // testing_loss_out_dist / 1.0,
+                    testing_loss_out_dist_d,
                     train_per_ele_loss,
                     test_per_ele_loss,
-                    test_per_ele_loss_out_dist is null ?
-                        null : test_per_ele_loss_out_dist);
+                    test_per_ele_loss_out_dist,
+                    testOutOfDist);
                 epoch_idx++;
             }
 
@@ -412,7 +419,7 @@ namespace SurrogateModel.Surrogate
         /// <summary>
         /// Offline fit the model using data in the offline data file.
         /// </summary>
-        public abstract void OfflineFit();
+        public abstract void OfflineFit(bool testOutOfDist = false);
 
     }
 }

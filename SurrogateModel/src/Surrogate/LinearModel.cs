@@ -122,9 +122,9 @@ namespace SurrogateModel.Surrogate
         /// <summary>
         /// offline fit the model using generated data
         /// </summary>
-        public override void OfflineFit()
+        public override void OfflineFit(bool testOutOfDist)
         {
-            prepare_data();
+            prepare_data(testOutOfDist: testOutOfDist);
             train();
         }
 
