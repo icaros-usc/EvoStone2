@@ -70,6 +70,9 @@ namespace DeckSearch.Search
         private bool _testOutOfDist = false;
 
 
+        private bool _keepSurrogateArchive = false;
+
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -83,12 +86,20 @@ namespace DeckSearch.Search
             _numSurrogateEvals = _searchManager.searchAlgo.InitialPopulation();
             _logLengthPerGen = config.Search.LogLengthPerGen;
             _testOutOfDist = config.Surrogate.TestOutOfDist;
+            _keepSurrogateArchive = config.Search.KeepSurrogateArchive;
 
             if (_testOutOfDist)
             {
                 Utilities.WriteLineWithTimestamp(
                     "Running with out-of-dist testing data.");
             }
+
+            if (_keepSurrogateArchive)
+            {
+                Utilities.WriteLineWithTimestamp(
+                    "Will not clear surrogate archive in outer loop.");
+            }
+
 
             // create surrogate elites log dir
             _surrogateElitesLogDir = System.IO.Path.Combine(
@@ -289,7 +300,17 @@ namespace DeckSearch.Search
                 }
 
                 // clear the surrogate map
-                _searchManager.searchAlgo.ClearSurrogateMap();
+                if (!_keepSurrogateArchive)
+                {
+                    _searchManager.searchAlgo.ClearSurrogateMap();
+                    Utilities.WriteLineWithTimestamp(
+                        "Surrogate archive is cleared.");
+                }
+                else
+                {
+                    Utilities.WriteLineWithTimestamp(
+                        "Surrogate archive is kept.");
+                }
 
                 // run MAP-Elites on surrogate
                 Utilities.WriteLineWithTimestamp(

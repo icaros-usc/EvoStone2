@@ -22,6 +22,7 @@ namespace SabberStoneUtil.Config
         public int NumGeneration { get; set; }
         public int NumToEvaluatePerGeneration { get; set; }
         public int LogLengthPerGen { get; set; }
+        public bool KeepSurrogateArchive { get; set; }
     }
 
     public class SurrogateParams

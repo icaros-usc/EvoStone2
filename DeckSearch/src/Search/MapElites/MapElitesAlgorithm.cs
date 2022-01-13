@@ -32,6 +32,12 @@ namespace DeckSearch.Search.MapElites
         /// </summary>
         private int _individualsDispatched;
 
+
+        /// <summary>
+        /// Number of individuals dispatched from surrogate feature map.
+        /// </summary>
+        private int _individualsDispatchedFromSurrMap;
+
         /// <summary>
         /// Name of the features in the feature map
         /// </summary>
@@ -65,6 +71,7 @@ namespace DeckSearch.Search.MapElites
         {
             _individualsDispatched = 0;
             _individualsEvaluated = 0;
+            _individualsDispatchedFromSurrMap = 0;
             _params = config;
             _log_dir_exp = log_dir_exp;
 
@@ -149,8 +156,8 @@ namespace DeckSearch.Search.MapElites
 
         public Individual GenerateIndividualFromSurrogateMap(List<Card> cardSet)
         {
-            _individualsDispatched++;
-            return _individualsDispatched <= _params.Search.InitialPopulation ?
+            _individualsDispatchedFromSurrMap++;
+            return _individualsDispatchedFromSurrMap <= _params.Search.InitialPopulation ?
                    Individual.GenerateRandomIndividual(cardSet) :
                    _surrogateFeatureMap.GetRandomElite().Mutate();
         }
@@ -221,7 +228,7 @@ namespace DeckSearch.Search.MapElites
         {
             // init new maps
             InitSurrogateMap(_log_dir_exp);
-            _individualsDispatched = 0;
+            _individualsDispatchedFromSurrMap = 0;
 
             // update map log
             _surrogate_map_log.UpdateMap(_surrogateFeatureMap);
