@@ -21,7 +21,7 @@ echo "\
 #SBATCH --ntasks=1
 #SBATCH --job-name=Search
 #SBATCH --cpus-per-task=4
-#SBATCH --mem-per-cpu=2GB
+#SBATCH --mem-per-cpu=6GB
 #SBATCH --tasks-per-node=1
 #SBATCH --time=30:00:00
 #SBATCH --account=nikolaid_548
