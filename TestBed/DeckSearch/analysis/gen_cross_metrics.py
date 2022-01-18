@@ -28,7 +28,7 @@ plt.rcParams.update({
 })
 
 NUM_FEATURES = 2
-NUM_EVAL = 20000
+NUM_EVAL = 10000
 NUM_GAME = 200
 FITNESS_MIN = -30
 FITNESS_MAX = 30
@@ -110,7 +110,7 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
 
     out_of_dist_losses = None
 
-    if os.path.exists(loss_log_file):
+    if os.path.exists(loss_log_file) and PLOT_OUT_OF_DIST_LOSS:
         losses_pd = pd.read_csv(loss_log_file)
         out_of_dist_losses = losses_pd[OUT_OF_DIST_LABELS.keys()]
         # if "Sum test out-of-dist loss" in losses_pd.columns:
@@ -151,10 +151,19 @@ if __name__ == '__main__':
         help="whether add legend to the plot",
         action='store_true',
     )
+    parser.add_argument(
+        '-ol',
+        '--out_of_dist_loss',
+        required=False,
+        help="whether to plot out-of-dist loss",
+        action='store_true',
+    )
 
     opt = parser.parse_args()
     log_dir_plot = opt.log_dir_plot
     add_legend = opt.add_legend
+    PLOT_OUT_OF_DIST_LOSS = opt.out_of_dist_loss
+
     qdplots = {}
     for log_dir in os.listdir(log_dir_plot):
         # read in the name of the algorithm and features to plot
@@ -168,6 +177,8 @@ if __name__ == '__main__':
                 curr_exp_id += "_" + surrogate_type
                 if surrogate_type == "FixedFCNN":
                     curr_exp_id += "_" + experiment_config["Surrogate"]["FixedModelSavePath"]
+                if experiment_config["Search"].get("KeepSurrogateArchive"):
+                    curr_exp_id += "_KeepSurrogateArchive"
 
             # add to dict
             if curr_exp_id in qdplots:
@@ -235,7 +246,7 @@ if __name__ == '__main__':
             all_last_fitness.append(curr_last_fitnesses)
             all_percent_ccdf.append(percent_elites_ccdf)
             if out_of_dist_losses is not None:
-                PLOT_OUT_OF_DIST_LOSS = True
+                # PLOT_OUT_OF_DIST_LOSS = True
                 for label in out_of_dist_losses:
                     if label in all_out_of_dist_losses:
                         all_out_of_dist_losses[label].append(

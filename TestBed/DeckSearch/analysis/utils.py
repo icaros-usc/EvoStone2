@@ -15,6 +15,7 @@ def get_label_color(experiment_config):
     legend = ""
     color = None
     if experiment_config["Search"]["Category"] == "Surrogated":
+        # Search algo
         if experiment_config["Search"]["Type"] == "MAP-Elites":
             if experiment_config["Surrogate"]["Type"] == "FullyConnectedNN":
                 # legend += "MLP" + " DSM-ME"
@@ -31,7 +32,10 @@ def get_label_color(experiment_config):
                 fixed_model_path = experiment_config["Surrogate"]["FixedModelSavePath"]
                 if fixed_model_path == "resources/fixed_models/miracle_rogue_dsa-me_FCNN_default_target/model.ckpt":
                     legend += " (DSA-ME Data Model)"
-                    color = "salmon"
+                    color = "maroon"
+                elif fixed_model_path == "resources/fixed_models/miracle_rogue_dsa-me-offline_FCNN_default_target/model.ckpt":
+                    legend += " (Fresh DSA-ME Data Model)"
+                    color = "gold"
                 elif fixed_model_path == "resources/fixed_models/miracle_rogue_random_FCNN_default_target/model.ckpt":
                     legend += " (Random Data Model)"
                     color = "red"
@@ -39,6 +43,12 @@ def get_label_color(experiment_config):
                 legend += experiment_config["Surrogate"]["Type"] \
                           + " DSA-ME"
                 color = None
+
+        # Keep surrogate archive or not
+        if experiment_config["Search"].get("KeepSurrogateArchive"):
+            legend += " (Const Surr Archive)"
+            color = "indigo"
+
     elif experiment_config["Search"]["Category"] == "Distributed":
         legend += experiment_config["Search"]["Type"]
         color = "blue"
