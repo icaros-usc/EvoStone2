@@ -237,6 +237,12 @@ namespace DeckSearch.Search.MapElites
 
         public int NumIndividualsEvaled() { return this._individualsEvaluated; }
 
+
+        public int NumIndividualsToEval()
+        {
+            return this._params.Search.NumToEvaluate;
+        }
+
 		public int InitialPopulation()
 		{
 			return this._params.Search.InitialPopulation;

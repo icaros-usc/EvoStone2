@@ -75,6 +75,9 @@ namespace DeckSearch.Search
       int NumIndividualsEvaled() { return 0; }
 
 
+      int NumIndividualsToEval() { return 0; }
+
+
       void ClearSurrogateMap() { }
 
 

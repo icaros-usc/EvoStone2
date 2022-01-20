@@ -58,5 +58,13 @@ namespace DeckSearch.Search.EvolutionStrategy
                            .Reverse().Take(_params.Search.NumParents).ToList();
             }
         }
+
+        public int NumIndividualsEvaled() { return this._individualsEvaluated; }
+
+
+        public int NumIndividualsToEval()
+        {
+            return this._params.Search.NumToEvaluate;
+        }
     }
 }

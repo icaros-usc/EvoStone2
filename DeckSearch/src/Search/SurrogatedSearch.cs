@@ -58,6 +58,9 @@ namespace DeckSearch.Search
         private int _numMAPElitesRun = 0;
 
 
+        private int _numOuterIterations = System.Int32.MaxValue;
+
+
         private string _surrogateElitesLogDir;
 
 
@@ -71,6 +74,9 @@ namespace DeckSearch.Search
 
 
         private bool _keepSurrogateArchive = false;
+
+
+        private bool _skipInitPopulation = false;
 
 
         /// <summary>
@@ -87,6 +93,7 @@ namespace DeckSearch.Search
             _logLengthPerGen = config.Search.LogLengthPerGen;
             _testOutOfDist = config.Surrogate.TestOutOfDist;
             _keepSurrogateArchive = config.Search.KeepSurrogateArchive;
+            _skipInitPopulation = config.Search.SkipInitPopulation;
 
             if (_testOutOfDist)
             {
@@ -98,6 +105,30 @@ namespace DeckSearch.Search
             {
                 Utilities.WriteLineWithTimestamp(
                     "Will not clear surrogate archive in outer loop.");
+            }
+
+            if (_skipInitPopulation)
+            {
+                Utilities.WriteLineWithTimestamp(
+                    "Will skip initial population.");
+            }
+
+            // If number of outer iteration is specified, stop after the specified number of outer iterations or number of evals.
+            if (config.Search.NumOuterIterations != null)
+            {
+                _numOuterIterations = Convert.ToInt32(config.Search.NumOuterIterations);
+                Utilities.WriteLineWithTimestamp(
+                    String.Format(
+                        "Search will stop after {0} outer iterations or {1} evaluations",
+                        _numOuterIterations,
+                        _searchManager.searchAlgo.NumIndividualsToEval()));
+            }
+            else
+            {
+                Utilities.WriteLineWithTimestamp(
+                    String.Format(
+                        "Search will stop after {0} evaluations",
+                        _searchManager.searchAlgo.NumIndividualsToEval()));
             }
 
 
@@ -267,29 +298,33 @@ namespace DeckSearch.Search
             _searchManager.AnnounceWorkersStart();
             Utilities.WriteLineWithTimestamp("Begin Surrogated Search...");
 
-            // generate initial population
-            while(!_searchManager.searchAlgo.InitialPopulationEvaluated())
+
+            if (!_skipInitPopulation)
             {
-                // dispatch jobs until the number reaches
-                // initial population size
-                _searchManager.FindNewWorkers();
+                // generate initial population
+                while(!_searchManager.searchAlgo.InitialPopulationEvaluated())
+                {
+                    // dispatch jobs until the number reaches
+                    // initial population size
+                    _searchManager.FindNewWorkers();
 
-                // dispatch initial population
-                _searchManager.DispatchInitJobsToWorkers();
+                    // dispatch initial population
+                    _searchManager.DispatchInitJobsToWorkers();
 
-                // wait for workers to finish evaluating initial population
-                _searchManager.FindDoneWorkers(
-                    storeBuffer: true,
-                    logFeatureMap: true);
-                Thread.Sleep(1000);
+                    // wait for workers to finish evaluating initial population
+                    _searchManager.FindDoneWorkers(
+                        storeBuffer: true,
+                        logFeatureMap: true);
+                    Thread.Sleep(1000);
+                }
             }
 
             _searchManager.numEvaledPerRun = 0;
-
-
             List<Individual> indsToTrain;
+            int currNumOuterIter = 0;
 
-            while(_searchManager.searchAlgo.IsRunning())
+            while(_searchManager.searchAlgo.IsRunning() &&
+                  currNumOuterIter < _numOuterIterations)
             {
                 // back prop using individuals in the buffer
                 if (!_useFixedModel)
@@ -398,8 +433,11 @@ namespace DeckSearch.Search
                     String.Format("Current number of training individuals: {0}",
                                   _searchManager._individualsBuffer.Count));
 
-                // reset run per run
+                // reset num evals per run
                 _searchManager.numEvaledPerRun = 0;
+
+                // increment number of outer evals
+                currNumOuterIter += 1;
             }
 
             if (!_useFixedModel)
