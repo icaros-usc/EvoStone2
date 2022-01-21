@@ -170,7 +170,7 @@ def createImage(rowData, filename, archive_name, dpi=100):
     )
 
     # ax.set(title=IMAGE_TITLE)
-    ax.set_title(IMAGE_TITLE, fontdict={'fontsize': 40}, y=1.04)
+    ax.set_title(IMAGE_TITLE, fontdict={'fontsize': 25}, y=1.04)
     # fig.suptitle(IMAGE_TITLE, fontsize=30)
     # ax.tick_params(labelsize=20)
     ax.set_xlabel(FEATURE1_LABEL, fontsize=40)
@@ -305,7 +305,7 @@ def generateAll(elite_map_logs, loss_log_file):
             createMovie(curr_heatmap_dir, movieFilename)
 
             # Create the final image we need
-            imageFilename = f"heatmap_{IMAGE_TITLE}.png"
+            imageFilename = f"heatmap_{IMAGE_TITLE}.pdf"
             createImage(allRows[-1],
                         os.path.join(curr_heatmap_dir, imageFilename),
                         archive_name, dpi=1200)

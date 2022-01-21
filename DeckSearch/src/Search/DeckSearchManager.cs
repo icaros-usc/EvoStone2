@@ -198,17 +198,17 @@ namespace DeckSearch.Search
                 int originalID = stableInd.ID;
                 searchAlgo.AddToFeatureMap(stableInd);
 
-                if (logFeatureMap)
-                {
-                    searchAlgo.LogFeatureMap();
-                }
-
                 // A new ID would be given while the individual is added to
                 // the feature map.
                 // For Surrogate Search we need to keep the ID.
                 if (keepIndID)
                 {
                     stableInd.ID = originalID;
+                }
+
+                if (logFeatureMap)
+                {
+                    searchAlgo.LogFeatureMap();
                 }
 
                 // store done individual to a tmp buffer
