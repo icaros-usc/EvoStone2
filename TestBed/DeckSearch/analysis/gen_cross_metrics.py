@@ -200,6 +200,13 @@ if __name__ == '__main__':
         "cell_filled": [],
         "qd_score": [],
     }
+    sem_numerical_measures = {
+        "algo": [],
+        "max_fitness": [],
+        "max_winrate": [],
+        "cell_filled": [],
+        "qd_score": [],
+    }
     elites_dists = {
         "legends": [],
         "fitnesses": [],
@@ -304,6 +311,11 @@ if __name__ == '__main__':
         avg_numerical_measures["max_fitness"].append(np.mean(all_max_fitness))
         avg_numerical_measures["cell_filled"].append(np.mean(all_cell_filled))
         avg_numerical_measures["max_winrate"].append(np.mean(all_max_winrate))
+        sem_numerical_measures["algo"].append(algo_label)
+        sem_numerical_measures["qd_score"].append(st.sem(all_last_qd_score))
+        sem_numerical_measures["max_fitness"].append(st.sem(all_max_fitness))
+        sem_numerical_measures["cell_filled"].append(st.sem(all_cell_filled))
+        sem_numerical_measures["max_winrate"].append(st.sem(all_max_winrate))
         numerical_measures[algo_label]["qd_score"] = all_last_qd_score
         numerical_measures[algo_label]["max_fitness"] = all_max_fitness
         numerical_measures[algo_label]["cell_filled"] = all_cell_filled
@@ -466,3 +478,7 @@ if __name__ == '__main__':
     avg_numerical_measures_df = pd.DataFrame(avg_numerical_measures)
     avg_numerical_measures_df.to_csv(
         os.path.join(log_dir_plot, "avg_numerical_measures.csv"))
+
+    sem_numerical_measures_df = pd.DataFrame(sem_numerical_measures)
+    sem_numerical_measures_df.to_csv(
+        os.path.join(log_dir_plot, "sem_numerical_measures.csv"))
