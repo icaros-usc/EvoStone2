@@ -1,6 +1,6 @@
 # EvoStone
 
-This project is contains the Hearthstone experiment of the paper **Deep Surrogate Assisted MAP-Elites for Automated Hearthstone Deckbuilding**. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms EM-ME and all the correspoinding emulation models.
+This project is contains the Hearthstone experiment of the paper **Deep Surrogate Assisted MAP-Elites for Automated Hearthstone Deckbuilding**. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms DSA-ME and all the correspoinding emulation models.
 
 This project is designed to be run on a High-Performance Computing (HPC) cluster and is (mainly) divided into two subprojects `DeckEvaluator` (for running Hearthstone games and collecting data from those games) and `DeckSearch` (for running distributed versions of each evolutionary algorithm). EvoStone is a unified .NET project and all subprojects can be compiled through a single command.
 
@@ -27,7 +27,7 @@ That's it! Your project is now setup to run experiments from the paper.
 
 The setup script created three empty folders in the `TestBed/DeckSearch` directory: `bin`, `active`, `boxes`, and `logs`. The `active` folder is used for initial communication between distributed nodes and for letting the workers know when the search is complete. The `boxes` folder is for sending neural networks to the `DeckEvaluator` and receiving results. The `logs` folder holds CSV files for logging information about the neural net policies and elite maps from the search.
 
-First we need to start the control node responsible for running our search (MAP-Elites, EM-ME, etc). To do this, run the following command.
+First we need to start the control node responsible for running our search (MAP-Elites, DSA-ME, etc). To do this, run the following command.
 
 ```
 dotnet bin/DeckSearch.dll config/experiment/distrited_search/paladin_me_demo.tml
