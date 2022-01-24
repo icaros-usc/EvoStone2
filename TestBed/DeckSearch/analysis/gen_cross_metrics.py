@@ -466,6 +466,7 @@ if __name__ == '__main__':
     else:
         row_label = "Without Ancillary Data"
 
+    # fig.suptitle("Post-hoc Experiments Result", y=1.02, fontsize=40)
     fig.suptitle(row_label, y=1.02, fontsize=40)
     fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),
                 bbox_inches="tight")
