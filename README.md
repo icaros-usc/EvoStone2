@@ -1,8 +1,8 @@
 # EvoStone
 
-This project is contains the Hearthstone experiment of the paper *[Learning Emulation Models for Automated Hearthstone Deckbuilding]()*. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms EM-ME and all the correspoinding emulation models.
+This project is contains the Hearthstone experiment of the paper *Deep Surrogate Assisted MAP-Elites for Automated Hearthstone Deckbuilding*. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms EM-ME and all the correspoinding emulation models.
 
-This project is designed to be run on a High-Performance Computing (HPC) cluster and is divided into two subprojects `DeckEvaluator` (for running Hearthstone games and collecting data from those games) and `DeckSearch` (for running distributed versions of each evolutionary algorithm). EvoStone is a unified .NET project and all subprojects can be compiled through a single command.
+This project is designed to be run on a High-Performance Computing (HPC) cluster and is (mainly) divided into two subprojects `DeckEvaluator` (for running Hearthstone games and collecting data from those games) and `DeckSearch` (for running distributed versions of each evolutionary algorithm). EvoStone is a unified .NET project and all subprojects can be compiled through a single command.
 
 ## Installation
 To install the project, you need to install the [.NET Core 3.1](https://dotnet.microsoft.com/download) developer toolkit for your system. You may also need the [NuGet](https://docs.microsoft.com/en-us/nuget/install-nuget-client-tools) client tools for updating dependencies for the project. Included in this project is a `setup.py` script to make installation easier. Users can install Python 3 or follow the commands in the script for installation.
@@ -44,29 +44,14 @@ This command starts a new DeckEvaluator node. The first parameter is the node ID
 
 ## Running DeckSearch Experiment (Distributed using Slurm)
 
-Running the experiment on HPC using slurm is a bit more tricky because .NET is not supported natively there. Therefore, you need to first build a [Singularity](https://sylabs.io/docs/) container and use the provided script to run the experiment.
-
-First, log into the HPC:
-```
-ssh <USC_ID>@discovery.usc.edu
-```
-
-Then, you have to build the Singularity container. USC HPC natively supports Singularity, so you can use it directly. Run the following to build the container:
-```
-cd TestBed/DeckSearch
-sudo singularity build singularity/ubuntu_dotnet singularity/ubuntu_dotnet.def
-```
-
-You can also build the contrainer locally and copy it to the HPC using `scp`.
-
-Then, run a python script to clean up left-over files from previous experiments, if any:
+Run a python script to clean up left-over files from previous experiments, if any:
 ```
 python setup_hpc.py
 ```
 
-Finally, run the following to schedule the experiment:
+Then, run the following to schedule the experiment:
 ```
-sh slurm/run_slurm.sh <config_file> <num_evaluators>
+sh slurm/run_search_slurm.sh <config_file> <num_evaluators>
 ```
 where `<config_file>` is the path to the configuration file and `<num_evaluators>` is the number of evaluators.
 
