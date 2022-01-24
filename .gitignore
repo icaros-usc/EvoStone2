@@ -43,6 +43,7 @@ TestBed/DeckSearch/__pycache__
 TestBed/DeckSearch/analysis/__pycache__
 TestBed/DeckSearch/analysis/*.png
 TestBed/DeckSearch/analysis/*.csv
+TestBed/DeckSearch/deploy_cluster.sh
 
 TestBed/StrategySearch/bin/
 TestBed/StrategySearch/active/
