@@ -32,16 +32,6 @@ namespace SabberStoneUtil.DataProcessing
         private static Dictionary<String, int> cardIndex = new Dictionary<string, int>();
 
         /// <summary>
-        /// A map from cards to its card2vec embedding.
-        /// </summary>
-        public static Dictionary<String, double[]> cardEmbeddings = new Dictionary<string, double[]>();
-
-        /// <summary>
-        /// Dimension of the card embedding vector
-        /// </summary>
-        public static int cardEmbeddingSize { get; private set; }
-
-        /// <summary>
         /// static constructor
         /// </summary>
         static DataProcessor()
@@ -60,16 +50,6 @@ namespace SabberStoneUtil.DataProcessing
                 int index = CardReader._cardSet.IndexOf(CardReader._cardSet.Where(c => c.Name == cardName).ToList()[0]);
                 cardIndex[cardName] = index;
             }
-
-            // construct card to vector embedding map
-            var cardEmbeddingJsonString =
-                File.ReadAllText("card2vec/CardEmbeddings.json");
-            var rawEmbeddings = JsonSerializer.Deserialize<CardEmbedding[]>(cardEmbeddingJsonString);
-            for(int i=0; i<rawEmbeddings.Length; i++)
-            {
-                cardEmbeddings[rawEmbeddings[i].cardName] = rawEmbeddings[i].embedding;
-            }
-            cardEmbeddingSize = rawEmbeddings[0].embedding.Length;
         }
 
         // ****************** I/O Functions ******************
@@ -352,27 +332,6 @@ namespace SabberStoneUtil.DataProcessing
             return (cardsEncoding, deckStats);
         }
 
-        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromData(List<LogIndividual> logIndividualsList, string[] modelTargets)
-        {
-            // store embedding in a 3D array
-            // each deck consists of 30 embedding vectors
-            double[][][] deckEmbeddings = new double[logIndividualsList.Count][][];
-            for(int i=0; i<logIndividualsList.Count; i++)
-            {
-                string[] deckCards = logIndividualsList[i].Deck.Split('*');
-                double [][] deckEmbedding = new double[30][];
-                for(int j=0; j<deckCards.Length; j++)
-                {
-                    deckEmbedding[j] = cardEmbeddings[deckCards[j]];
-                }
-                deckEmbeddings[i] = deckEmbedding;
-            }
-
-            double[,] deckStats = GetDeckStats(logIndividualsList, modelTargets);
-
-            return (deckEmbeddings, deckStats);
-        }
-
         /// <summary>
         /// Generate encoding of a deck as a set of 30 one hot encoded cards from data
         /// </summary>
@@ -424,15 +383,6 @@ namespace SabberStoneUtil.DataProcessing
             return PreprocessDeckOnehotFromData(logIndividualsList, modelTargets);
         }
 
-        /// <summary>
-        /// Generate deck2vec embedding from data read from
-        /// </summary>
-        public static (double[][][], double[,]) PreprocessDeckToVecEmbeddingFromFile(string path, string[] modelTargets)
-        {
-            var logIndividualsList = readLogIndividuals(path).ToList();
-            return PreprocessDeckToVecEmbeddingFromData(
-                logIndividualsList, modelTargets);
-        }
 
         /// <summary>
         /// Generate encoding of a deck as a set of 30 one hot encoded cards from file
@@ -503,29 +453,6 @@ namespace SabberStoneUtil.DataProcessing
             {
                 throw;
             }
-        }
-
-
-        public static void GenerateCardDescription()
-        {
-            List<LogCard> logCards = new List<LogCard>();
-            foreach(var card in allCards)
-            {
-                LogCard logCard = new LogCard();
-                logCard.cardName = card.Name;
-                logCard.cardRace = Enum.GetName(typeof(Race), card.GetRawRace());
-                logCard.cardClass = Enum.GetName(typeof(CardClass), card.Class);
-                logCard.cardType = Enum.GetName(typeof(CardType), card.Type);
-                string rawDescription = String.Join(" ", new string[] { logCard.cardName, logCard.cardRace, logCard.cardClass, logCard.cardType, card.Text});
-
-                logCard.description =
-                    rawDescription.Replace("<b>", "").Replace("</b>", "")
-                                  .Replace("<i>", "").Replace("</i>", "")
-                                  .Replace("[x]", "").Replace("_", "")
-                                  .Replace("\n", "");
-                logCards.Add(logCard);
-            }
-            WriteToCsv(logCards, "card2vec/CardTexts.csv");
         }
 
         // *************** End Util Functions ***********************

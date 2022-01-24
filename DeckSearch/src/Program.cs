@@ -13,8 +13,6 @@ namespace DeckSearch
     {
         static void Main(string[] args)
         {
-            // DataProcessor.GenerateCardDescription();
-
             // read in config and initialize search space (domain of cards to search)
             var config = Toml.ReadFile<Configuration>(args[0]);
             CardReader.Init(config);

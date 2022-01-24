@@ -28,7 +28,6 @@ namespace PlayGround
         {
             var config = Toml.ReadFile<SabberStoneUtil.Config.Configuration>(args[0]);
             CardReader.Init(config);
-            // DataProcessor.GenerateCardDescription();
             var model = new FullyConnectedNN(
                 offline_train_data_file: "resources/individual_log_rogue.csv",
                 model_targets: config.Surrogate.ModelTargets);
@@ -67,13 +66,6 @@ namespace PlayGround
             // var out_ = sess.run((y), (x, np.array(a)));
             // print(out_);
             // print(out_.shape);
-
-            // // test deckEmbedding
-            // var logIndividuals = DataProcessor.readLogIndividuals("resources/individual_log.csv");
-            // var (deckEmbedding, deckStats) = DataProcessor.PreprocessDeckDataWithCard2VecEmbeddingFromData(logIndividuals.ToList());
-
-            // var deckEmbedding_np = np.array(deckEmbedding);
-            // print(deckEmbedding_np.shape);
 
             // // test tf.reduce_mean
             // Tensor z = tf.reduce_mean(x, axis: new int[]{1}, keepdims: true);
