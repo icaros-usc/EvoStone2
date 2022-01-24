@@ -1,6 +1,6 @@
 # EvoStone
 
-This project is contains the Hearthstone experiment of the paper *Deep Surrogate Assisted MAP-Elites for Automated Hearthstone Deckbuilding*. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms EM-ME and all the correspoinding emulation models.
+This project is contains the Hearthstone experiment of the paper **Deep Surrogate Assisted MAP-Elites for Automated Hearthstone Deckbuilding**. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms EM-ME and all the correspoinding emulation models.
 
 This project is designed to be run on a High-Performance Computing (HPC) cluster and is (mainly) divided into two subprojects `DeckEvaluator` (for running Hearthstone games and collecting data from those games) and `DeckSearch` (for running distributed versions of each evolutionary algorithm). EvoStone is a unified .NET project and all subprojects can be compiled through a single command.
 
