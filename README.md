@@ -105,3 +105,20 @@ MaxValue = 7.0
 ```
 
 This config file specifies the behavior dimensions for the map of elites and parameters specific to running the search algorithm.
+
+
+## Experiments and Corresponding Config Files
+
+For each algorithm in the paper, the correspoinding config file is the following:
+
+| Algorithm Name | Config file |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| MAP-Elites                           | config/experiment/distrited_search/rogue_classic_miracle_me_w_elitedeck_nn_strategy.tml                                               |
+| DSA-ME                               | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fcnn_w_elitedeck_nn_strategy_w_out_dist_test.tml                     |
+| DSA-ME (without resetting)           | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fcnn_w_elitedeck_nn_strategy_w_out_dist_test_keep_surr_archive.tml   |
+| DSA-ME (with Ancillary Data)         | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fcnn_w_elitedeck_nn_strategy.tml                                     |
+| LSA-ME                               | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_linear_w_elitedeck_nn_strategy.tml                                   |
+| Offline DSA-ME                       | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fixed_fcnn_w_elitedeck_nn_strategy_default_target.tml                |
+| Offline DSA-ME (with Ancillary Data) | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fixed_fcnn_w_elitedeck_nn_strategy.tml                               |
+| Offline DSA-ME (Elite Data)          | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fixed_dsa-me-offline_fcnn_w_elitedeck_nn_strategy_default_target.tml |
+| Offline DSA-ME (Surrogate Model)     | config/experiment/surrogate_search/rogue_classic_miracle_surr_me_fixed_dsa-me_fcnn_w_elitedeck_nn_strategy_default_target.tml         |
