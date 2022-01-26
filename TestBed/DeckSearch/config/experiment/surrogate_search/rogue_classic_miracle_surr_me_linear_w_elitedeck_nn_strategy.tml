@@ -136,18 +136,9 @@ LogLengthPerGen=10
 [Surrogate]
 Type="LinearModel"
 ModelTargets=[
-  "WinCount",
   "AverageHealthDifference",
-  "DamageDone",
   "NumTurns",
-  "CardsDrawn",
   "HandSize",
-  "ManaSpent",
-  "ManaWasted",
-  "DeckManaSum",
-  "DeckManaVariance",
-  "NumMinionCards",
-  "NumSpellCards",
 ]
 
 [[Nerfs]]
