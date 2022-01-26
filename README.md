@@ -1,17 +1,17 @@
-# EvoStone
+# EvoStone 2.0
 
 This project is contains the Hearthstone experiment of the paper **Deep Surrogate Assisted MAP-Elites for Automated Hearthstone Deckbuilding**. The code base builds upon [EvoStone](https://github.com/tehqin/EvoStone), which contains Hearthstone experiments for the paper *[Covariance Matrix Adaptation for the Rapid Illumination of Behavior Space](https://arxiv.org/abs/1912.02400)*. The project contains distributed implementations of evolutionary algorithms DSA-ME and all the correspoinding emulation models.
 
-This project is designed to be run on a High-Performance Computing (HPC) cluster and is (mainly) divided into two subprojects `DeckEvaluator` (for running Hearthstone games and collecting data from those games) and `DeckSearch` (for running distributed versions of each evolutionary algorithm). EvoStone is a unified .NET project and all subprojects can be compiled through a single command.
+This project is designed to be run on a High-Performance Computing (HPC) cluster and is (mainly) divided into two subprojects `DeckEvaluator` (for running Hearthstone games and collecting data from those games) and `DeckSearch` (for running distributed versions of each evolutionary algorithm). EvoStone 2.0 is a unified .NET project and all subprojects can be compiled through a single command.
 
 ## Installation
 To install the project, you need to install the [.NET Core 3.1](https://dotnet.microsoft.com/download) developer toolkit for your system. You may also need the [NuGet](https://docs.microsoft.com/en-us/nuget/install-nuget-client-tools) client tools for updating dependencies for the project. Included in this project is a `setup.py` script to make installation easier. Users can install Python 3 or follow the commands in the script for installation.
 
-Next you need to compile [SabberStone](https://github.com/HearthSim/SabberStone), the Hearthstone simulator for running games. Follow the instructions on the SabberStone github compile the project into `SabberStone.dll`. Put `SabberStone` in the same root directory as `EvoStone`. Therefore the project structure should look like the follows:
+Next you need to compile [SabberStone](https://github.com/HearthSim/SabberStone), the Hearthstone simulator for running games. Follow the instructions on the SabberStone github compile the project into `SabberStone.dll`. Put `SabberStone` in the same root directory as `EvoStone2`. Therefore the project structure should look like the follows:
 ```
 project
 |
-└───EvoStone
+└───EvoStone2
 |
 └───SabberStone
 ```
@@ -58,7 +58,7 @@ where `<config_file>` is the path to the configuration file and `<num_evaluators
 
 ## Config Files
 
-There are two types of config files for EvoStone. The first specifies the experiment level parameters (see below).
+There are two types of config files for EvoStone 2.0. The first specifies the experiment level parameters (see below).
 
 ```
 [Evaluation]
