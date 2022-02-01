@@ -16,6 +16,15 @@ project
 └───SabberStone
 ```
 
+Run the following to compile SabberStone. Since we only need `SabberStoneCore.dll`, we can only compile this sub-project and ignore other projects in SabberStone.
+
+```
+cd SabberStone/SabberStoneCore
+dotnet publish --configuration Release
+```
+
+Then, a `SabberStoneCore.dll` file should be written to `SabberStone/SabberStoneCore/bin/Release/netstandard2.0/SabberStoneCore.dll`, which will be used by EvoStone 2.1.
+
 Next move to the `TestBed/DeckSearch` directory. From here you can run the `setup.py` script.
 
 ```
