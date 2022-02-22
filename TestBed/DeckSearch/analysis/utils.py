@@ -31,10 +31,10 @@ def get_label_color(experiment_config):
                 legend += "Offline DSA-ME"
                 fixed_model_path = experiment_config["Surrogate"]["FixedModelSavePath"]
                 if fixed_model_path == "resources/fixed_models/miracle_rogue_dsa-me_FCNN_default_target/model.ckpt":
-                    legend += " (DSA-ME Data Model)"
+                    legend += " (Surrogate Model)"
                     color = "maroon"
                 elif fixed_model_path == "resources/fixed_models/miracle_rogue_dsa-me-offline_FCNN_default_target/model.ckpt":
-                    legend += " (Fresh DSA-ME Data Model)"
+                    legend += " (Elite Data)"
                     color = "gold"
                 elif fixed_model_path == "resources/fixed_models/miracle_rogue_random_FCNN_default_target/model.ckpt":
                     legend += " (Random Data Model)"
@@ -46,7 +46,7 @@ def get_label_color(experiment_config):
 
         # Keep surrogate archive or not
         if experiment_config["Search"].get("KeepSurrogateArchive"):
-            legend += " (Const Surr Archive)"
+            legend += " (without resetting)"
             color = "indigo"
 
     elif experiment_config["Search"]["Category"] == "Distributed":

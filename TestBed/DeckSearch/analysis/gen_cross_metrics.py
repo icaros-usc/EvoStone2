@@ -425,7 +425,7 @@ if __name__ == '__main__':
             fontsize=32,
             #    mode="expand",
             # bbox_to_anchor=(0.5, -0.3), # for ncols=4
-            bbox_to_anchor=(0.5, -0.5), # for ncols=2
+            bbox_to_anchor=(0.5, -0.4), # for ncols=2
             # borderaxespad=0,
         )
 
@@ -466,8 +466,8 @@ if __name__ == '__main__':
     else:
         row_label = "Without Ancillary Data"
 
-    # fig.suptitle("Post-hoc Experiments Result", y=1.02, fontsize=40)
-    fig.suptitle(row_label, y=1.02, fontsize=40)
+    fig.suptitle("Post-hoc Experiments", y=1.02, fontsize=40)
+    # fig.suptitle(row_label, y=1.02, fontsize=40)
     fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),
                 bbox_inches="tight")
 
