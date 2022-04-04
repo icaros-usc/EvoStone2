@@ -39,6 +39,8 @@ OUT_OF_DIST_LABELS = {
     "NumTurns test out-of-dist loss": "Loss on measure 1 (Num Turns)",
     "HandSize test out-of-dist loss": "Loss on measure 2 (Hand Size)"
 }
+SPLIT_MODE = "split"
+COMBINE_MODE = "combine"
 
 
 def get_fitness_from_cell(cell_data):
@@ -103,10 +105,8 @@ def calculate_stats(log_dir, experiment_config, elite_map_config):
             percent_elites_ccdf.append(
                 (curr_last_fitnesses > fitness).sum() / total_num_cell * 100)
 
-    loss_log_file = os.path.join(
-        log_dir,
-        "surrogate_train_log",
-        "model_losses.csv")
+    loss_log_file = os.path.join(log_dir, "surrogate_train_log",
+                                 "model_losses.csv")
 
     out_of_dist_losses = None
 
@@ -129,10 +129,10 @@ def process_out_of_dist_losses(all_out_of_dist_losses):
                 min_epoch_num = len(out_of_dist_loss)
 
         for i in range(len(curr_losses)):
-            all_out_of_dist_losses[label][i] = all_out_of_dist_losses[label][i][:min_epoch_num]
+            all_out_of_dist_losses[label][i] = all_out_of_dist_losses[label][
+                i][:min_epoch_num]
 
     return all_out_of_dist_losses
-
 
 
 if __name__ == '__main__':
@@ -158,10 +158,20 @@ if __name__ == '__main__':
         help="whether to plot out-of-dist loss",
         action='store_true',
     )
+    parser.add_argument(
+        '-m',
+        '--mode',
+        required=False,
+        help=
+        "Mode of plotting. 'combine' would combine all plots. 'split' would generate plots separately.",
+        default=COMBINE_MODE)
 
     opt = parser.parse_args()
     log_dir_plot = opt.log_dir_plot
     add_legend = opt.add_legend
+    mode = opt.mode
+    if mode not in {COMBINE_MODE, SPLIT_MODE}:
+        raise ValueError(f"Plotting mode {mode} does not exist.")
     PLOT_OUT_OF_DIST_LOSS = opt.out_of_dist_loss
 
     qdplots = {}
@@ -176,7 +186,8 @@ if __name__ == '__main__':
                 surrogate_type = experiment_config["Surrogate"]["Type"]
                 curr_exp_id += "_" + surrogate_type
                 if surrogate_type == "FixedFCNN":
-                    curr_exp_id += "_" + experiment_config["Surrogate"]["FixedModelSavePath"]
+                    curr_exp_id += "_" + experiment_config["Surrogate"][
+                        "FixedModelSavePath"]
                 if experiment_config["Search"].get("KeepSurrogateArchive"):
                     curr_exp_id += "_KeepSurrogateArchive"
 
@@ -211,11 +222,15 @@ if __name__ == '__main__':
         "legends": [],
         "fitnesses": [],
     }
-    # qd_fig, qd_ax = plt.subplots(figsize=(8, 6))
-    # num_elites_fig, num_elites_ax = plt.subplots(figsize=(8, 6))
-    # ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
 
-    fig, (qd_ax, num_elites_ax, ccdf_ax) = plt.subplots(1, 3, figsize=(33, 6))
+    if mode == SPLIT_MODE:
+        qd_fig, qd_ax = plt.subplots(figsize=(8, 6))
+        num_elites_fig, num_elites_ax = plt.subplots(figsize=(8, 6))
+        ccdf_fig, ccdf_ax = plt.subplots(figsize=(8, 6))
+    elif mode == COMBINE_MODE:
+        fig, (qd_ax, num_elites_ax, ccdf_ax) = \
+            plt.subplots(1, 3, figsize=(33, 6))
+
     out_of_dist_fig, out_of_dist_ax = plt.subplots(figsize=(8, 5))
 
     for curr_plots in tqdm(qdplots.values()):
@@ -228,7 +243,7 @@ if __name__ == '__main__':
         all_percent_ccdf = []
         all_last_fitness = []
         all_max_winrate = []
-        all_out_of_dist_losses = {} # out-of-dist losses have many dimensions
+        all_out_of_dist_losses = {}  # out-of-dist losses have many dimensions
 
         results = Parallel(n_jobs=8)(
             delayed(calculate_stats)(log_dir, experiment_config,
@@ -260,7 +275,8 @@ if __name__ == '__main__':
                             out_of_dist_losses[label])
                     else:
                         all_out_of_dist_losses[label] = [
-                            out_of_dist_losses[label]]
+                            out_of_dist_losses[label]
+                        ]
                     # all_out_of_dist_losses.append(out_of_dist_losses)
 
         # get average and std
@@ -285,26 +301,25 @@ if __name__ == '__main__':
 
         # plot out-of-dist losses, if any
         if PLOT_OUT_OF_DIST_LOSS:
-            all_out_of_dist_losses = process_out_of_dist_losses(all_out_of_dist_losses)
+            all_out_of_dist_losses = process_out_of_dist_losses(
+                all_out_of_dist_losses)
             for label, out_of_dist_losses in all_out_of_dist_losses.items():
-                avg_out_of_dist_losses = np.mean(
-                    np.array(out_of_dist_losses),
-                    axis=0)
+                avg_out_of_dist_losses = np.mean(np.array(out_of_dist_losses),
+                                                 axis=0)
                 cf_out_of_dist_losses = st.t.interval(
                     alpha=0.95,
                     df=len(out_of_dist_losses) - 1,
                     loc=avg_out_of_dist_losses,
                     scale=st.sem(out_of_dist_losses))
-                p = out_of_dist_ax.plot(
-                    avg_out_of_dist_losses,
-                    label=OUT_OF_DIST_LABELS[label],
-                    color=None)
-                out_of_dist_ax.fill_between(
-                    np.arange(len(avg_out_of_dist_losses)),
-                    cf_out_of_dist_losses[1],
-                    cf_out_of_dist_losses[0],
-                    alpha=0.5,
-                    color=p[0].get_color())
+                p = out_of_dist_ax.plot(avg_out_of_dist_losses,
+                                        label=OUT_OF_DIST_LABELS[label],
+                                        color=None)
+                out_of_dist_ax.fill_between(np.arange(
+                    len(avg_out_of_dist_losses)),
+                                            cf_out_of_dist_losses[1],
+                                            cf_out_of_dist_losses[0],
+                                            alpha=0.5,
+                                            color=p[0].get_color())
 
         avg_numerical_measures["algo"].append(algo_label)
         avg_numerical_measures["qd_score"].append(np.mean(all_last_qd_score))
@@ -380,8 +395,7 @@ if __name__ == '__main__':
     #                      borderaxespad=0,
     #                      ncol=2,
     #                      mode="expand")
-    num_elites_ax.set_xlabel('Evaluations',
-                             fontsize=label_fontsize)
+    num_elites_ax.set_xlabel('Evaluations', fontsize=label_fontsize)
     num_elites_ax.set_ylabel('Number of Elites', fontsize=label_fontsize)
     num_elites_ax.set(xlim=(0, NUM_EVAL), ylim=(0, 600))
     num_elites_ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=2))
@@ -409,25 +423,50 @@ if __name__ == '__main__':
     #                  bbox_inches="tight")
 
     if add_legend:
-        handles, labels = ccdf_ax.get_legend_handles_labels()
+        if mode == COMBINE_MODE:
+            handles, labels = ccdf_ax.get_legend_handles_labels()
 
-        if "more_target" in log_dir_plot:
-            # add legend for LSA-ME
-            lsa_me_line = Line2D([0], [0], color='orange',lw=1, label='LSA-ME')
-            handles.append(lsa_me_line)
-            labels.append("LSA-ME")
+            if "more_target" in log_dir_plot:
+                # add legend for LSA-ME
+                lsa_me_line = Line2D([0], [0],
+                                     color='orange',
+                                     lw=1,
+                                     label='LSA-ME')
+                handles.append(lsa_me_line)
+                labels.append("LSA-ME")
 
-        fig.legend(
-            handles,
-            labels,
-            loc="lower center",
-            ncol=2,
-            fontsize=32,
-            #    mode="expand",
-            # bbox_to_anchor=(0.5, -0.3), # for ncols=4
-            bbox_to_anchor=(0.5, -0.4), # for ncols=2
-            # borderaxespad=0,
-        )
+            fig.legend(
+                handles,
+                labels,
+                loc="lower center",
+                ncol=2,
+                fontsize=32,
+                #    mode="expand",
+                # bbox_to_anchor=(0.5, -0.3), # for ncols=4
+                bbox_to_anchor=(0.5, -0.4),  # for ncols=2
+                # borderaxespad=0,
+            )
+
+        elif mode == SPLIT_MODE:
+            qd_ax.legend(loc='lower left',
+                         fontsize='x-large',
+                         bbox_to_anchor=(0, 1.02, 1, 0.2),
+                         borderaxespad=0,
+                         ncol=2,
+                         mode="expand")
+            num_elites_ax.legend(loc='lower left',
+                                 fontsize='x-large',
+                                 bbox_to_anchor=(0, 1.02, 1, 0.2),
+                                 borderaxespad=0,
+                                 ncol=2,
+                                 mode="expand")
+            ccdf_ax.legend(facecolor='white',
+                           loc='lower left',
+                           fontsize='x-large',
+                           bbox_to_anchor=(0, 1.02, 1, 0.2),
+                           borderaxespad=0,
+                           ncol=2,
+                           mode="expand")
 
         if PLOT_OUT_OF_DIST_LOSS:
             handles, labels = out_of_dist_ax.get_legend_handles_labels()
@@ -439,37 +478,44 @@ if __name__ == '__main__':
                 ncol=2,
                 fontsize=25,
                 #    mode="expand",
-                bbox_to_anchor=(0.5, -0.5), # for ncols=2
+                bbox_to_anchor=(0.5, -0.5),  # for ncols=2
                 # borderaxespad=0,
             )
 
     if PLOT_OUT_OF_DIST_LOSS:
-        out_of_dist_ax.set_xlabel(
-            'Training Epoches',
-            fontsize=label_fontsize)
-        out_of_dist_ax.set_ylabel(
-            'Out-of-dist MSE Loss',
-            fontsize=label_fontsize)
+        out_of_dist_ax.set_xlabel('Training Epoches', fontsize=label_fontsize)
+        out_of_dist_ax.set_ylabel('Out-of-dist MSE Loss',
+                                  fontsize=label_fontsize)
         out_of_dist_ax.set(xlim=(0, None), ylim=(0, 50))
         out_of_dist_ax.xaxis.set_major_locator(
             MaxNLocator(integer=False, nbins=5))
         out_of_dist_ax.yaxis.set_major_locator(
             MaxNLocator(integer=True, nbins=2))
         out_of_dist_ax.tick_params(labelsize=tick_fontsize)
-        out_of_dist_fig.savefig(
-            os.path.join(log_dir_plot, f"Out-of-dist Loss.pdf"),
-            bbox_inches="tight")
+        out_of_dist_fig.savefig(os.path.join(log_dir_plot,
+                                             f"Out-of-dist Loss.pdf"),
+                                bbox_inches="tight")
 
-    # add row label
-    if "more_target" in log_dir_plot:
-        row_label = "With Ancillary Data"
-    else:
-        row_label = "Without Ancillary Data"
+    if mode == COMBINE_MODE:
+        # add row label
+        if "more_target" in log_dir_plot:
+            row_label = "With Ancillary Data"
+        else:
+            row_label = "Without Ancillary Data"
 
-    fig.suptitle("Post-hoc Experiments", y=1.02, fontsize=40)
-    # fig.suptitle(row_label, y=1.02, fontsize=40)
-    fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),
-                bbox_inches="tight")
+        # fig.suptitle("Post-hoc Experiments", y=1.02, fontsize=40)
+        fig.suptitle(row_label, y=1.02, fontsize=40)
+        fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),
+                    bbox_inches="tight")
+    elif mode == SPLIT_MODE:
+        qd_fig.savefig(os.path.join(log_dir_plot,
+                                    image_title + " QD-score.pdf"),
+                       bbox_inches="tight")
+        num_elites_fig.savefig(os.path.join(log_dir_plot,
+                                            image_title + " Num elites.pdf"),
+                               bbox_inches="tight")
+        ccdf_fig.savefig(os.path.join(log_dir_plot, image_title + " CCDF.pdf"),
+                         bbox_inches="tight")
 
     # write numerical results
     numerical_measures_df = pd.DataFrame(numerical_measures)
