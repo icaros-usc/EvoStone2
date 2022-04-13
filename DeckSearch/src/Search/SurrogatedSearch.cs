@@ -137,16 +137,7 @@ namespace DeckSearch.Search
                 _searchManager.log_dir_exp, "surrogate_elites");
             System.IO.Directory.CreateDirectory(_surrogateElitesLogDir);
 
-
-            // configurate surrogate model
-            if (config.Surrogate.Type == "DeepSetModel")
-            {
-                _surrogateModel = new DeepSetModel(
-                    log_dir_exp: _searchManager.log_dir_exp,
-                    model_targets: config.Surrogate.ModelTargets,
-                    offline_test_data_file: config.Surrogate.TestOutOfDistDataFile);
-            }
-            else if (config.Surrogate.Type == "FullyConnectedNN")
+            if (config.Surrogate.Type == "FullyConnectedNN")
             {
                 _surrogateModel = new FullyConnectedNN(
                     log_dir_exp: _searchManager.log_dir_exp,

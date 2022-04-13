@@ -31,9 +31,6 @@ namespace PlayGround
             var model = new FullyConnectedNN(
                 offline_train_data_file: "resources/individual_log_rogue.csv",
                 model_targets: config.Surrogate.ModelTargets);
-            // var model = new DeepSetModel(
-            //     offline_data_file: "resources/individual_log_rogue.csv",
-            //     model_targets: config.Surrogate.ModelTargets);
             // var model = new LinearModel(
             //     offline_data_file: "resources/individual_log_rogue.csv",
             //     model_targets: config.Surrogate.ModelTargets);
@@ -80,13 +77,6 @@ namespace PlayGround
             // print(out_f);
             // print(out_f.shape);
 
-            // test per_equi_layer of DeepSet
-            // DeepSetModel model = new DeepSetModel();
-            // Tensor y = model.perm_equi_layer(x, "per_equi_max1", 4, "max");
-            // var out_per_a = sess.run((y), (x, a_np));
-            // print(out_per_a);
-            // print(out_per_a.shape);
-
             // var out_per_b = sess.run((y), (x, b_np));
             // print(out_per_b);
             // print(out_per_b.shape);
@@ -99,11 +89,7 @@ namespace PlayGround
 
             // DemoTFSaver();
 
-            // DemoDeepSet();
-
             // Demo2DSlicing();
-
-            // DemoGradient();
 
             // DemoSavedModel();
 
@@ -248,35 +234,11 @@ namespace PlayGround
             // model.OfflineFit();
 
             // restore
-            // var model = new LinearModel();
-            // model.LoadModel("logs/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000/surrogate_train_log/surrogate_model/model0/model.ckpt");
+            var model = new LinearModel();
+            model.LoadModel("logs/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000/surrogate_train_log/surrogate_model/model0/model.ckpt");
 
-
-            var model = new DeepSetModel();
-            model.LoadModel("logs/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000/surrogate_train_log/surrogate_model/model18/model.ckpt");
-
-            print(model.Forward(np.ones(new int[] { 2, 30, 178 })));
+            print(model.Forward(np.ones(new int[] { 2, 178 })));
             // model.OfflineFit();
-        }
-
-        // test per_equi_layer of DeepSet
-        static void DemoDeepSet()
-        {
-            var model = new DeepSetModel();
-            var sess = tf.Session();
-
-            // Tensor x = tf.placeholder(tf.float32, shape: (3, 2, 2));
-            // Tensor y = model.perm_equi_layer(x, "per_equi1", 4, "mean");
-            // sess.run(tf.global_variables_initializer());
-
-            // // shape (3, 2, 2)
-            // var a = new float[,,] { { { 1, 2 }, { 3, 4 } },
-            //                         { { 5, 6 }, { 7, 8 } },
-            //                         { { 9, 10 }, { 11, 12 } } };
-            // var a_np = np.array(a);
-            // var out_per_a = sess.run((y), (x, a_np));
-            // print(out_per_a);
-            // print(out_per_a.shape);
         }
 
         static void Demo2DSlicing()
@@ -284,35 +246,6 @@ namespace PlayGround
             var a = np.random.rand(new int[] { 2, 2 });
             print(a);
             print(a[Slice.All, Slice.Index(1)]);
-        }
-
-        static void DemoGradient()
-        {
-            var model = new DeepSetModel();
-            // var sess = tf.Session();
-
-            var x_input = np.random.rand(new int[] { 2, 30, 178 });
-            // print(model.Forward(x_input));
-
-            print(model.input);
-            print(model.model_output);
-
-            print(model.TakeGradient(x_input));
-
-            // using var g = tf.GradientTape();
-
-            // print(gradients);
-
-            // var a = tf.constant(1f);
-            // var b = tf.tanh(a);
-            // var g = tf.gradients(b, a);
-            // using (var sess = tf.Session())
-            // {
-            //     var result = sess.run(g);
-            //     var actual = result[0].GetData<float>()[0];
-            //     print(result);
-            //     // self.assertEquals(0.41997434127f, actual);
-            // }
         }
 
         static void DemoToml(string configFileName)

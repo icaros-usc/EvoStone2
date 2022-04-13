@@ -8,7 +8,7 @@ import argparse
 import tensorflow as tf
 import pandas as pd
 import numpy as np
-from surrogate_model import FCNN, DeepSet, LinearModel
+from surrogate_model import FCNN, LinearModel
 from tqdm import tqdm
 from pprint import pprint
 from utils import read_in_paladin_card_index, read_in_rogue_card_index
@@ -36,10 +36,6 @@ def get_vec_encoding(deck):
     return x.reshape((1, -1))
 
 
-def get_deepset_encoding(deck):
-    pass
-
-
 def build_model(log_dir, surrogate_log_dir="surrogate_train_log"):
     # read in model
     exp_config = toml.load(os.path.join(log_dir, "experiment_config.tml"))
@@ -48,8 +44,6 @@ def build_model(log_dir, surrogate_log_dir="surrogate_train_log"):
         model_type = exp_config["Surrogate"]["Type"]
         if model_type == "FullyConnectedNN":
             model = FCNN()
-        # elif model_type == "DeepSetModel":
-        #     model = DeepSet()
         elif model_type == "LinearModel":
             model = LinearModel()
         else:

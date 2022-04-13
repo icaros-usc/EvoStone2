@@ -48,14 +48,7 @@ namespace SurrogateModel
             string modelType = args[1];
             // configurate surrogate model
             SurrogateBaseModel model = null;
-            if (modelType == "DeepSetModel")
-            {
-                model = new DeepSetModel(
-                    log_dir_exp: expLogDir,
-                    offline_train_data_file: indsLogPath,
-                    model_targets: modelTargets);
-            }
-            else if (modelType == "FullyConnectedNN")
+            if (modelType == "FullyConnectedNN")
             {
                 model = new FullyConnectedNN(
                     log_dir_exp: expLogDir,
@@ -72,7 +65,7 @@ namespace SurrogateModel
             else
             {
                 throw new System.ArgumentException(
-                    "Invalid model type: {0}.\nMust be one of [DeepSetModel, FullyConnectedNN, LinearModel].", modelType);
+                    "Invalid model type: {0}.\nMust be one of [FullyConnectedNN, LinearModel].", modelType);
             }
 
             // run offline fit

@@ -175,11 +175,7 @@ namespace Analysis
 
             // configurate surrogate model
             model = null;
-            if (config.Surrogate.Type == "DeepSetModel")
-            {
-                model = new DeepSetModel(log_dir_exp: expLogDir);
-            }
-            else if (config.Surrogate.Type == "FullyConnectedNN")
+            if (config.Surrogate.Type == "FullyConnectedNN")
             {
                 model = new FullyConnectedNN(log_dir_exp: expLogDir);
             }

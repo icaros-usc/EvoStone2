@@ -21,9 +21,6 @@ def get_label_color(experiment_config):
                 # legend += "MLP" + " DSM-ME"
                 legend += "DSA-ME"
                 color = "green"
-            elif experiment_config["Surrogate"]["Type"] == "DeepSetModel":
-                legend += "Deep-set" + " DSA-ME"
-                color = "purple"
             elif experiment_config["Surrogate"]["Type"] == "LinearModel":
                 legend += "LSA-ME"
                 color = "orange"
