@@ -426,24 +426,24 @@ if __name__ == '__main__':
         if mode == COMBINE_MODE:
             handles, labels = ccdf_ax.get_legend_handles_labels()
 
-            if "more_target" in log_dir_plot:
-                # add legend for LSA-ME
-                lsa_me_line = Line2D([0], [0],
-                                     color='orange',
-                                     lw=1,
-                                     label='LSA-ME')
-                handles.append(lsa_me_line)
-                labels.append("LSA-ME")
+            # if "more_target" in log_dir_plot:
+            #     # add legend for LSA-ME
+            #     lsa_me_line = Line2D([0], [0],
+            #                          color='orange',
+            #                          lw=1,
+            #                          label='LSA-ME')
+            #     handles.append(lsa_me_line)
+            #     labels.append("LSA-ME")
 
             fig.legend(
                 handles,
                 labels,
                 loc="lower center",
-                ncol=2,
+                ncol=4,
                 fontsize=32,
                 #    mode="expand",
-                # bbox_to_anchor=(0.5, -0.3), # for ncols=4
-                bbox_to_anchor=(0.5, -0.4),  # for ncols=2
+                bbox_to_anchor=(0.5, -0.3), # for ncols=4
+                # bbox_to_anchor=(0.5, -0.4),  # for ncols=2
                 # borderaxespad=0,
             )
 
@@ -504,12 +504,12 @@ if __name__ == '__main__':
             row_label = "Without Ancillary Data"
 
         # fig.suptitle("Post-hoc Experiments", y=1.02, fontsize=40)
-        fig.suptitle(row_label, y=1.02, fontsize=40)
+        # fig.suptitle(row_label, y=1.02, fontsize=40)
         fig.savefig(os.path.join(log_dir_plot, f"{image_title}.pdf"),
                     bbox_inches="tight")
     elif mode == SPLIT_MODE:
         qd_fig.savefig(os.path.join(log_dir_plot,
-                                    image_title + " QD-score.pdf"),
+                                    image_title + " QD-score.png"),
                        bbox_inches="tight")
         num_elites_fig.savefig(os.path.join(log_dir_plot,
                                             image_title + " Num elites.pdf"),

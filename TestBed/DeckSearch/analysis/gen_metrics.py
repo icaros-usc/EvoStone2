@@ -51,6 +51,7 @@ HEAT_MAP_IMAGE_DIR = "heatmaps"
 QD_SCORE_DIR = "qd_score"
 LOSS_DIR = "surrogate_model_losses"
 COLORMAP = "viridis"  # Colormap for everything.
+NUM_EVAL = 10_000
 
 # max and min value of fitness
 FITNESS_MIN = -30
@@ -224,7 +225,7 @@ def createMovie(folderPath, filename):
 
 def plot_qd_score(rowData, savePath, archive_name):
     map_fitnesses = []
-    for mapData in rowData[1:]:
+    for mapData in rowData:
         map_fitness = 0
         for cellData in mapData[1:]:
             splitedData = cellData.split(":")
@@ -296,22 +297,22 @@ def generateAll(elite_map_logs, loss_log_file):
             os.mkdir(curr_qd_dir)
 
             # # Read all the data from the csv file
-            allRows = list(csv.reader(csvfile, delimiter=','))
+            rowData = list(csv.reader(csvfile, delimiter=','))[1:NUM_EVAL + 1]
 
             # generate the movie
             template = os.path.join(curr_heatmap_dir, 'grid_{:05d}.png')
-            createImages(step_size, allRows[1:], template, archive_name)
+            createImages(step_size, rowData, template, archive_name)
             movieFilename = f"heatmap_{IMAGE_TITLE}.avi"
             createMovie(curr_heatmap_dir, movieFilename)
 
             # Create the final image we need
             imageFilename = f"heatmap_{IMAGE_TITLE}.pdf"
-            createImage(allRows[-1],
+            createImage(rowData[-1],
                         os.path.join(curr_heatmap_dir, imageFilename),
                         archive_name, dpi=1200)
 
             # plot QD score
-            plot_qd_score(allRows, os.path.join(curr_qd_dir, "qd-score.pdf"),
+            plot_qd_score(rowData, os.path.join(curr_qd_dir, "qd-score.pdf"),
                           archive_name)
 
 

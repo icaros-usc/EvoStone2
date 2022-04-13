@@ -36,8 +36,10 @@ def get_label_color(experiment_config):
                 elif fixed_model_path == "resources/fixed_models/miracle_rogue_dsa-me-offline_FCNN_default_target/model.ckpt":
                     legend += " (Elite Data)"
                     color = "gold"
-                elif fixed_model_path == "resources/fixed_models/miracle_rogue_random_FCNN_default_target/model.ckpt":
-                    legend += " (Random Data Model)"
+                elif fixed_model_path in [
+                    "resources/fixed_models/miracle_rogue_random_FCNN_default_target/model.ckpt",
+                    "resources/fixed_models/miracle_rogue_random_FCNN/model.ckpt"]:
+                    # legend += " (Random Data Model)"
                     color = "red"
             else:
                 legend += experiment_config["Surrogate"]["Type"] \
