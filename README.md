@@ -34,7 +34,7 @@ That's it! Your project is now setup to run experiments from the paper.
 
 ## Running Experiments (Locally)
 
-The setup script created several empty folders in the `TestBed/DeckSearch` directory: `bin`, `active`, `boxes`, `logs`, and `train_log`. The `bin` folder holds the compiled executables. The `active` folder is used for initial communication between distributed nodes and for letting the workers know when the search is complete. The `boxes` folder is for sending neural networks to the `DeckEvaluator` and receiving results. The `logs` folder holds logging files for the neural net surrogate models and elite maps from the search. The `train_log` folder is the default place to log the information of the surrogate model while training surrogate model offline.
+The setup script created several empty folders in the `TestBed/DeckSearch` directory: `bin`, `active`, `boxes`, `logs`, and `train_log`. The `bin` folder holds the compiled executables. The `active` folder is used for initial communication between distributed nodes and for letting the workers know when the search is complete. The `boxes` folder is for sending neural networks (strategy) or decks to the `DeckEvaluator` and receiving results. The `logs` folder holds logging files for the neural net surrogate models and elite maps from the search. The `train_log` folder is the default place to log the information of the surrogate model while training surrogate model offline.
 
 First we need to start the control node responsible for running our search (MAP-Elites, DSA-ME, etc). To do this, run the following command.
 
