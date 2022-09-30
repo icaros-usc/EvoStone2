@@ -28,7 +28,7 @@ plt.rcParams.update({
 })
 
 NUM_FEATURES = 2
-NUM_EVAL = 10000
+NUM_EVAL = 20000
 NUM_GAME = 200
 FITNESS_MIN = -30
 FITNESS_MAX = 30
@@ -484,7 +484,7 @@ if __name__ == '__main__':
 
     if PLOT_OUT_OF_DIST_LOSS:
         out_of_dist_ax.set_xlabel('Training Epoches', fontsize=label_fontsize)
-        out_of_dist_ax.set_ylabel('Out-of-dist MSE Loss',
+        out_of_dist_ax.set_ylabel('Validation MSE Loss',
                                   fontsize=label_fontsize)
         out_of_dist_ax.set(xlim=(0, None), ylim=(0, 50))
         out_of_dist_ax.xaxis.set_major_locator(
@@ -493,7 +493,7 @@ if __name__ == '__main__':
             MaxNLocator(integer=True, nbins=2))
         out_of_dist_ax.tick_params(labelsize=tick_fontsize)
         out_of_dist_fig.savefig(os.path.join(log_dir_plot,
-                                             f"Out-of-dist Loss.pdf"),
+                                             f"Validation Loss.pdf"),
                                 bbox_inches="tight")
 
     if mode == COMBINE_MODE:

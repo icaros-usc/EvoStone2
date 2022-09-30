@@ -323,7 +323,6 @@ if __name__ == "__main__":
         exps_to_find = [
             # "logs/to_plot/2021-05-18_15-16-41_Surrogated_MAP-Elites_LinearModel_10000",
             # "logs/to_plot/2021-04-21_18-49-56_Surrogated_MAP-Elites_FullyConnectedNN_10000",
-            # "logs/to_plot/2021-04-22_01-14-27_Surrogated_MAP-Elites_DeepSetModel_10000",
             "logs/classic_miracle_rogue_strat_deck/to_plot/2021-07-19_21-24-50_Surrogated_MAP-Elites_FullyConnectedNN_Classic_Miracle_Rogue_RCA",
             "logs/classic_miracle_rogue_strat_deck/to_plot/2021-07-14_21-15-30_Surrogated_MAP-Elites_LinearModel_Classic_Miracle_Rogue_RCA",
         ]

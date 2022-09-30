@@ -40,27 +40,6 @@ class FCNN:
         self.output = o_fc4
 
 
-class DeepSet:
-    def __init__(self):
-        g = tf.compat.v1.get_default_graph()
-
-        with tf.compat.v1.variable_scope("placeholder"):
-            self.n_samples = tf.compat.v1.placeholder(tf.float32)
-            self.input = tf.compat.v1.placeholder(tf.float32,
-                                                  shape=(None, 30, 180))
-            self.y_true = tf.compat.v1.placeholder(tf.float32, shape=(None, 3))
-
-        # push through phi approximator
-        phi_output = phi_approximator(self.input, name="phi", pool="mean")
-
-        # take sum on the set dimension
-        sum_output = tf.reduce_sum(phi_output, 1)
-
-        # push through ro approximator
-        ro_output = ro_approximator(sum_output, name="ro")
-        self.output = ro_output
-
-
 def fc_layer(input, name, num_output, bias=True):
     output = None
     input_rank = input.shape
